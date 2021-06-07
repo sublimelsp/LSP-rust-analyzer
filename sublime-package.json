@@ -6,13 +6,13 @@
           "/LSP-rust-analyzer.sublime-settings"
         ],
         "schema": {
-          "$id": "sublime://settings/rust-analyzer",
+          "$id": "sublime://settings/LSP-rust-analyzer",
           "allOf": [
             {
               "$ref": "sublime://settings/LSP-plugin-base"
             },
             {
-              "$ref": "sublime://settings/rust-analyzer#/definitions/PluginConfig"
+              "$ref": "sublime://settings/LSP-rust-analyzer#/definitions/PluginConfig"
             }
           ],
           "definitions": {
@@ -627,7 +627,7 @@
                 "LSP": {
                   "properties": {
                     "rust-analyzer": {
-                      "$ref": "sublime://settings/rust-analyzer#/definitions/PluginConfig"
+                      "$ref": "sublime://settings/LSP-rust-analyzer#/definitions/PluginConfig"
                     }
                   }
                 }
