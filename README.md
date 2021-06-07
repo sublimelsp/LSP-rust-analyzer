@@ -16,7 +16,27 @@ You can edit the global settings using:
 Preferences: LSP-rust-analyzer Settings
 ```
 
-You can also create a project specific configurations
+You can also create a project specific configurations.
+
+
+Find the `<project>.sublime-project` file and edit the following in the `settings` json.
+
+Path to config is `settings/LSP/rust-analyzer/settings` and put in custom settings!
+
+```json
+{
+    "settings":
+    {
+        "LSP": {
+            "rust-analyzer": {
+                "settings": {
+                    "rust-analyzer.cargo.features": ["auto_updates"]
+                }
+            }
+        }
+    }
+}
+```
 
 ## Installing Rust Analyzer
 
