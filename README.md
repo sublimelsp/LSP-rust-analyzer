@@ -1,11 +1,11 @@
 # LSP-rust-analyzer
 
-This is a helper package that starts the [rust-anallyzer](https://github.com/rust-analyzer/rust-analyzer) language server for you
+This is a helper package that starts the [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) language server for you
 
 To use this package, you must have:
 
 - The [LSP](https://packagecontrol.io/packages/LSP) package.
-- Rust syntax. Sublime Text 4 comes with one by default but for 3 and below use [RustEnhanced](https://packagecontrol.io/packages/Rust%20Enhanced)
+- Rust syntax. Sublime Text 4 comes with one by default but for 3 and below use [RustEnhanced](https://packagecontrol.io/packages/Rust%20Enhanced). You can follow RustEnhanced's installation instructions for ST4 as well.
 - The rust analyzer binary installed (prefferably on path)
 
 ## Configuration
@@ -21,7 +21,6 @@ You can also create a project specific configurations.
 
 Find the `<project>.sublime-project` file and edit the following in the `settings` json.
 
-Path to config is `settings/LSP/rust-analyzer/settings` and put in custom settings!
 
 ```json
 {
