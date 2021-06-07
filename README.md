@@ -30,7 +30,7 @@ Path to config is `settings/LSP/rust-analyzer/settings` and put in custom settin
         "LSP": {
             "rust-analyzer": {
                 "settings": {
-                    "rust-analyzer.cargo.features": ["auto_updates"]
+                    //Setting-here
                 }
             }
         }
