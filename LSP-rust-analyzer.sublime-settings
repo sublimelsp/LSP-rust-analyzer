@@ -1,0 +1,7 @@
+{
+	"selector": "source.rust",
+	"command": ["rust-analyzer"],
+	"settings": {
+		"rust-analyzer.cargo.features": ["auto_updates"]
+	}
+}

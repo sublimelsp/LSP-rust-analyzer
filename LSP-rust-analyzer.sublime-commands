@@ -1,0 +1,10 @@
+[
+    {
+        "caption": "Preferences: LSP-rust-analyzer Settings",
+        "command": "edit_settings",
+        "args": {
+            "base_file": "${packages}/LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings",
+            "default": "// Settings in here override those in \"LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings\"\n{\n\t$0\n}\n"
+        }
+    }
+]
