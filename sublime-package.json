@@ -626,7 +626,7 @@
               "properties": {
                 "LSP": {
                   "properties": {
-                    "LSP-rust-analyzer": {
+                    "rust-analyzer": {
                       "$ref": "sublime://settings/LSP-rust-analyzer#/definitions/PluginConfig"
                     }
                   }
