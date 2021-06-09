@@ -545,26 +545,6 @@
                         "string"
                       ]
                     },
-                    "rust-analyzer.trace.extension": {
-                      "default": false,
-                      "description": "Enable logging of VS Code extensions itself.",
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.trace.server": {
-                      "default": "off",
-                      "description": "Trace requests to the rust-analyzer (this is usually overly verbose and not recommended for regular users).",
-                      "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                      ],
-                      "enumDescriptions": [
-                        "No traces",
-                        "Error only",
-                        "Full log"
-                      ],
-                      "type": "string"
-                    },
                     "rust-analyzer.updates.askBeforeDownload": {
                       "default": true,
                       "description": "Whether to ask for permission before downloading any files from the Internet.",
@@ -626,7 +606,7 @@
               "properties": {
                 "LSP": {
                   "properties": {
-                    "LSP-rust-analyzer": {
+                    "rust-analyzer": {
                       "$ref": "sublime://settings/LSP-rust-analyzer#/definitions/PluginConfig"
                     }
                   }
