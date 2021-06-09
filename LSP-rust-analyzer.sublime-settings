@@ -28,7 +28,7 @@
 		"rust-analyzer.cargo.target": null,
 		//Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to avoid compiling unnecessary things.
 		"rust-analyzer.cargo.useRustcWrapperForBuildScripts": true,
-		//
+		//Custom cargo runner extension ID.
 		"rust-analyzer.cargoRunner": null,
 		//Check with all features (`--all-features`). Defaults to `#rust-analyzer.cargo.allFeatures#`.
 		"rust-analyzer.checkOnSave.allFeatures": null,
@@ -58,14 +58,14 @@
 		"rust-analyzer.completion.autoself.enable": true,
 		//Whether to show postfix snippets like `dbg`, `if`, `not`, etc.
 		"rust-analyzer.completion.postfix.enable": true,
-		//
+		//Preferred debug engine.
 		"rust-analyzer.debug.engine": "auto",
 		//Optional settings passed to the debug engine. Example: `{ "lldb": { "terminal":"external"} }`
 		"rust-analyzer.debug.engineSettings": {},
 		//Whether to open up the `Debug Panel` on debugging start.
 		"rust-analyzer.debug.openDebugPane": false,
-		//
-		"rust-analyzer.debug.sourceFileMap": { "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust" },
+		//Optional source file mappings passed to the debug engine.
+		"rust-analyzer.debug.sourceFileMap": {"/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"},
 		//List of rust-analyzer diagnostics to disable.
 		"rust-analyzer.diagnostics.disabled": [],
 		//Whether to show native rust-analyzer diagnostics.
@@ -102,13 +102,13 @@
 		"rust-analyzer.hoverActions.run": true,
 		//Whether to show inlay type hints for method chains.
 		"rust-analyzer.inlayHints.chainingHints": true,
-		//
+		//Whether to show inlay hints.
 		"rust-analyzer.inlayHints.enable": true,
 		//Maximum length for inlay hints. Set to null to have an unlimited length.
 		"rust-analyzer.inlayHints.maxLength": 25,
 		//Whether to show function parameter name inlay hints at the call site.
 		"rust-analyzer.inlayHints.parameterHints": true,
-		//
+		//Whether inlay hints font size should be smaller than editor's font size.
 		"rust-analyzer.inlayHints.smallerHints": true,
 		//Whether to show inlay type hints for variables.
 		"rust-analyzer.inlayHints.typeHints": true,
@@ -152,11 +152,7 @@
 		"rust-analyzer.server.extraEnv": null,
 		//Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used
 		"rust-analyzer.server.path": null,
-		//
-		"rust-analyzer.trace.extension": false,
-		//
-		"rust-analyzer.trace.server": "off",
-		//
+		//Whether to ask for permission before downloading any files from the Internet.
 		"rust-analyzer.updates.askBeforeDownload": true,
 		//Choose `nightly` updates to get the latest features and bug fixes every day. While `stable` releases occur weekly and don't contain cutting-edge features from VSCode proposed APIs.
 		"rust-analyzer.updates.channel": "stable",
@@ -164,6 +160,5 @@
 		"rust-analyzer.workspace.symbol.search.kind": "only_types",
 		//Workspace symbol search scope.
 		"rust-analyzer.workspace.symbol.search.scope": "workspace"
-
 	}
 }
