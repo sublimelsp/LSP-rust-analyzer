@@ -1,6 +1,6 @@
 # LSP-rust-analyzer
 
-This is a helper package that starts the [rust-anallyzer](https://github.com/rust-analyzer/rust-analyzer) language server for you
+This is a helper package that starts the [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) language server for you
 
 To use this package, you must have:
 

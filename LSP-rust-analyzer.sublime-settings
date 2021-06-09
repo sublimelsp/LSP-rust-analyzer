@@ -1,5 +1,169 @@
 {
 	"selector": "source.rust",
 	"command": ["rust-analyzer"],
-	"settings": {}
+	"settings": {
+		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
+		"rust-analyzer.assist.importEnforceGranularity": false,
+		//How imports should be grouped into use statements.
+		"rust-analyzer.assist.importGranularity": "crate",
+		//Group inserted imports by the [following order](https://rust-analyzer.github.io/manual.html#auto-import). Groups are separated by newlines.
+		"rust-analyzer.assist.importGroup": true,
+		//The path structure for newly inserted paths to use.
+		"rust-analyzer.assist.importPrefix": "plain",
+		//Show function name and docs in parameter hints.
+		"rust-analyzer.callInfo.full": true,
+		//Activate all available features (`--all-features`).
+		"rust-analyzer.cargo.allFeatures": false,
+		//Automatically refresh project info via `cargo metadata` on `Cargo.toml` changes.
+		"rust-analyzer.cargo.autoreload": true,
+		//List of features to activate.
+		"rust-analyzer.cargo.features": [],
+		//Do not activate the `default` feature.
+		"rust-analyzer.cargo.noDefaultFeatures": false,
+		//Internal config for debugging, disables loading of sysroot crates.
+		"rust-analyzer.cargo.noSysroot": false,
+		//Run build scripts (`build.rs`) for more precise code analysis.
+		"rust-analyzer.cargo.runBuildScripts": true,
+		//Compilation target (target triple).
+		"rust-analyzer.cargo.target": null,
+		//Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to avoid compiling unnecessary things.
+		"rust-analyzer.cargo.useRustcWrapperForBuildScripts": true,
+		//
+		"rust-analyzer.cargoRunner": null,
+		//Check with all features (`--all-features`). Defaults to `#rust-analyzer.cargo.allFeatures#`.
+		"rust-analyzer.checkOnSave.allFeatures": null,
+		//Check all targets and tests (`--all-targets`).
+		"rust-analyzer.checkOnSave.allTargets": true,
+		//Cargo command to use for `cargo check`.
+		"rust-analyzer.checkOnSave.command": "check",
+		//Run specified `cargo check` command for diagnostics on save.
+		"rust-analyzer.checkOnSave.enable": true,
+		//Extra arguments for `cargo check`.
+		"rust-analyzer.checkOnSave.extraArgs": [],
+		//List of features to activate. Defaults to `#rust-analyzer.cargo.features#`.
+		"rust-analyzer.checkOnSave.features": null,
+		//Do not activate the `default` feature.
+		"rust-analyzer.checkOnSave.noDefaultFeatures": null,
+		//Advanced option, fully override the command rust-analyzer uses for checking. The command should include `--message-format=json` or similar option.
+		"rust-analyzer.checkOnSave.overrideCommand": null,
+		//Check for a specific target. Defaults to `#rust-analyzer.cargo.target#`.
+		"rust-analyzer.checkOnSave.target": null,
+		//Whether to add argument snippets when completing functions. Only applies when `#rust-analyzer.completion.addCallParenthesis#` is set.
+		"rust-analyzer.completion.addCallArgumentSnippets": true,
+		//Whether to add parenthesis when completing functions.
+		"rust-analyzer.completion.addCallParenthesis": true,
+		//Toggles the additional completions that automatically add imports when completed. Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
+		"rust-analyzer.completion.autoimport.enable": true,
+		//Toggles the additional completions that automatically show method calls and field accesses with `self` prefixed to them when inside a method.
+		"rust-analyzer.completion.autoself.enable": true,
+		//Whether to show postfix snippets like `dbg`, `if`, `not`, etc.
+		"rust-analyzer.completion.postfix.enable": true,
+		//
+		"rust-analyzer.debug.engine": "auto",
+		//Optional settings passed to the debug engine. Example: `{ "lldb": { "terminal":"external"} }`
+		"rust-analyzer.debug.engineSettings": {},
+		//Whether to open up the `Debug Panel` on debugging start.
+		"rust-analyzer.debug.openDebugPane": false,
+		//
+		"rust-analyzer.debug.sourceFileMap": { "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust" },
+		//List of rust-analyzer diagnostics to disable.
+		"rust-analyzer.diagnostics.disabled": [],
+		//Whether to show native rust-analyzer diagnostics.
+		"rust-analyzer.diagnostics.enable": true,
+		//Whether to show experimental rust-analyzer diagnostics that might have more false positives than usual.
+		"rust-analyzer.diagnostics.enableExperimental": true,
+		//Map of prefixes to be substituted when parsing diagnostic file paths. This should be the reverse mapping of what is passed to `rustc` as `--remap-path-prefix`.
+		"rust-analyzer.diagnostics.remapPrefix": {},
+		//List of warnings that should be displayed with hint severity.  The warnings will be indicated by faded text or three dots in code and will not show up in the `Problems Panel`.
+		"rust-analyzer.diagnostics.warningsAsHint": [],
+		//List of warnings that should be displayed with info severity.  The warnings will be indicated by a blue squiggly underline in code and a blue icon in the `Problems Panel`.
+		"rust-analyzer.diagnostics.warningsAsInfo": [],
+		//Expand attribute macros.
+		"rust-analyzer.experimental.procAttrMacros": false,
+		//These directories will be ignored by rust-analyzer.
+		"rust-analyzer.files.excludeDirs": [],
+		//Controls file watching implementation.
+		"rust-analyzer.files.watcher": "client",
+		//Use semantic tokens for strings.  In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents.
+		"rust-analyzer.highlighting.strings": true,
+		//Whether to show `Debug` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
+		"rust-analyzer.hoverActions.debug": true,
+		//Whether to show HoverActions in Rust files.
+		"rust-analyzer.hoverActions.enable": true,
+		//Whether to show `Go to Type Definition` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
+		"rust-analyzer.hoverActions.gotoTypeDef": true,
+		//Whether to show `Implementations` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
+		"rust-analyzer.hoverActions.implementations": true,
+		//Use markdown syntax for links in hover.
+		"rust-analyzer.hoverActions.linksInHover": true,
+		//Whether to show `References` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
+		"rust-analyzer.hoverActions.references": false,
+		//Whether to show `Run` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
+		"rust-analyzer.hoverActions.run": true,
+		//Whether to show inlay type hints for method chains.
+		"rust-analyzer.inlayHints.chainingHints": true,
+		//
+		"rust-analyzer.inlayHints.enable": true,
+		//Maximum length for inlay hints. Set to null to have an unlimited length.
+		"rust-analyzer.inlayHints.maxLength": 25,
+		//Whether to show function parameter name inlay hints at the call site.
+		"rust-analyzer.inlayHints.parameterHints": true,
+		//
+		"rust-analyzer.inlayHints.smallerHints": true,
+		//Whether to show inlay type hints for variables.
+		"rust-analyzer.inlayHints.typeHints": true,
+		//Whether to show `Debug` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
+		"rust-analyzer.lens.debug": true,
+		//Whether to show CodeLens in Rust files.
+		"rust-analyzer.lens.enable": true,
+		//Whether to show `Implementations` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
+		"rust-analyzer.lens.implementations": true,
+		//Whether to show `Method References` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
+		"rust-analyzer.lens.methodReferences": false,
+		//Whether to show `References` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
+		"rust-analyzer.lens.references": false,
+		//Whether to show `Run` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
+		"rust-analyzer.lens.run": true,
+		//Disable project auto-discovery in favor of explicitly specified set of projects.  Elements must be paths pointing to `Cargo.toml`, `rust-project.json`, or JSON objects in `rust-project.json` format.
+		"rust-analyzer.linkedProjects": [],
+		//Number of syntax trees rust-analyzer keeps in memory. Defaults to 128.
+		"rust-analyzer.lruCapacity": null,
+		//Whether to show `can't find Cargo.toml` error message.
+		"rust-analyzer.notifications.cargoTomlNotFound": true,
+		//Enable support for procedural macros, implies `#rust-analyzer.cargo.runBuildScripts#`.
+		"rust-analyzer.procMacro.enable": true,
+		//Internal config, path to proc-macro server executable (typically, this is rust-analyzer itself, but we override this in tests).
+		"rust-analyzer.procMacro.server": null,
+		//Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command.
+		"rust-analyzer.runnableEnv": null,
+		//Additional arguments to be passed to cargo for runnables such as tests or binaries. For example, it may be `--release`.
+		"rust-analyzer.runnables.cargoExtraArgs": [],
+		//Command to be executed instead of 'cargo' for runnables.
+		"rust-analyzer.runnables.overrideCargo": null,
+		//Path to the Cargo.toml of the rust compiler workspace, for usage in rustc_private projects, or "discover" to try to automatically find it.  Any project which uses rust-analyzer with the rustcPrivate crates must set `[package.metadata.rust-analyzer] rustc_private=true` to use it.  This option is not reloaded automatically; you must restart rust-analyzer for it to take effect.
+		"rust-analyzer.rustcSource": null,
+		//Enables the use of rustfmt's unstable range formatting command for the `textDocument/rangeFormatting` request. The rustfmt option is unstable and only available on a nightly build.
+		"rust-analyzer.rustfmt.enableRangeFormatting": false,
+		//Additional arguments to `rustfmt`.
+		"rust-analyzer.rustfmt.extraArgs": [],
+		//Advanced option, fully override the command rust-analyzer uses for formatting.
+		"rust-analyzer.rustfmt.overrideCommand": null,
+		//Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging.
+		"rust-analyzer.server.extraEnv": null,
+		//Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used
+		"rust-analyzer.server.path": null,
+		//
+		"rust-analyzer.trace.extension": false,
+		//
+		"rust-analyzer.trace.server": "off",
+		//
+		"rust-analyzer.updates.askBeforeDownload": true,
+		//Choose `nightly` updates to get the latest features and bug fixes every day. While `stable` releases occur weekly and don't contain cutting-edge features from VSCode proposed APIs.
+		"rust-analyzer.updates.channel": "stable",
+		//Workspace symbol search kind.
+		"rust-analyzer.workspace.symbol.search.kind": "only_types",
+		//Workspace symbol search scope.
+		"rust-analyzer.workspace.symbol.search.scope": "workspace"
+
+	}
 }
