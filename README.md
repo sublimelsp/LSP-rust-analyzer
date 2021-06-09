@@ -1,10 +1,9 @@
 # LSP-rust-analyzer
 
-<<<<<<< HEAD
 This is a helper package that starts the [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer) language server for you
 =======
+
 Rust language server provided through [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer).
->>>>>>> c19c2340f564936706aecce38721f338d0faaaf7
 
 ## Installation
 
