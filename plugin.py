@@ -7,7 +7,12 @@ import shutil
 import sublime
 import urllib.request
 
+# Update this single git tag to download a newer version.
+# After changing this tag, go through the server settings
+# again to see if any new server settings are added or
+# old ones removed.
 TAG = "2021-06-07"
+
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
 
