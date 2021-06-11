@@ -1,16 +1,13 @@
 from LSP.plugin import AbstractPlugin
-from LSP.plugin import ClientConfig
 from LSP.plugin import register_plugin
 from LSP.plugin import unregister_plugin
-from LSP.plugin import WorkspaceFolder
-from LSP.plugin.core.typing import List, Optional
 import gzip
 import os
 import shutil
 import sublime
 import urllib.request
 
-
+TAG = "2021-06-07"
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
 
@@ -46,8 +43,7 @@ class RustAnalyzer(AbstractPlugin):
 
     @classmethod
     def server_version(cls) -> str:
-        settings = sublime.load_settings("LSP-rust-analyzer.sublime-settings")
-        return str(settings.get("version"))
+        return TAG
 
     @classmethod
     def current_server_version(cls) -> str:
@@ -67,7 +63,7 @@ class RustAnalyzer(AbstractPlugin):
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             os.makedirs(cls.basedir(), exist_ok=True)
             version = cls.server_version()
-            url = URL.format(tag=version, arch=arch(), platform=platform())
+            url = URL.format(tag=TAG, arch=arch(), platform=platform())
             gzipfile = os.path.join(cls.basedir(), "server.gz")
             serverfile = os.path.join(
                 cls.basedir(),
