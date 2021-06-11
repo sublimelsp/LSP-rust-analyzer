@@ -35,7 +35,7 @@ class RustAnalyzer(AbstractPlugin):
 
     @classmethod
     def name(cls) -> str:
-        return __package__
+        return "rust-analyzer"
 
     @classmethod
     def basedir(cls) -> str:
