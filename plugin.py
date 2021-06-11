@@ -60,7 +60,8 @@ class RustAnalyzer(AbstractPlugin):
     @classmethod
     def install_or_update(cls) -> None:
         try:
-            shutil.rmtree(cls.basedir(), ignore_errors=True)
+            if os.path.isdir(cls.basedir()):
+                shutil.rmtree(cls.basedir())
             os.makedirs(cls.basedir(), exist_ok=True)
             version = cls.server_version()
             url = URL.format(tag=TAG, arch=arch(), platform=platform())
