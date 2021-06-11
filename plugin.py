@@ -35,11 +35,11 @@ class RustAnalyzer(AbstractPlugin):
 
     @classmethod
     def name(cls) -> str:
-        return "rust-analyzer"
+        return __package__
 
     @classmethod
     def basedir(cls) -> str:
-        return os.path.join(cls.storage_path(), "LSP-{}".format(cls.name()))
+        return os.path.join(cls.storage_path(), __package__)
 
     @classmethod
     def server_version(cls) -> str:
