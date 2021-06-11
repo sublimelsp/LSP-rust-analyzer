@@ -83,22 +83,6 @@ class RustAnalyzer(AbstractPlugin):
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
 
-    @classmethod
-    def can_start(
-        cls,
-        window: sublime.Window,
-        initiating_view: sublime.View,
-        workspace_folders: List[WorkspaceFolder],
-        configuration: ClientConfig,
-    ) -> Optional[str]:
-        rust_analyzer_binary = shutil.which("rust-analyzer")
-        if not rust_analyzer_binary:
-            rust_analyzer_binary = configuration.settings.get("rust-analyzer.server.path")
-        if not rust_analyzer_binary:
-            return "Unable to find rust-analyzer binary. Should be on the PATH or specified in the 'rust-analyzer.server.path' setting"
-        configuration.command = [rust_analyzer_binary]
-        return None
-
 
 def plugin_loaded() -> None:
     register_plugin(RustAnalyzer)
