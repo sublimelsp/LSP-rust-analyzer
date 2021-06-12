@@ -37,3 +37,9 @@ You can also have a project-specific configuration. Run the `Project: Edit Proje
 ## Applicable Selectors
 
 This language server operates on views with the `source.rust` base scope.
+
+## Custom Command Palette Commands
+
+### LSP-rust-analyzer: Open Docs Under Cursor
+
+Opens the URL to documentation for the symbol under the cursor, if available.
