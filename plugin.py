@@ -107,6 +107,9 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
     def run(self, edit: sublime.Edit) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
         session.send_request(Request("experimental/externalDocs", params), self.on_result)
 
     def on_result(self, url: Optional[str]) -> None:
