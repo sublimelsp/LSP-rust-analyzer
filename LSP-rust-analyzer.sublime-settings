@@ -1,6 +1,6 @@
 {
 	"selector": "source.rust",
-	"command": ["rust-analyzer"],
+	"command": ["${storage_path}/LSP-rust-analyzer/server"],
 	"settings": {
 		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
 		"rust-analyzer.assist.importEnforceGranularity": false,
@@ -148,14 +148,6 @@
 		"rust-analyzer.rustfmt.extraArgs": [],
 		//Advanced option, fully override the command rust-analyzer uses for formatting.
 		"rust-analyzer.rustfmt.overrideCommand": null,
-		//Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging.
-		"rust-analyzer.server.extraEnv": null,
-		//Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used
-		"rust-analyzer.server.path": null,
-		//Whether to ask for permission before downloading any files from the Internet.
-		"rust-analyzer.updates.askBeforeDownload": true,
-		//Choose `nightly` updates to get the latest features and bug fixes every day. While `stable` releases occur weekly and don't contain cutting-edge features from VSCode proposed APIs.
-		"rust-analyzer.updates.channel": "stable",
 		//Workspace symbol search kind.
 		"rust-analyzer.workspace.symbol.search.kind": "only_types",
 		//Workspace symbol search scope.
