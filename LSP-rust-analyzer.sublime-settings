@@ -1,6 +1,6 @@
 {
 	"selector": "source.rust",
-	"command": ["${storage_path}/LSP-rust-analyzer/server"],
+	"command": ["${storage_path}/LSP-rust-analyzer/rust-analyzer"],
 	"settings": {
 		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
 		"rust-analyzer.assist.importEnforceGranularity": false,

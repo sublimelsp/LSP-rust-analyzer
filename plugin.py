@@ -70,10 +70,10 @@ class RustAnalyzer(AbstractPlugin):
             os.makedirs(cls.basedir(), exist_ok=True)
             version = cls.server_version()
             url = URL.format(tag=TAG, arch=arch(), platform=platform())
-            gzipfile = os.path.join(cls.basedir(), "server.gz")
+            gzipfile = os.path.join(cls.basedir(), "rust-analyzer.gz")
             serverfile = os.path.join(
                 cls.basedir(),
-                "server.exe" if sublime.platform() == "windows" else "server"
+                "rust-analyzer.exe" if sublime.platform() == "windows" else "rust-analyzer"
             )
             with urllib.request.urlopen(url) as fp:
                 with open(gzipfile, "wb") as f:
