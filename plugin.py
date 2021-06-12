@@ -98,14 +98,11 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
     session_name = "rust-analyzer"
 
     def is_enabled(self) -> bool:
-        if not bool(self.session_by_name(self.session_name)):
-            return False
-
         selection = self.view.sel()
         if len(selection) == 0:
             return False
 
-        return True
+        return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
