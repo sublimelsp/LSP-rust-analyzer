@@ -1,6 +1,10 @@
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import register_plugin
+from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
+from LSP.plugin.core.registry import LspTextCommand
+from LSP.plugin.core.typing import Optional
+from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
 import shutil
@@ -89,6 +93,32 @@ class RustAnalyzer(AbstractPlugin):
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
 
+
+class RustAnalyzerOpenDocsCommand(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("experimental/externalDocs", params), self.on_result)
+
+    def on_result(self, url: Optional[str]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if url is not None:
+            window.run_command("open_url", { "url": url })
 
 def plugin_loaded() -> None:
     register_plugin(RustAnalyzer)

@@ -6,5 +6,9 @@
             "base_file": "${packages}/LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings",
             "default": "// Settings in here override those in \"LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings\"\n{\n\t$0\n}\n"
         }
+    },
+    {
+        "caption": "LSP-rust-analyzer: Open Docs Under Cursor",
+        "command": "rust_analyzer_open_docs"
     }
 ]

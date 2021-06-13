@@ -152,5 +152,8 @@
 		"rust-analyzer.workspace.symbol.search.kind": "only_types",
 		//Workspace symbol search scope.
 		"rust-analyzer.workspace.symbol.search.scope": "workspace"
+	},
+	"experimental_capabilities": {
+		// empty for now
 	}
 }
