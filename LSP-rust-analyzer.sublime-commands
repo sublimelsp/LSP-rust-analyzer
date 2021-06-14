@@ -20,7 +20,7 @@
         "command": "rust_analyzer_memory_usage"
     },
     {
-        "caption": "LSP-rust-analyzer: Run",
+        "caption": "LSP-rust-analyzer: Run...",
         "command": "rust_analyzer_run_project"
     }
 ]

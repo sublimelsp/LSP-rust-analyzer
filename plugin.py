@@ -317,10 +317,10 @@ class RustAnalyzerCheckProject(RustAnalyzerExec):
     check_phrase = "cargo check"
 
     def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
     def on_result(self, payload: List[Any]) -> None:
