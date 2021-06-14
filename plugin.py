@@ -129,7 +129,7 @@ class RustAnalyzerReloadProject(LspTextCommand):
         if session is None:
             return
 
-        session.send_request(Request("rust-analyzer/reloadWorkspace"))
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: ...)
 
 
 def plugin_loaded() -> None:
