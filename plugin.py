@@ -187,7 +187,6 @@ class RustAnalyzerReloadProject(LspTextCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-
         session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 
