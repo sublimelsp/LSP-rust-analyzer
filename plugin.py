@@ -3,7 +3,7 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict
+from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable
 from LSP.plugin.core.views import text_document_position_params, text_document_identifier
 import gzip
 import os
@@ -107,6 +107,38 @@ class RustAnalyzer(AbstractPlugin):
         except Exception:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
+
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+
+        if len(command["arguments"]) == 0:
+            return False
+
+        output = command["arguments"][0]
+        window = sublime.active_window()
+        if window is None:
+            return False
+        view = window.active_view()
+        if not Terminus:
+            sublime.error_message(
+                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
+            return False
+        if output["args"]["overrideCargo"]:
+            cargo_path = output["args"]["overrideCargo"]
+        else:
+            cargo_path = '"{}"'.format(shutil.which("cargo"))
+        run_command = [cargo_path] + output["args"]["cargoArgs"] + \
+            output["args"]["cargoExtraArgs"]
+        cmd = " ".join(run_command)
+        args = {
+            "title": output["label"],
+            "shell_cmd": cmd,
+            "cwd": output["args"]["workspaceRoot"],
+            "auto_close": get_setting(view, "terminus_auto_close", False)
+        }
+        if get_setting(view, "terminus_use_panel", False):
+            args["panel_name"] = output["label"]
+        window.run_command("terminus_open", args)
+        return True
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
