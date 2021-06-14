@@ -176,8 +176,17 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             window.select_sheets(sheets)
 
 
-Runnable = TypedDict('Runnable', {'label': str, 'args': {
-                     'executableArgs': List[str], 'workspaceRoot': str, 'overrideCargo': Optional[str], 'cargoArgs': List[str], 'cargoExtraArgs': List[str]}, 'kind': str})
+Runnable = TypedDict('Runnable', {
+    'label': str,
+    'args': {
+        'executableArgs': List[str],
+        'workspaceRoot': str,
+        'overrideCargo': Optional[str],
+        'cargoArgs': List[str],
+        'cargoExtraArgs': List[str]},
+    'kind': str,
+}
+)
 
 
 class RustAnalyzerExec(LspTextCommand):
@@ -191,6 +200,9 @@ class RustAnalyzerExec(LspTextCommand):
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
     def run_termius(self, check_phrase: str, payload: List[Runnable]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
 
         if len(payload) == 0:
             return
@@ -222,7 +234,6 @@ class RustAnalyzerExec(LspTextCommand):
         }
         if get_setting(self.view, "terminus_use_panel", False):
             args["panel_name"] = output["label"]
-        window = self.view.window()
         window.run_command("terminus_open", args)
 
 
