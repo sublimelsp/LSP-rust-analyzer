@@ -3,13 +3,19 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional
-from LSP.plugin.core.views import text_document_position_params
+from LSP.plugin.core.typing import Optional, Union
+from LSP.plugin.core.views import text_document_position_params, text_document_identifier
 import gzip
 import os
 import shutil
 import sublime
 import urllib.request
+
+
+try:
+    import Terminus  # type: ignore
+except ImportError:
+    Terminus = None
 
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings
@@ -29,6 +35,16 @@ def arch() -> str:
         return "aarch64"
     else:
         raise RuntimeError("Unknown architecture: " + sublime.arch())
+
+
+def get_setting(view: sublime.View, key: str, default: Optional[str] = None) -> Union[bool, str]:
+    if view:
+        settings = view.settings()
+        if settings.has(key):
+            return settings.get(key)
+    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings')
+    return settings.get(key, default)
+
 
 
 def platform() -> str:
@@ -130,6 +146,116 @@ class RustAnalyzerReloadProject(LspTextCommand):
             return
 
         session.send_request(Request("rust-analyzer/reloadWorkspace"))
+
+
+class RustAnalyzerMemoryUsage(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/memoryUsage"), self.on_result)
+
+    def on_result(self, payload: Optional[str]) -> None:
+        view = sublime.active_window().new_file()
+        view.set_scratch(True)
+        view.set_name("--- RustAnalyzer Memory Usage ---")
+        view.run_command("append", {"characters": "Per-query memory usage:"})
+        for line in payload.splitlines():
+            view.run_command("append", {"characters": '\n{}'.format(line)})
+        view.run_command("append", {"characters": "\n(note: database has been cleared)"})
+        view.set_read_only(True)
+
+
+
+
+class RustAnalyzerExec(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def run_termius(self, check_phrase: str , payload) -> None:
+        output = None
+        for i in range(len(payload)):
+            if payload[i]["label"].startswith(check_phrase):
+                output = payload[i]
+
+        if not output:
+            return
+
+        if not Terminus:
+            sublime.error_message(
+                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
+            return
+
+        cargo_path = '"{}"'.format(shutil.which("cargo"))
+        run_command = [cargo_path] + output["args"]["cargoArgs"] + output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
+        cmd = " ".join(run_command)
+        args = {
+            "title": output["label"],
+            "shell_cmd": cmd,
+            "cwd": output["args"]["workspaceRoot"],
+            "auto_close": get_setting(self.view, "terminus_auto_close", False)
+        }
+        if get_setting(self.view, "terminus_use_panel", False):
+            args["panel_name"] = output["label"]
+        window = self.view.window()
+        window.run_command("terminus_open", args)
+
+
+
+
+
+class RustAnalyzerRunProject(RustAnalyzerExec):
+    session_name = "rust-analyzer"
+    check_phrase = "run"
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def on_result(self, payload: Optional[str]) -> None:
+        self.run_termius(self.check_phrase ,payload)
+        
+
+class RustAnalyzerCheckProject(RustAnalyzerExec):
+    session_name = "rust-analyzer"
+    check_phrase = "cargo check"
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def on_result(self, payload: Optional[str]) -> None:
+        self.run_termius(self.check_phrase ,payload)
+
+class RustAnalyzerTestProject(RustAnalyzerExec):
+    session_name = "rust-analyzer"
+    check_phrase = "cargo test"
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def on_result(self, payload: Optional[str]) -> None:
+        self.run_termius(self.check_phrase ,payload)
+
 
 
 def plugin_loaded() -> None:
