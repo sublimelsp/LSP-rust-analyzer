@@ -109,10 +109,14 @@ class RustAnalyzer(AbstractPlugin):
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
 
-        if len(command["arguments"]) == 0:
+        cargo_commands = []
+        for c in command["arguments"]:
+            if c["kind"] == "cargo":
+                cargo_commands.append(c)
+
+        if len(cargo_commands) == 0:
             return False
 
-        output = command["arguments"][0]
         window = sublime.active_window()
         if window is None:
             return False
@@ -123,26 +127,27 @@ class RustAnalyzer(AbstractPlugin):
             sublime.error_message(
                 'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
             return False
-        if output["args"]["overrideCargo"]:
-            cargo_path = output["args"]["overrideCargo"]
-        else:
-            if not shutil.which("cargo"):
-                sublime.error_message('Cannot find "cargo" on path.')
-                return False
-            cargo_path = '"{}"'.format(shutil.which("cargo"))
-        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-            output["args"]["cargoExtraArgs"]
-        print(command_to_run)
-        cmd = " ".join(command_to_run)
-        args = {
-            "title": output["label"],
-            "shell_cmd": cmd,
-            "cwd": output["args"]["workspaceRoot"],
-            "auto_close": get_setting(view, "terminus_auto_close", False)
-        }
-        if get_setting(view, "terminus_use_panel", False):
-            args["panel_name"] = output["label"]
-        window.run_command("terminus_open", args)
+
+        for output in cargo_commands:
+            if output["args"]["overrideCargo"]:
+                cargo_path = output["args"]["overrideCargo"]
+            else:
+                if not shutil.which("cargo"):
+                    sublime.error_message('Cannot find "cargo" on path.')
+                    return False
+                cargo_path = '"{}"'.format(shutil.which("cargo"))
+            command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
+                output["args"]["cargoExtraArgs"]
+            cmd = " ".join(command_to_run)
+            args = {
+                "title": output["label"],
+                "shell_cmd": cmd,
+                "cwd": output["args"]["workspaceRoot"],
+                "auto_close": get_setting(view, "terminus_auto_close", False)
+            }
+            if get_setting(view, "terminus_use_panel", False):
+                args["panel_name"] = output["label"]
+            window.run_command("terminus_open", args)
         return True
 
 

@@ -41,7 +41,7 @@ This language server operates on views with the `source.rust` base scope.
 
 Select a cargo command from the submenu. This spawns a shell with terminus for tests, checks and executing code.
 
-![Example](https://i.imgur.com/6bNxcur.gif)
+![Example](/images/commands.gif)
 
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
