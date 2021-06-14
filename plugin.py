@@ -143,14 +143,17 @@ class RustAnalyzerExpandMacro(LspTextCommand):
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
 
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session.send_request(Request("rust-analyzer/expandMacro", params), self.on_result)
 
-    def on_result(self, expanded_macro: Dict[str, str]) -> None:
+    def on_result(self, expanded_macro: Optional[Dict[str, str]]) -> None:
+        if expanded_macro is None:
+            return
+
         window = self.view.window()
         if window is None:
             return
