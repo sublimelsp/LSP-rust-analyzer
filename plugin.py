@@ -188,10 +188,7 @@ class RustAnalyzerReloadProject(LspTextCommand):
         if session is None:
             return
 
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), self.on_result)
-
-    def on_result(self, arg: Any):
-        pass
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 
 class RustAnalyzerMemoryUsage(LspTextCommand):
