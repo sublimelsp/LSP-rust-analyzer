@@ -4,10 +4,11 @@ from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
 from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable
-from LSP.plugin.core.views import text_document_position_params, text_document_identifier
+from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
 import shutil
+import shlex
 import sublime
 import urllib.request
 
@@ -26,6 +27,9 @@ TAG = "2021-06-07"
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
 
+def is_posix() -> bool:
+    return not (sublime.platform() == "windows")
+
 def arch() -> str:
     if sublime.arch() == "x64":
         return "x86_64"
@@ -37,7 +41,7 @@ def arch() -> str:
         raise RuntimeError("Unknown architecture: " + sublime.arch())
 
 
-def get_setting(view: sublime.View, key: str, default: Optional[str] = None) -> Union[bool, str]:
+def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Union[bool, str]:
     if view:
         settings = view.settings()
         if settings.has(key):
@@ -118,6 +122,8 @@ class RustAnalyzer(AbstractPlugin):
         if window is None:
             return False
         view = window.active_view()
+        if not view:
+            return False
         if not Terminus:
             sublime.error_message(
                 'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
@@ -125,10 +131,13 @@ class RustAnalyzer(AbstractPlugin):
         if output["args"]["overrideCargo"]:
             cargo_path = output["args"]["overrideCargo"]
         else:
+            if not shutil.which("cargo"):
+                sublime.error_message('Cannot find "cargo" on path.')
+                return False
             cargo_path = '"{}"'.format(shutil.which("cargo"))
         run_command = [cargo_path] + output["args"]["cargoArgs"] + \
             output["args"]["cargoExtraArgs"]
-        cmd = " ".join(run_command)
+        cmd = shlex.join(run_command)
         args = {
             "title": output["label"],
             "shell_cmd": cmd,
@@ -176,7 +185,10 @@ class RustAnalyzerReloadProject(LspTextCommand):
         if session is None:
             return
 
-        session.send_request(Request("rust-analyzer/reloadWorkspace"))
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), self.on_result)
+
+    def on_result(self, arg: Any):
+        pass
 
 
 class RustAnalyzerMemoryUsage(LspTextCommand):
@@ -208,17 +220,18 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             window.select_sheets(sheets)
 
 
+RunnableArgs = TypedDict('RunnableArgs', {
+    'cargoArgs': List[str],
+    'cargoExtraArgs': List[str],
+    'executableArgs': List[str],
+    'overrideCargo': Optional[str],
+    'workspaceRoot': str,
+})
 Runnable = TypedDict('Runnable', {
-    'label': str,
-    'args': {
-        'executableArgs': List[str],
-        'workspaceRoot': str,
-        'overrideCargo': Optional[str],
-        'cargoArgs': List[str],
-        'cargoExtraArgs': List[str]},
+    'args': RunnableArgs,
     'kind': str,
-}
-)
+    'label': str,
+})
 
 
 class RustAnalyzerExec(LspTextCommand):
@@ -240,9 +253,11 @@ class RustAnalyzerExec(LspTextCommand):
             return
 
         output = None
-        for i in range(len(payload)):
-            if payload[i]["label"].startswith(check_phrase):
-                output = payload[i]
+        for item in payload:
+            if item["label"].startswith(check_phrase):
+                output = item
+                break
+
 
         if not output:
             return
@@ -254,10 +269,13 @@ class RustAnalyzerExec(LspTextCommand):
         if output["args"]["overrideCargo"]:
             cargo_path = output["args"]["overrideCargo"]
         else:
+            if not shutil.which("cargo"):
+                sublime.error_message('Cannot find "cargo" on path.')
+                return
             cargo_path = '"{}"'.format(shutil.which("cargo"))
         run_command = [cargo_path] + output["args"]["cargoArgs"] + \
             output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
-        cmd = " ".join(run_command)
+        cmd = shlex.join(run_command)
         args = {
             "title": output["label"],
             "shell_cmd": cmd,
@@ -267,6 +285,9 @@ class RustAnalyzerExec(LspTextCommand):
         if get_setting(self.view, "terminus_use_panel", False):
             args["panel_name"] = output["label"]
         window.run_command("terminus_open", args)
+
+    def on_result(self, payload: Any) -> None:
+        raise NotImplementedError()
 
 
 class RustAnalyzerRunProject(RustAnalyzerExec):
