@@ -3,7 +3,7 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Union
+from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict
 from LSP.plugin.core.views import text_document_position_params, text_document_identifier
 import gzip
 import os
@@ -44,7 +44,6 @@ def get_setting(view: sublime.View, key: str, default: Optional[str] = None) -> 
             return settings.get(key)
     settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings')
     return settings.get(key, default)
-
 
 
 def platform() -> str:
@@ -134,7 +133,7 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
             return
 
         if url is not None:
-            window.run_command("open_url", { "url": url })
+            window.run_command("open_url", {"url": url})
 
 
 class RustAnalyzerReloadProject(LspTextCommand):
@@ -158,8 +157,12 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
 
         session.send_request(Request("rust-analyzer/memoryUsage"), self.on_result)
 
-    def on_result(self, payload: Optional[str]) -> None:
-        view = sublime.active_window().new_file()
+    def on_result(self, payload: str) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
         view.set_scratch(True)
         view.set_name("--- RustAnalyzer Memory Usage ---")
         view.run_command("append", {"characters": "Per-query memory usage:"})
@@ -167,8 +170,14 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             view.run_command("append", {"characters": '\n{}'.format(line)})
         view.run_command("append", {"characters": "\n(note: database has been cleared)"})
         view.set_read_only(True)
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
 
 
+Runnable = TypedDict('Runnable', {'label': str, 'args': {
+                     'executableArgs': List[str], 'workspaceRoot': str, 'overrideCargo': Optional[str], 'cargoArgs': List[str], 'cargoExtraArgs': List[str]}, 'kind': str})
 
 
 class RustAnalyzerExec(LspTextCommand):
@@ -181,7 +190,11 @@ class RustAnalyzerExec(LspTextCommand):
             return
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def run_termius(self, check_phrase: str , payload) -> None:
+    def run_termius(self, check_phrase: str, payload: List[Runnable]) -> None:
+
+        if len(payload) == 0:
+            return
+
         output = None
         for i in range(len(payload)):
             if payload[i]["label"].startswith(check_phrase):
@@ -194,9 +207,12 @@ class RustAnalyzerExec(LspTextCommand):
             sublime.error_message(
                 'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
             return
-
-        cargo_path = '"{}"'.format(shutil.which("cargo"))
-        run_command = [cargo_path] + output["args"]["cargoArgs"] + output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
+        if output["args"]["overrideCargo"]:
+            cargo_path = output["args"]["overrideCargo"]
+        else:
+            cargo_path = '"{}"'.format(shutil.which("cargo"))
+        run_command = [cargo_path] + output["args"]["cargoArgs"] + \
+            output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
         cmd = " ".join(run_command)
         args = {
             "title": output["label"],
@@ -210,9 +226,6 @@ class RustAnalyzerExec(LspTextCommand):
         window.run_command("terminus_open", args)
 
 
-
-
-
 class RustAnalyzerRunProject(RustAnalyzerExec):
     session_name = "rust-analyzer"
     check_phrase = "run"
@@ -224,9 +237,9 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
             return
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def on_result(self, payload: Optional[str]) -> None:
-        self.run_termius(self.check_phrase ,payload)
-        
+    def on_result(self, payload: List[Runnable]) -> None:
+        self.run_termius(self.check_phrase, payload)
+
 
 class RustAnalyzerCheckProject(RustAnalyzerExec):
     session_name = "rust-analyzer"
@@ -239,8 +252,9 @@ class RustAnalyzerCheckProject(RustAnalyzerExec):
             return
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def on_result(self, payload: Optional[str]) -> None:
-        self.run_termius(self.check_phrase ,payload)
+    def on_result(self, payload: List[Any]) -> None:
+        self.run_termius(self.check_phrase, payload)
+
 
 class RustAnalyzerTestProject(RustAnalyzerExec):
     session_name = "rust-analyzer"
@@ -253,9 +267,8 @@ class RustAnalyzerTestProject(RustAnalyzerExec):
             return
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def on_result(self, payload: Optional[str]) -> None:
-        self.run_termius(self.check_phrase ,payload)
-
+    def on_result(self, payload: List[Runnable]) -> None:
+        self.run_termius(self.check_phrase, payload)
 
 
 def plugin_loaded() -> None:
