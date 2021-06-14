@@ -125,7 +125,7 @@ class RustAnalyzer(AbstractPlugin):
             return False
         if not Terminus:
             sublime.error_message(
-                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
+                'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
             done_callback()
             return True
         if not shutil.which("cargo"):
