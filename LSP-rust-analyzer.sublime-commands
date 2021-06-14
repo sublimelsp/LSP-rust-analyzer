@@ -10,5 +10,9 @@
     {
         "caption": "LSP-rust-analyzer: Open Docs Under Cursor",
         "command": "rust_analyzer_open_docs"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Reload Project",
+        "command": "rust_analyzer_reload_project"
     }
 ]

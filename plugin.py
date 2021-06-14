@@ -120,6 +120,18 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
         if url is not None:
             window.run_command("open_url", { "url": url })
 
+
+class RustAnalyzerReloadProject(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/reloadWorkspace"))
+
+
 def plugin_loaded() -> None:
     register_plugin(RustAnalyzer)
 

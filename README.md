@@ -40,3 +40,7 @@ This language server operates on views with the `source.rust` base scope.
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
 Opens the URL to documentation for the symbol under the cursor, if available.
+
+### LSP-rust-analyzer: Reload Project
+
+Reloads the project metadata, i.e. runs `cargo metadata` again.
