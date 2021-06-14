@@ -26,9 +26,6 @@ TAG = "2021-06-07"
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
 
-def is_posix() -> bool:
-    return not (sublime.platform() == "windows")
-
 def arch() -> str:
     if sublime.arch() == "x64":
         return "x86_64"
@@ -41,10 +38,9 @@ def arch() -> str:
 
 
 def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Union[bool, str]:
-    if view:
-        settings = view.settings()
-        if settings.has(key):
-            return settings.get(key)
+    settings = view.settings()
+    if settings.has(key):
+        return settings.get(key)
     settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings')
     return settings.get(key, default)
 
@@ -191,7 +187,6 @@ class RustAnalyzerReloadProject(LspTextCommand):
         pass
 
 
-
 class RustAnalyzerMemoryUsage(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -209,9 +204,8 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
         view = window.new_file(flags=sublime.TRANSIENT)
         view.set_scratch(True)
         view.set_name("--- RustAnalyzer Memory Usage ---")
-        view.run_command("append", {"characters": "Per-query memory usage:"})
-        for line in payload.splitlines():
-            view.run_command("append", {"characters": '\n{}'.format(line)})
+        view.run_command("append", {"characters": "Per-query memory usage:\n"})
+        view.run_command("append", {"characters": payload})
         view.run_command("append", {"characters": "\n(note: database has been cleared)"})
         view.set_read_only(True)
         sheet = view.sheet()
@@ -257,7 +251,6 @@ class RustAnalyzerExec(LspTextCommand):
             if item["label"].startswith(check_phrase):
                 output = item
                 break
-
 
         if not output:
             return
@@ -310,7 +303,7 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         if window is None:
             return
         sublime.set_timeout(
-            lambda : window.show_quick_panel(items, self.callback)
+            lambda: window.show_quick_panel(items, self.callback)
         )
 
     def callback(self, option: int) -> None:
