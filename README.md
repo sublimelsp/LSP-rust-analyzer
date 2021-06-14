@@ -37,6 +37,12 @@ This language server operates on views with the `source.rust` base scope.
 
 ## Custom Command Palette Commands
 
+### LSP-rust-analyzer: Run
+
+Select a command from the submenu.
+
+![Example](https://i.imgur.com/6bNxcur.gif)
+
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
 Opens the URL to documentation for the symbol under the cursor, if available.
