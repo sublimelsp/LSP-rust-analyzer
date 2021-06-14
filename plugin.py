@@ -126,16 +126,17 @@ class RustAnalyzer(AbstractPlugin):
         if not Terminus:
             sublime.error_message(
                 'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
+            done_callback()
+            return True
+        if not shutil.which("cargo"):
+            sublime.error_message('Cannot find "cargo" on path.')
             return False
-
+        main_cargo_path = '"{}"'.format(shutil.which("cargo"))
         for output in cargo_commands:
             if output["args"]["overrideCargo"]:
                 cargo_path = output["args"]["overrideCargo"]
             else:
-                if not shutil.which("cargo"):
-                    sublime.error_message('Cannot find "cargo" on path.')
-                    return False
-                cargo_path = '"{}"'.format(shutil.which("cargo"))
+                cargo_path = main_cargo_path
             command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
                 output["args"]["cargoExtraArgs"]
             cmd = " ".join(command_to_run)
@@ -148,6 +149,7 @@ class RustAnalyzer(AbstractPlugin):
             if get_setting(view, "terminus_use_panel", False):
                 args["panel_name"] = output["label"]
             window.run_command("terminus_open", args)
+        done_callback()
         return True
 
 

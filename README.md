@@ -37,11 +37,13 @@ This language server operates on views with the `source.rust` base scope.
 
 ## Custom Command Palette Commands
 
-### LSP-rust-analyzer: Run
+### LSP-rust-analyzer: Run...
 
-Select a cargo command from the submenu. This spawns a shell with terminus for tests, checks and executing code.
+Select a cargo command from the submenu. This spawns a shell with [Terminus](https://packagecontrol.io/packages/Terminus) for tests, checks and executing code.
 
-![Example](/images/commands.gif)
+> Note: The [Terminus](https://packagecontrol.io/packages/Terminus) package needs to be installed for this functionality.
+
+![Example](./images/commands.gif)
 
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
