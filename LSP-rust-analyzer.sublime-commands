@@ -22,13 +22,5 @@
     {
         "caption": "LSP-rust-analyzer: Run",
         "command": "rust_analyzer_run_project"
-    },
-    {
-        "caption": "LSP-rust-analyzer: Check",
-        "command": "rust_analyzer_check_project"
-    },
-    {
-        "caption": "LSP-rust-analyzer: Test",
-        "command": "rust_analyzer_test_project"
     }
 ]

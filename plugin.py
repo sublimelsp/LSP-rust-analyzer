@@ -8,7 +8,6 @@ from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
 import shutil
-import shlex
 import sublime
 import urllib.request
 
@@ -135,9 +134,10 @@ class RustAnalyzer(AbstractPlugin):
                 sublime.error_message('Cannot find "cargo" on path.')
                 return False
             cargo_path = '"{}"'.format(shutil.which("cargo"))
-        run_command = [cargo_path] + output["args"]["cargoArgs"] + \
+        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
             output["args"]["cargoExtraArgs"]
-        cmd = shlex.join(run_command)
+        print(command_to_run)
+        cmd = " ".join(command_to_run)
         args = {
             "title": output["label"],
             "shell_cmd": cmd,
@@ -191,6 +191,7 @@ class RustAnalyzerReloadProject(LspTextCommand):
         pass
 
 
+
 class RustAnalyzerMemoryUsage(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -198,7 +199,6 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-
         session.send_request(Request("rust-analyzer/memoryUsage"), self.on_result)
 
     def on_result(self, payload: str) -> None:
@@ -273,9 +273,10 @@ class RustAnalyzerExec(LspTextCommand):
                 sublime.error_message('Cannot find "cargo" on path.')
                 return
             cargo_path = '"{}"'.format(shutil.which("cargo"))
-        run_command = [cargo_path] + output["args"]["cargoArgs"] + \
+        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
             output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
-        cmd = shlex.join(run_command)
+        print(command_to_run)
+        cmd = " ".join(command_to_run)
         args = {
             "title": output["label"],
             "shell_cmd": cmd,
@@ -292,7 +293,6 @@ class RustAnalyzerExec(LspTextCommand):
 
 class RustAnalyzerRunProject(RustAnalyzerExec):
     session_name = "rust-analyzer"
-    check_phrase = "run"
 
     def run(self, edit: sublime.Edit) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
@@ -302,7 +302,21 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
     def on_result(self, payload: List[Runnable]) -> None:
-        self.run_termius(self.check_phrase, payload)
+        items = [item["label"] for item in payload]
+        self.items = items
+        self.payload = payload
+        view = self.view
+        window = view.window()
+        if window is None:
+            return
+        sublime.set_timeout(
+            lambda : window.show_quick_panel(items, self.callback)
+        )
+
+    def callback(self, option: int) -> None:
+        if option == -1:
+            return
+        self.run_termius(self.items[option], self.payload)
 
 
 class RustAnalyzerCheckProject(RustAnalyzerExec):
