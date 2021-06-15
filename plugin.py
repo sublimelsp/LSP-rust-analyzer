@@ -361,6 +361,198 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
             return
         session.open_location_async(payload)
 
+class RustAnalyzerMatchingBrace(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = selection_range_params(self.view)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("experimental/matchingBrace", params), self.on_result)
+
+    def on_result(self, payload: List[Dict[str, int]]) -> None:
+        if len(payload) == 0:
+            return
+        res = payload[0]
+        point = self.view.text_point(res["line"], res["character"])
+        self.view.show_at_center(point)
+
+
+class RustAnalyzerJoinLines(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        print("Ready")
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        text_doc = text_document_identifier(self.view)
+        range_list = []
+        for sel in self.view.sel():
+            range_list.append(region_to_range(self.view, sel).to_lsp())
+        params = {
+            "textDocument": text_doc,
+            "ranges": range_list
+        }
+        session.send_request(Request("experimental/joinLines", params), self.on_result, self.on_err)
+
+    def on_err(self, e: str) -> None:
+        sublime.error_message("Error Occured: {}".format(e))
+
+    def on_result(self, payload: List[Dict[str, int]]) -> None:
+        print(payload)
+        payload_new = [{
+            'newText': '',
+            'range': {
+                'end': {
+                    'line': 5,
+                    'character': 8
+                },
+                'start': {
+                    'line': 4,
+                    'character': 20
+                }
+            }
+        }, {
+            'newText': ' ',
+            'range': {
+                'end': {
+                    'line': 6,
+                    'character': 8
+                },
+                'start': {
+                    'line': 5,
+                    'character': 12
+                }
+            }
+        }, {
+            'newText': ' ',
+            'range': {
+                'end': {
+                    'line': 7,
+                    'character': 8
+                },
+                'start': {
+                    'line': 6,
+                    'character': 12
+                }
+            }
+        }, {
+            'newText': '',
+            'range': {
+                'end': {
+                    'line': 8,
+                    'character': 8
+                },
+                'start': {
+                    'line': 7,
+                    'character': 11
+                }
+            }
+        }]
+
+
+class RustAnalyzerSyntaxTree(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/syntaxTree", params), self.on_result)
+
+    def on_result(self, out: Optional[str]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if out is None:
+            return
+
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("Syntax Tree")
+        # Resource Aware Session Types Syntax highlighting not available
+        view.run_command("append", {"characters": out})
+        view.set_read_only(True)
+
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
+
+
+class RustAnalyzerViewItemTree(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/viewItemTree", params), self.on_result)
+
+    def on_result(self, out: Optional[str]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if out is None:
+            return
+
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("View Item Tree")
+        view.assign_syntax("scope:source.rust")
+        view.run_command("append", {"characters": out})
+        view.set_read_only(True)
+
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
+
+
+class RustAnalyzerReloadProject(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 class RustAnalyzerExpandMacro(LspTextCommand):
     session_name = "rust-analyzer"
