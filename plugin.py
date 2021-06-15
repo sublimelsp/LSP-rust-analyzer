@@ -11,18 +11,31 @@ import shutil
 import sublime
 import urllib.request
 
-
 try:
     import Terminus  # type: ignore
 except ImportError:
     Terminus = None
 
+
+RunnableArgs = TypedDict('RunnableArgs', {
+    'cargoArgs': List[str],
+    'cargoExtraArgs': List[str],
+    'executableArgs': List[str],
+    'overrideCargo': Optional[str],
+    'workspaceRoot': str,
+})
+Runnable = TypedDict('Runnable', {
+    'args': RunnableArgs,
+    'kind': str,
+    'label': str,
+})
+
+SESSION_NAME = "rust-analyzer"
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings
 # again to see if any new server settings are added or
 # old ones removed.
 TAG = "2021-06-07"
-
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
 
@@ -37,16 +50,11 @@ def arch() -> str:
         raise RuntimeError("Unknown architecture: " + sublime.arch())
 
 
-def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Union[bool, str]:
+def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Any:
     settings = view.settings()
     if settings.has(key):
         return settings.get(key)
-
-    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings")
-    out = settings.get(key)
-    if out is None:
-        out = default
-    return out
+    return sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings", {}).get(key, default)
 
 
 def platform() -> str:
@@ -62,7 +70,7 @@ class RustAnalyzer(AbstractPlugin):
 
     @classmethod
     def name(cls) -> str:
-        return "rust-analyzer"
+        return SESSION_NAME
 
     @classmethod
     def basedir(cls) -> str:
@@ -164,7 +172,7 @@ class RustAnalyzer(AbstractPlugin):
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
-    session_name = "rust-analyzer"
+    session_name = SESSION_NAME
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -174,11 +182,10 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session.send_request(Request("experimental/externalDocs", params), self.on_result)
 
     def on_result(self, url: Optional[str]) -> None:
@@ -191,7 +198,7 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
 
 
 class RustAnalyzerReloadProject(LspTextCommand):
-    session_name = "rust-analyzer"
+    session_name = SESSION_NAME
 
     def run(self, edit: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
@@ -201,7 +208,7 @@ class RustAnalyzerReloadProject(LspTextCommand):
 
 
 class RustAnalyzerMemoryUsage(LspTextCommand):
-    session_name = "rust-analyzer"
+    session_name = SESSION_NAME
 
     def run(self, edit: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
@@ -227,28 +234,20 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             window.select_sheets(sheets)
 
 
-RunnableArgs = TypedDict('RunnableArgs', {
-    'cargoArgs': List[str],
-    'cargoExtraArgs': List[str],
-    'executableArgs': List[str],
-    'overrideCargo': Optional[str],
-    'workspaceRoot': str,
-})
-Runnable = TypedDict('Runnable', {
-    'args': RunnableArgs,
-    'kind': str,
-    'label': str,
-})
-
-
 class RustAnalyzerExec(LspTextCommand):
-    session_name = "rust-analyzer"
+    session_name = SESSION_NAME
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+        return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
     def run_terminus(self, check_phrase: str, payload: List[Runnable]) -> None:
@@ -297,21 +296,7 @@ class RustAnalyzerExec(LspTextCommand):
 
 
 class RustAnalyzerRunProject(RustAnalyzerExec):
-    session_name = "rust-analyzer"
-
-    def is_enabled(self) -> bool:
-        selection = self.view.sel()
-        if len(selection) == 0:
-            return False
-
-        return super().is_enabled()
-
-    def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(Request("experimental/runnables", params), self.on_result)
+    session_name = SESSION_NAME
 
     def on_result(self, payload: List[Runnable]) -> None:
         items = [item["label"] for item in payload]
@@ -321,9 +306,7 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         window = view.window()
         if window is None:
             return
-        sublime.set_timeout(
-            lambda: window.show_quick_panel(items, self.callback)
-        )
+        sublime.set_timeout(lambda: window.show_quick_panel(items, self.callback))
 
     def callback(self, option: int) -> None:
         if option == -1:
@@ -331,44 +314,13 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         self.run_terminus(self.items[option], self.payload)
 
 
-# class RustAnalyzerCheckProject(RustAnalyzerExec):
-#     session_name = "rust-analyzer"
-#     check_phrase = "cargo check"
-
-#     def run(self, edit: sublime.Edit) -> None:
-#         session = self.session_by_name(self.session_name)
-#         if session is None:
-#             return
-#         params = text_document_position_params(self.view, self.view.sel()[0].b)
-#         session.send_request(Request("experimental/runnables", params), self.on_result)
-
-#     def on_result(self, payload: List[Any]) -> None:
-#         self.run_terminus(self.check_phrase, payload)
-
-
-# class RustAnalyzerTestProject(RustAnalyzerExec):
-#     session_name = "rust-analyzer"
-#     check_phrase = "cargo test"
-
-#     def run(self, edit: sublime.Edit) -> None:
-#         params = text_document_position_params(self.view, self.view.sel()[0].b)
-#         session = self.session_by_name(self.session_name)
-#         if session is None:
-#             return
-#         session.send_request(Request("experimental/runnables", params), self.on_result)
-
-#     def on_result(self, payload: List[Runnable]) -> None:
-#         self.run_terminus(self.check_phrase, payload)
-
-
 class RustAnalyzerExpandMacro(LspTextCommand):
-    session_name = "rust-analyzer"
+    session_name = SESSION_NAME
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
         if len(selection) == 0:
             return False
-
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
