@@ -1,14 +1,24 @@
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import register_plugin
 from LSP.plugin import Request
+from LSP.plugin import Session
 from LSP.plugin import unregister_plugin
+from LSP.plugin.core.protocol import Range
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
+from LSP.plugin.core.types import debounced
+from LSP.plugin.core.types import FEATURES_TIMEOUT
+from LSP.plugin.core.typing import Optional, Union, List, Tuple, Any, TypedDict, Mapping, Callable, Dict
+from LSP.plugin.core.views import point_to_offset
+from LSP.plugin.core.views import text_document_identifier
 from LSP.plugin.core.views import text_document_position_params
+from LSP.plugin.core.views import uri_from_view
+from html import escape as html_escape
 import gzip
 import os
 import shutil
 import sublime
+import sublime_plugin
+import weakref
 import urllib.request
 
 
@@ -25,6 +35,11 @@ TAG = "2021-06-07"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
+InlayHint = TypedDict("InlayHint", {
+    "kind": str,
+    "range": Range,
+    "label": str,
+})
 
 def arch() -> str:
     if sublime.arch() == "x64":
@@ -58,7 +73,72 @@ def platform() -> str:
         return "unknown-linux-gnu"
 
 
+def inlay_hint_css(view: sublime.View) -> str:
+    style = view.style_for_scope("comment")
+    rules = [
+        "color: {};".format(style["foreground"]),
+    ]
+
+    css = """
+    body {{
+        padding: 0px;
+        margin: 0px;
+        border: 0px;
+        font-size: 0.8em;
+    }}
+
+    .rust-analyzer-inlay-hints {{
+        {0}
+    }}
+    """
+    return css.format('\n'.join(rules))
+
+
+def inlay_hint_to_phantom(view: sublime.View, css: str, hint: InlayHint) -> sublime.Phantom:
+    rng = Range.from_lsp(hint["range"])
+    html = """
+    <body id="rust-analyzer-inlay-hints">
+        <style>{css}</style>
+        <div class="rust-analyzer-inlay-hints">
+            {label}
+        </div>
+    </body>
+    """
+
+    label = html_escape(hint["label"])
+    if hint["kind"] == "TypeHint":
+        # For a type hint, the end range is where you want to put it
+        region = sublime.Region(point_to_offset(rng.end, view))
+        label = ": {}".format(label)
+    elif hint["kind"] == "ParameterHint":
+        # For parameter hints, you actually want it to start where it's started
+        region = sublime.Region(point_to_offset(rng.start, view))
+        label = "{}: ".format(label)
+    else:
+        # The last kind is ChainingHint, we want those at the end too
+        region = sublime.Region(point_to_offset(rng.end, view))
+        label = ": {}".format(label)
+
+    html = html.format(css=css, label=label)
+    return sublime.Phantom(region, html, sublime.LAYOUT_INLINE)
+
+
 class RustAnalyzer(AbstractPlugin):
+
+    plugin_mapping = weakref.WeakValueDictionary()  # type: weakref.WeakValueDictionary[int, RustAnalyzer]
+
+    def __init__(self, session: 'weakref.ref[Session]') -> None:
+        super().__init__(session)
+        s = session()
+        if s:
+            self.plugin_mapping[s.window.id()] = self
+
+    @classmethod
+    def plugin_from_view(cls, view: sublime.View) -> Optional['RustAnalyzer']:
+        window = view.window()
+        if window is None:
+            return None
+        return cls.plugin_mapping.get(window.id())
 
     @classmethod
     def name(cls) -> str:
@@ -161,6 +241,36 @@ class RustAnalyzer(AbstractPlugin):
             window.run_command("terminus_open", args)
         done_callback()
         return True
+
+    def request_inlay_hints_async(self, view: sublime.View) -> None:
+        session = self.weaksession()
+        if session is None:
+            return
+
+        params = {
+            "textDocument": text_document_identifier(view),
+        }
+
+        def callback(hints: List[InlayHint]) -> None:
+            self.on_inlay_hints_async(view, hints)
+
+        session.send_request_async(Request("rust-analyzer/inlayHints", params), callback)
+
+    def on_inlay_hints_async(self, view: sublime.View, hints: List[InlayHint]) -> None:
+        session = self.weaksession()
+        if session is None:
+            return
+
+        buffer = session.get_session_buffer_for_uri_async(uri_from_view(view))
+        try:
+            phantom_set = buffer._lsp_rust_analyzer_inlay_hints
+        except AttributeError:
+            phantom_set = sublime.PhantomSet(view, "_lsp_rust_analyzer_inlay_hints")
+            buffer._lsp_rust_analyzer_inlay_hints = phantom_set
+
+        css = inlay_hint_css(view)
+        phantoms = [inlay_hint_to_phantom(view, css, hint) for hint in hints]
+        phantom_set.update(phantoms)
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
@@ -403,9 +513,54 @@ class RustAnalyzerExpandMacro(LspTextCommand):
             window.select_sheets(sheets)
 
 
+class EventListener(sublime_plugin.ViewEventListener):
+    def __init__(self, view: sublime.View) -> None:
+        super().__init__(view)
+        self._stored_region = sublime.Region(-1, -1)
+
+    # This trick comes from the parent LSP repo
+    def _update_stored_region_async(self) -> Tuple[bool, sublime.Region]:
+        sel = self.view.sel()
+        if not sel:
+            return False, sublime.Region(-1, -1)
+
+        region = sel[0]
+        if self._stored_region != region:
+            self._stored_region = region
+            return True, region
+        return False, sublime.Region(-1, -1)
+
+    def on_modified_async(self) -> None:
+        plugin = RustAnalyzer.plugin_from_view(self.view)
+        if plugin is None:
+            return
+
+        different, region = self._update_stored_region_async()
+        if not different:
+            return
+
+        debounced(
+            lambda: plugin.request_inlay_hints_async(self.view),
+            FEATURES_TIMEOUT,
+            lambda: self._stored_region == region,
+            async_thread=True,
+        )
+
+    def on_load_async(self) -> None:
+        plugin = RustAnalyzer.plugin_from_view(self.view)
+        if plugin is None:
+            return
+
+        plugin.request_inlay_hints_async(self.view)
+
+
+    on_activated_async = on_load_async
+
+
 def plugin_loaded() -> None:
     register_plugin(RustAnalyzer)
 
 
 def plugin_unloaded() -> None:
     unregister_plugin(RustAnalyzer)
+    RustAnalyzer.plugin_mapping.clear()
