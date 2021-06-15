@@ -42,8 +42,11 @@ def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]
     if settings.has(key):
         return settings.get(key)
 
-    settings = sublime.load_settings('Packages/LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings')
-    return settings.get(key, default)
+    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings")
+    out = settings.get(key)
+    if out is None:
+        out = default
+    return out
 
 
 def platform() -> str:
@@ -109,7 +112,7 @@ class RustAnalyzer(AbstractPlugin):
             raise
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        if not command["command"] in ["rust-analyzer.runSingle", "rust-analyzer.runDebug"]:
+        if command["command"] not in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
             return False
         cargo_commands = []
         for c in command["arguments"]:
