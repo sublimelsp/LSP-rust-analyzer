@@ -108,51 +108,52 @@ class RustAnalyzer(AbstractPlugin):
             raise
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        if command["command"].startswith("rust-analyzer"):
-            cargo_commands = []
-            for c in command["arguments"]:
-                if c["kind"] == "cargo":
-                    cargo_commands.append(c)
+        if not command["command"].startswith("rust-analyzer"):
+            return False
+        cargo_commands = []
+        for c in command["arguments"]:
+            if c["kind"] == "cargo":
+                cargo_commands.append(c)
 
-            if len(cargo_commands) == 0:
-                done_callback()
-                return True
+        if len(cargo_commands) == 0:
+            done_callback()
+            return True
 
-            window = sublime.active_window()
-            if window is None:
-                done_callback()
-                return True
-            view = window.active_view()
-            if not view:
-                done_callback()
-                return False
-            if not Terminus:
-                sublime.error_message(
-                    'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
-                done_callback()
-                return True
-            if not shutil.which("cargo"):
-                sublime.error_message('Cannot find "cargo" on path.')
-                done_callback()
-                return True
-            main_cargo_path = '"{}"'.format(shutil.which("cargo"))
-            for output in cargo_commands:
-                if output["args"]["overrideCargo"]:
-                    cargo_path = output["args"]["overrideCargo"]
-                else:
-                    cargo_path = main_cargo_path
-                command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-                    output["args"]["cargoExtraArgs"]
-                cmd = " ".join(command_to_run)
-                args = {
-                    "title": output["label"],
-                    "shell_cmd": cmd,
-                    "cwd": output["args"]["workspaceRoot"],
-                    "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
-                }
-                if get_setting(view, "rust-analyzer.terminusUsePanel", False):
-                    args["panel_name"] = output["label"]
-                window.run_command("terminus_open", args)
+        window = sublime.active_window()
+        if window is None:
+            done_callback()
+            return True
+        view = window.active_view()
+        if not view:
+            done_callback()
+            return True
+        if not Terminus:
+            sublime.error_message(
+                'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
+            done_callback()
+            return True
+        if not shutil.which("cargo"):
+            sublime.error_message('Cannot find "cargo" on path.')
+            done_callback()
+            return True
+        main_cargo_path = '"{}"'.format(shutil.which("cargo"))
+        for output in cargo_commands:
+            if output["args"]["overrideCargo"]:
+                cargo_path = output["args"]["overrideCargo"]
+            else:
+                cargo_path = main_cargo_path
+            command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
+                output["args"]["cargoExtraArgs"]
+            cmd = " ".join(command_to_run)
+            args = {
+                "title": output["label"],
+                "shell_cmd": cmd,
+                "cwd": output["args"]["workspaceRoot"],
+                "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
+            }
+            if get_setting(view, "rust-analyzer.terminusUsePanel", False):
+                args["panel_name"] = output["label"]
+            window.run_command("terminus_open", args)
         done_callback()
         return True
 
