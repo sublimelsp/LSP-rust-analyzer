@@ -148,9 +148,9 @@ class RustAnalyzer(AbstractPlugin):
                     "title": output["label"],
                     "shell_cmd": cmd,
                     "cwd": output["args"]["workspaceRoot"],
-                    "auto_close": get_setting(view, "terminus_auto_close", False)
+                    "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
                 }
-                if get_setting(view, "terminus_use_panel", False):
+                if get_setting(view, "rust-analyzer.terminusUsePanel", False):
                     args["panel_name"] = output["label"]
                 window.run_command("terminus_open", args)
         done_callback()
