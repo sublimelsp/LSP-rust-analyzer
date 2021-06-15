@@ -66,6 +66,45 @@ def platform() -> str:
         return "unknown-linux-gnu"
 
 
+def open_runnables_in_terminus(window: Optional[sublime.Window], runnables: List[Runnable]) -> None:
+    filtered_runnables = [r for r in runnables if r["kind"] == "cargo"]
+    if len(filtered_runnables) == 0:
+        return
+    if not window:
+        return
+    view = window.active_view()
+    if not view:
+        return
+    if not Terminus:
+        sublime.error_message(
+            'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
+        return
+    main_cargo = shutil.which("cargo")
+    if not main_cargo:
+        sublime.error_message('Cannot find "cargo" on path.')
+        return
+    main_cargo_path = '"{}"'.format(main_cargo)
+    for runnable in filtered_runnables:
+        if runnable["args"]["overrideCargo"]:
+            cargo_path = runnable["args"]["overrideCargo"]
+        else:
+            cargo_path = main_cargo_path
+        command_to_run = [cargo_path] + runnable["args"]["cargoArgs"]
+        if runnable["args"]["cargoExtraArgs"]:
+            command_to_run += runnable["args"]["cargoExtraArgs"]
+        if runnable["args"]["executableArgs"]:
+            command_to_run += ['--'] + runnable["args"]["executableArgs"]
+        args = {
+            "title": runnable["label"],
+            "shell_cmd": " ".join(command_to_run),
+            "cwd": runnable["args"]["workspaceRoot"],
+            "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
+        }
+        if get_setting(view, "rust-analyzer.terminusUsePanel", False):
+            args["panel_name"] = runnable["label"]
+        window.run_command("terminus_open", args)
+
+
 class RustAnalyzer(AbstractPlugin):
 
     @classmethod
@@ -121,54 +160,10 @@ class RustAnalyzer(AbstractPlugin):
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
         if command["command"] not in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
-            return False
-        cargo_commands = []
-        for c in command["arguments"]:
-            if c["kind"] == "cargo":
-                cargo_commands.append(c)
-
-        if len(cargo_commands) == 0:
+            open_runnables_in_terminus(sublime.active_window(), command["arguments"])
             done_callback()
             return True
-
-        window = sublime.active_window()
-        if window is None:
-            done_callback()
-            return True
-        view = window.active_view()
-        if not view:
-            done_callback()
-            return True
-        if not Terminus:
-            sublime.error_message(
-                'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
-            done_callback()
-            return True
-        main_cargo = shutil.which("cargo")
-        if not main_cargo:
-            sublime.error_message('Cannot find "cargo" on path.')
-            done_callback()
-            return True
-        main_cargo_path = '"{}"'.format(main_cargo)
-        for output in cargo_commands:
-            if output["args"]["overrideCargo"]:
-                cargo_path = output["args"]["overrideCargo"]
-            else:
-                cargo_path = main_cargo_path
-            command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-                output["args"]["cargoExtraArgs"]
-            cmd = " ".join(command_to_run)
-            args = {
-                "title": output["label"],
-                "shell_cmd": cmd,
-                "cwd": output["args"]["workspaceRoot"],
-                "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
-            }
-            if get_setting(view, "rust-analyzer.terminusUsePanel", False):
-                args["panel_name"] = output["label"]
-            window.run_command("terminus_open", args)
-        done_callback()
-        return True
+        return False
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
@@ -250,46 +245,11 @@ class RustAnalyzerExec(LspTextCommand):
         params = text_document_position_params(self.view, self.view.sel()[0].b)
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def run_terminus(self, check_phrase: str, payload: List[Runnable]) -> None:
-        window = self.view.window()
-        if window is None:
-            return
-
-        if len(payload) == 0:
-            return
-
-        output = None
-        for item in payload:
-            if item["label"].startswith(check_phrase):
-                output = item
+    def run_terminus(self, check_phrase: str, runnables: List[Runnable]) -> None:
+        for runnable in runnables:
+            if runnable["label"].startswith(check_phrase):
+                open_runnables_in_terminus(self.view.window(), [runnable])
                 break
-
-        if not output:
-            return
-
-        if not Terminus:
-            sublime.error_message(
-                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
-            return
-        if output["args"]["overrideCargo"]:
-            cargo_path = output["args"]["overrideCargo"]
-        else:
-            if not shutil.which("cargo"):
-                sublime.error_message('Cannot find "cargo" on path.')
-                return
-            cargo_path = '"{}"'.format(shutil.which("cargo"))
-        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-            output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
-        cmd = " ".join(command_to_run)
-        args = {
-            "title": output["label"],
-            "shell_cmd": cmd,
-            "cwd": output["args"]["workspaceRoot"],
-            "auto_close": get_setting(self.view, "terminus_auto_close", False)
-        }
-        if get_setting(self.view, "terminus_use_panel", False):
-            args["panel_name"] = output["label"]
-        window.run_command("terminus_open", args)
 
     def on_result(self, payload: Any) -> None:
         raise NotImplementedError()
