@@ -41,7 +41,8 @@ def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]
     settings = view.settings()
     if settings.has(key):
         return settings.get(key)
-    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings')
+
+    settings = sublime.load_settings('Packages/LSP-rust-analyzer/LSP-rust-analyzer.sublime-settings')
     return settings.get(key, default)
 
 
