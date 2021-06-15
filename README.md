@@ -44,3 +44,7 @@ Opens the URL to documentation for the symbol under the cursor, if available.
 ### LSP-rust-analyzer: Reload Project
 
 Reloads the project metadata, i.e. runs `cargo metadata` again.
+
+### LSP-rust-analyzer: Expand Macro Recursively
+
+Shows the full macro expansion of the macro at current cursor.
