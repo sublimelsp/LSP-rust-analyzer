@@ -164,8 +164,6 @@ class RustAnalyzer(AbstractPlugin):
         return True
 
 
-
-
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -220,6 +218,7 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             window.select_sheets(sheets)
 
 
+
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
     'cargoExtraArgs': List[str],
@@ -251,7 +250,6 @@ class RustAnalyzerExec(LspTextCommand):
 
         if len(payload) == 0:
             return
-
         output = None
         for item in payload:
             if item["label"].startswith(check_phrase):
@@ -287,7 +285,6 @@ class RustAnalyzerExec(LspTextCommand):
 
     def on_result(self, payload: Any) -> None:
         raise NotImplementedError()
-
 
 class RustAnalyzerRunProject(RustAnalyzerExec):
     session_name = "rust-analyzer"
@@ -338,19 +335,6 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
 #     def on_result(self, payload: List[Any]) -> None:
 #         self.run_terminus(self.check_phrase, payload)
 
-
-# class RustAnalyzerTestProject(RustAnalyzerExec):
-#     session_name = "rust-analyzer"
-#     check_phrase = "cargo test"
-
-#     def run(self, edit: sublime.Edit) -> None:
-#         params = text_document_position_params(self.view, self.view.sel()[0].b)
-#         session = self.session_by_name(self.session_name)
-#         if session is None:
-#             return
-#         session.send_request(Request("experimental/runnables", params), self.on_result)
-
-
 class RustAnalyzerOpenCargoToml(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -366,7 +350,17 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
+        session.send_request(Request("experimental/openCargoToml", params), self.on_result)
+
+    def on_result(self, payload: Location) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.open_location_async(payload)
+
 
 class RustAnalyzerExpandMacro(LspTextCommand):
     session_name = "rust-analyzer"
