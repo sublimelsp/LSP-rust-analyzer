@@ -3,7 +3,7 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable
+from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
 from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
@@ -343,6 +343,48 @@ class RustAnalyzerTestProject(RustAnalyzerExec):
 
     def on_result(self, payload: List[Runnable]) -> None:
         self.run_termius(self.check_phrase, payload)
+
+
+class RustAnalyzerExpandMacro(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session.send_request(Request("rust-analyzer/expandMacro", params), self.on_result)
+
+    def on_result(self, expanded_macro: Optional[Dict[str, str]]) -> None:
+        if expanded_macro is None:
+            return
+
+        window = self.view.window()
+        if window is None:
+            return
+
+        header = "Recursive expansion of {0}! macro".format(expanded_macro["name"])
+        content = "// {0}\n// {1}\n\n{2}".format(header, (1 + len(header)) * "=", expanded_macro["expansion"])
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("Macro Expansion")
+        view.assign_syntax("scope:source.rust")
+        view.run_command("append", { "characters": content })
+        view.set_read_only(True)
+
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
 
 
 def plugin_loaded() -> None:
