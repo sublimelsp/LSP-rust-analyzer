@@ -21,6 +21,16 @@
                 "settings": {
                   "additionalProperties": false,
                   "properties": {
+                    "rust-analyzer.terminusAutoClose": {
+                      "default": false,
+                      "description": "Wether or not to automatically close terminus panel/tab upon completion.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.terminusUsePanel": {
+                      "default": false,
+                      "description": "Wether or not to spawn a panel at the bottom, or a new tab.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.assist.importEnforceGranularity": {
                       "default": false,
                       "markdownDescription": "Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.",

@@ -2,6 +2,16 @@
 	"selector": "source.rust",
 	"command": ["${storage_path}/LSP-rust-analyzer/rust-analyzer"],
 	"settings": {
+
+		// Settings Not Related to rust-analyzer Server
+
+		// Wether or not to automatically close terminus panel/tab upon completion.
+		"rust-analyzer.terminusAutoClose": false,
+		// Wether or not to spawn a panel at the bottom, or a new tab
+		"rust-analyzer.terminusUsePanel": false,
+
+		// Rust-Analyzer Server Settings
+
 		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
 		"rust-analyzer.assist.importEnforceGranularity": false,
 		//How imports should be grouped into use statements.
