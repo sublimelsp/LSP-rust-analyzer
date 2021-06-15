@@ -1,10 +1,11 @@
+from LSP.plugin.core.protocol import Location
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
 from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
-from LSP.plugin.core.views import text_document_position_params
+from LSP.plugin.core.views import text_document_position_params, selection_range_params, region_to_range, text_document_identifier
 import gzip
 import os
 import shutil
@@ -37,7 +38,7 @@ def arch() -> str:
         raise RuntimeError("Unknown architecture: " + sublime.arch())
 
 
-def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Union[bool, str]:
+def get_setting(view: sublime.View, key: str, default: Union[str, bool]) -> Union[bool, str]:
     settings = view.settings()
     if settings.has(key):
         return settings.get(key)
@@ -163,6 +164,8 @@ class RustAnalyzer(AbstractPlugin):
         return True
 
 
+
+
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -188,16 +191,6 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
 
         if url is not None:
             window.run_command("open_url", {"url": url})
-
-
-class RustAnalyzerReloadProject(LspTextCommand):
-    session_name = "rust-analyzer"
-
-    def run(self, edit: sublime.Edit) -> None:
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 
 class RustAnalyzerMemoryUsage(LspTextCommand):
@@ -357,9 +350,23 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
 #             return
 #         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-#     def on_result(self, payload: List[Runnable]) -> None:
-#         self.run_terminus(self.check_phrase, payload)
 
+class RustAnalyzerOpenCargoToml(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 class RustAnalyzerExpandMacro(LspTextCommand):
     session_name = "rust-analyzer"

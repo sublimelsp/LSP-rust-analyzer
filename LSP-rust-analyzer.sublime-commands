@@ -26,5 +26,25 @@
     {
         "caption": "LSP-rust-analyzer: Expand Macro Recursively",
         "command": "rust_analyzer_expand_macro"
+    },
+    {
+        "caption": "LSP-rust-analyzer: View Item Tree",
+        "command": "rust_analyzer_view_item_tree"
+    },
+    {
+        "caption": "LSP-rust-analyzer: View Syntax Tree",
+        "command": "rust_analyzer_syntax_tree"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Open Cargo.toml",
+        "command": "rust_analyzer_open_cargo_toml"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Find Matching Brace",
+        "command": "rust_analyzer_matching_brace"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Join Lines",
+        "command": "rust_analyzer_join_lines"
     }
 ]
