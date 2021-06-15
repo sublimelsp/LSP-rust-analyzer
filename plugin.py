@@ -3,7 +3,7 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
+from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict, Iterable
 from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
@@ -118,49 +118,19 @@ class RustAnalyzer(AbstractPlugin):
         for c in command["arguments"]:
             if c["kind"] == "cargo":
                 cargo_commands.append(c)
-
-        if len(cargo_commands) == 0:
-            done_callback()
+        try:
+            if len(cargo_commands) == 0:
+                return True
+            window = sublime.active_window()
+            if window is None:
+                return True
+            view = window.active_view()
+            if not view:
+                return True
+            spawn_runnables(window, view, cargo_commands)
             return True
-
-        window = sublime.active_window()
-        if window is None:
+        finally:
             done_callback()
-            return True
-        view = window.active_view()
-        if not view:
-            done_callback()
-            return True
-        if not Terminus:
-            sublime.error_message(
-                'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
-            done_callback()
-            return True
-        main_cargo = shutil.which("cargo")
-        if not main_cargo:
-            sublime.error_message('Cannot find "cargo" on path.')
-            done_callback()
-            return True
-        main_cargo_path = '"{}"'.format(main_cargo)
-        for output in cargo_commands:
-            if output["args"]["overrideCargo"]:
-                cargo_path = output["args"]["overrideCargo"]
-            else:
-                cargo_path = main_cargo_path
-            command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-                output["args"]["cargoExtraArgs"]
-            cmd = " ".join(command_to_run)
-            args = {
-                "title": output["label"],
-                "shell_cmd": cmd,
-                "cwd": output["args"]["workspaceRoot"],
-                "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
-            }
-            if get_setting(view, "rust-analyzer.terminusUsePanel", False):
-                args["panel_name"] = output["label"]
-            window.run_command("terminus_open", args)
-        done_callback()
-        return True
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
@@ -241,6 +211,47 @@ Runnable = TypedDict('Runnable', {
 })
 
 
+def runnable_to_terminus_args(runnable: Runnable, view: sublime.View) -> Dict[str, Any]:
+    """
+    Convert the data of a Runnable into the arguments of a "terminus_open" command.
+    """
+    args = runnable["args"]
+    if args["overrideCargo"]:
+        cargo_path = args["overrideCargo"]
+    else:
+        cargo_path = "cargo"
+    command_to_run = [cargo_path] + args["cargoArgs"] + \
+        args["cargoExtraArgs"]
+    cmd = " ".join(command_to_run)
+    result = {
+        "title": runnable["label"],
+        "shell_cmd": cmd,
+        "cwd": args["workspaceRoot"],
+        "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
+    }
+    if get_setting(view, "rust-analyzer.terminusUsePanel", False):
+        result["panel_name"] = runnable["label"]
+    return result
+
+
+def spawn_runnable(window: sublime.Window, view: sublime.View, runnable: Runnable) -> None:
+    """
+    Create a Terminus session for the given runnable.
+    """
+    window.run_command("terminus_open", runnable_to_terminus_args(runnable, view))
+
+
+def spawn_runnables(window: sublime.Window, view: sublime.View, runnables: Iterable[Runnable]) -> None:
+    """
+    Create many Terminus sessions for the given runnables.
+    """
+    if not Terminus:
+        sublime.error_message(
+            'Cannot run runnables. You need to install the "Terminus" package and then restart Sublime Text')
+    for runnable in runnables:
+        spawn_runnable(window, view, runnable)
+
+
 class RustAnalyzerExec(LspTextCommand):
     session_name = "rust-analyzer"
 
@@ -251,46 +262,12 @@ class RustAnalyzerExec(LspTextCommand):
             return
         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def run_terminus(self, check_phrase: str, payload: List[Runnable]) -> None:
+    def run_terminus(self, check_phrase: str, payload: Iterable[Runnable]) -> None:
         window = self.view.window()
         if window is None:
             return
-
-        if len(payload) == 0:
-            return
-
-        output = None
-        for item in payload:
-            if item["label"].startswith(check_phrase):
-                output = item
-                break
-
-        if not output:
-            return
-
-        if not Terminus:
-            sublime.error_message(
-                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
-            return
-        if output["args"]["overrideCargo"]:
-            cargo_path = output["args"]["overrideCargo"]
-        else:
-            if not shutil.which("cargo"):
-                sublime.error_message('Cannot find "cargo" on path.')
-                return
-            cargo_path = '"{}"'.format(shutil.which("cargo"))
-        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
-            output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
-        cmd = " ".join(command_to_run)
-        args = {
-            "title": output["label"],
-            "shell_cmd": cmd,
-            "cwd": output["args"]["workspaceRoot"],
-            "auto_close": get_setting(self.view, "terminus_auto_close", False)
-        }
-        if get_setting(self.view, "terminus_use_panel", False):
-            args["panel_name"] = output["label"]
-        window.run_command("terminus_open", args)
+        matching_phrase = filter(lambda item: item["label"].startswith(check_phrase), payload)
+        spawn_runnables(window, self.view, matching_phrase)
 
     def on_result(self, payload: Any) -> None:
         raise NotImplementedError()
