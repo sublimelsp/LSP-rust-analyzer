@@ -108,7 +108,7 @@ class RustAnalyzer(AbstractPlugin):
             raise
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        if not command["command"].startswith("rust-analyzer"):
+        if not command["command"] in ["rust-analyzer.runSingle", "rust-analyzer.runDebug"]:
             return False
         cargo_commands = []
         for c in command["arguments"]:
@@ -132,11 +132,12 @@ class RustAnalyzer(AbstractPlugin):
                 'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
             done_callback()
             return True
-        if not shutil.which("cargo"):
+        main_cargo = shutil.which("cargo")
+        if not main_cargo:
             sublime.error_message('Cannot find "cargo" on path.')
             done_callback()
             return True
-        main_cargo_path = '"{}"'.format(shutil.which("cargo"))
+        main_cargo_path = '"{}"'.format(main_cargo)
         for output in cargo_commands:
             if output["args"]["overrideCargo"]:
                 cargo_path = output["args"]["overrideCargo"]
@@ -319,34 +320,34 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         self.run_terminus(self.items[option], self.payload)
 
 
-class RustAnalyzerCheckProject(RustAnalyzerExec):
-    session_name = "rust-analyzer"
-    check_phrase = "cargo check"
+# class RustAnalyzerCheckProject(RustAnalyzerExec):
+#     session_name = "rust-analyzer"
+#     check_phrase = "cargo check"
 
-    def run(self, edit: sublime.Edit) -> None:
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(Request("experimental/runnables", params), self.on_result)
+#     def run(self, edit: sublime.Edit) -> None:
+#         session = self.session_by_name(self.session_name)
+#         if session is None:
+#             return
+#         params = text_document_position_params(self.view, self.view.sel()[0].b)
+#         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def on_result(self, payload: List[Any]) -> None:
-        self.run_terminus(self.check_phrase, payload)
+#     def on_result(self, payload: List[Any]) -> None:
+#         self.run_terminus(self.check_phrase, payload)
 
 
-class RustAnalyzerTestProject(RustAnalyzerExec):
-    session_name = "rust-analyzer"
-    check_phrase = "cargo test"
+# class RustAnalyzerTestProject(RustAnalyzerExec):
+#     session_name = "rust-analyzer"
+#     check_phrase = "cargo test"
 
-    def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(Request("experimental/runnables", params), self.on_result)
+#     def run(self, edit: sublime.Edit) -> None:
+#         params = text_document_position_params(self.view, self.view.sel()[0].b)
+#         session = self.session_by_name(self.session_name)
+#         if session is None:
+#             return
+#         session.send_request(Request("experimental/runnables", params), self.on_result)
 
-    def on_result(self, payload: List[Runnable]) -> None:
-        self.run_terminus(self.check_phrase, payload)
+#     def on_result(self, payload: List[Runnable]) -> None:
+#         self.run_terminus(self.check_phrase, payload)
 
 
 class RustAnalyzerExpandMacro(LspTextCommand):
