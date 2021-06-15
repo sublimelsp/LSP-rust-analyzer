@@ -3,13 +3,19 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.typing import Optional, Dict
+from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
 from LSP.plugin.core.views import text_document_position_params
 import gzip
 import os
 import shutil
 import sublime
 import urllib.request
+
+
+try:
+    import Terminus  # type: ignore
+except ImportError:
+    Terminus = None
 
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings
@@ -29,6 +35,18 @@ def arch() -> str:
         return "aarch64"
     else:
         raise RuntimeError("Unknown architecture: " + sublime.arch())
+
+
+def get_setting(view: sublime.View, key: str, default: Optional[Union[str, bool]] = None) -> Union[bool, str]:
+    settings = view.settings()
+    if settings.has(key):
+        return settings.get(key)
+
+    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings")
+    out = settings.get(key)
+    if out is None:
+        out = default
+    return out
 
 
 def platform() -> str:
@@ -93,6 +111,57 @@ class RustAnalyzer(AbstractPlugin):
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
 
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+        if command["command"] not in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
+            return False
+        cargo_commands = []
+        for c in command["arguments"]:
+            if c["kind"] == "cargo":
+                cargo_commands.append(c)
+
+        if len(cargo_commands) == 0:
+            done_callback()
+            return True
+
+        window = sublime.active_window()
+        if window is None:
+            done_callback()
+            return True
+        view = window.active_view()
+        if not view:
+            done_callback()
+            return True
+        if not Terminus:
+            sublime.error_message(
+                'Cannot run executable. You need to install the "Terminus" package and then restart Sublime Text')
+            done_callback()
+            return True
+        main_cargo = shutil.which("cargo")
+        if not main_cargo:
+            sublime.error_message('Cannot find "cargo" on path.')
+            done_callback()
+            return True
+        main_cargo_path = '"{}"'.format(main_cargo)
+        for output in cargo_commands:
+            if output["args"]["overrideCargo"]:
+                cargo_path = output["args"]["overrideCargo"]
+            else:
+                cargo_path = main_cargo_path
+            command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
+                output["args"]["cargoExtraArgs"]
+            cmd = " ".join(command_to_run)
+            args = {
+                "title": output["label"],
+                "shell_cmd": cmd,
+                "cwd": output["args"]["workspaceRoot"],
+                "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", False)
+            }
+            if get_setting(view, "rust-analyzer.terminusUsePanel", False):
+                args["panel_name"] = output["label"]
+            window.run_command("terminus_open", args)
+        done_callback()
+        return True
+
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
     session_name = "rust-analyzer"
@@ -118,7 +187,7 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
             return
 
         if url is not None:
-            window.run_command("open_url", { "url": url })
+            window.run_command("open_url", {"url": url})
 
 
 class RustAnalyzerReloadProject(LspTextCommand):
@@ -128,8 +197,168 @@ class RustAnalyzerReloadProject(LspTextCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: ...)
+
+class RustAnalyzerMemoryUsage(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("rust-analyzer/memoryUsage"), self.on_result)
+
+    def on_result(self, payload: str) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("--- RustAnalyzer Memory Usage ---")
+        view.run_command("append", {"characters": "Per-query memory usage:\n"})
+        view.run_command("append", {"characters": payload})
+        view.run_command("append", {"characters": "\n(note: database has been cleared)"})
+        view.set_read_only(True)
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
+
+
+RunnableArgs = TypedDict('RunnableArgs', {
+    'cargoArgs': List[str],
+    'cargoExtraArgs': List[str],
+    'executableArgs': List[str],
+    'overrideCargo': Optional[str],
+    'workspaceRoot': str,
+})
+Runnable = TypedDict('Runnable', {
+    'args': RunnableArgs,
+    'kind': str,
+    'label': str,
+})
+
+
+class RustAnalyzerExec(LspTextCommand):
+    session_name = "rust-analyzer"
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def run_terminus(self, check_phrase: str, payload: List[Runnable]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if len(payload) == 0:
+            return
+
+        output = None
+        for item in payload:
+            if item["label"].startswith(check_phrase):
+                output = item
+                break
+
+        if not output:
+            return
+
+        if not Terminus:
+            sublime.error_message(
+                'Cannot run executable "{}": You need to install the "Terminus" package and then restart Sublime Text'.format(output["kind"]))
+            return
+        if output["args"]["overrideCargo"]:
+            cargo_path = output["args"]["overrideCargo"]
+        else:
+            if not shutil.which("cargo"):
+                sublime.error_message('Cannot find "cargo" on path.')
+                return
+            cargo_path = '"{}"'.format(shutil.which("cargo"))
+        command_to_run = [cargo_path] + output["args"]["cargoArgs"] + \
+            output["args"]["cargoExtraArgs"] + output["args"]["executableArgs"]
+        cmd = " ".join(command_to_run)
+        args = {
+            "title": output["label"],
+            "shell_cmd": cmd,
+            "cwd": output["args"]["workspaceRoot"],
+            "auto_close": get_setting(self.view, "terminus_auto_close", False)
+        }
+        if get_setting(self.view, "terminus_use_panel", False):
+            args["panel_name"] = output["label"]
+        window.run_command("terminus_open", args)
+
+    def on_result(self, payload: Any) -> None:
+        raise NotImplementedError()
+
+
+class RustAnalyzerRunProject(RustAnalyzerExec):
+    session_name = "rust-analyzer"
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/runnables", params), self.on_result)
+
+    def on_result(self, payload: List[Runnable]) -> None:
+        items = [item["label"] for item in payload]
+        self.items = items
+        self.payload = payload
+        view = self.view
+        window = view.window()
+        if window is None:
+            return
+        sublime.set_timeout(
+            lambda: window.show_quick_panel(items, self.callback)
+        )
+
+    def callback(self, option: int) -> None:
+        if option == -1:
+            return
+        self.run_terminus(self.items[option], self.payload)
+
+
+# class RustAnalyzerCheckProject(RustAnalyzerExec):
+#     session_name = "rust-analyzer"
+#     check_phrase = "cargo check"
+
+#     def run(self, edit: sublime.Edit) -> None:
+#         session = self.session_by_name(self.session_name)
+#         if session is None:
+#             return
+#         params = text_document_position_params(self.view, self.view.sel()[0].b)
+#         session.send_request(Request("experimental/runnables", params), self.on_result)
+
+#     def on_result(self, payload: List[Any]) -> None:
+#         self.run_terminus(self.check_phrase, payload)
+
+
+# class RustAnalyzerTestProject(RustAnalyzerExec):
+#     session_name = "rust-analyzer"
+#     check_phrase = "cargo test"
+
+#     def run(self, edit: sublime.Edit) -> None:
+#         params = text_document_position_params(self.view, self.view.sel()[0].b)
+#         session = self.session_by_name(self.session_name)
+#         if session is None:
+#             return
+#         session.send_request(Request("experimental/runnables", params), self.on_result)
+
+#     def on_result(self, payload: List[Runnable]) -> None:
+#         self.run_terminus(self.check_phrase, payload)
 
 
 class RustAnalyzerExpandMacro(LspTextCommand):
@@ -165,7 +394,7 @@ class RustAnalyzerExpandMacro(LspTextCommand):
         view.set_scratch(True)
         view.set_name("Macro Expansion")
         view.assign_syntax("scope:source.rust")
-        view.run_command("append", { "characters": content })
+        view.run_command("append", {"characters": content})
         view.set_read_only(True)
 
         sheet = view.sheet()

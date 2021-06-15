@@ -16,6 +16,14 @@
         "command": "rust_analyzer_reload_project"
     },
     {
+        "caption": "LSP-rust-analyzer: Memory Usage (Clears Database)",
+        "command": "rust_analyzer_memory_usage"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Run...",
+        "command": "rust_analyzer_run_project"
+    },
+    {
         "caption": "LSP-rust-analyzer: Expand Macro Recursively",
         "command": "rust_analyzer_expand_macro"
     }
