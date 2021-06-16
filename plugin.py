@@ -518,6 +518,15 @@ class EventListener(sublime_plugin.ViewEventListener):
         super().__init__(view)
         self._stored_region = sublime.Region(-1, -1)
 
+    def is_valid_view(self) -> bool:
+        transient = False
+        sheet = self.view.sheet()
+        if sheet is not None:
+            transient = sheet.is_transient()
+
+        rust = self.view.syntax().scope == 'source.rust'
+        return not transient and rust and bool(self.view.file_name()) and self.view.element() is None
+
     # This trick comes from the parent LSP repo
     def _update_stored_region_async(self) -> Tuple[bool, sublime.Region]:
         sel = self.view.sel()
@@ -531,6 +540,9 @@ class EventListener(sublime_plugin.ViewEventListener):
         return False, sublime.Region(-1, -1)
 
     def on_modified_async(self) -> None:
+        if not self.is_valid_view():
+            return
+
         plugin = RustAnalyzer.plugin_from_view(self.view)
         if plugin is None:
             return
@@ -547,6 +559,9 @@ class EventListener(sublime_plugin.ViewEventListener):
         )
 
     def on_load_async(self) -> None:
+        if not self.is_valid_view():
+            return
+
         plugin = RustAnalyzer.plugin_from_view(self.view)
         if plugin is None:
             return
