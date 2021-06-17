@@ -138,7 +138,10 @@ class RustAnalyzer(AbstractPlugin):
         window = view.window()
         if window is None:
             return None
-        return cls.plugin_mapping.get(window.id())
+        self = cls.plugin_mapping.get(window.id())
+        if self is None or not self.is_valid_for_view(view):
+            return None
+        return self
 
     @classmethod
     def name(cls) -> str:
@@ -240,6 +243,12 @@ class RustAnalyzer(AbstractPlugin):
                 args["panel_name"] = output["label"]
             window.run_command("terminus_open", args)
         done_callback()
+        return True
+
+    def is_valid_for_view(self, view: sublime.View) -> bool:
+        session = self.weaksession()
+        if not session or not session.session_view_for_view_async(view):
+            return False
         return True
 
     def request_inlay_hints_async(self, view: sublime.View) -> None:
