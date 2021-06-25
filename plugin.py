@@ -252,6 +252,9 @@ class RustAnalyzer(AbstractPlugin):
         return True
 
     def request_inlay_hints_async(self, view: sublime.View) -> None:
+        if not get_setting(view, "rust-analyzer.inlayHints.enable", True):
+            return
+
         session = self.weaksession()
         if session is None:
             return
