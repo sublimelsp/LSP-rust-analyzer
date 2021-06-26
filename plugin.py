@@ -3,7 +3,7 @@ from LSP.plugin import register_plugin
 from LSP.plugin import Request
 from LSP.plugin import Session
 from LSP.plugin import unregister_plugin
-from LSP.plugin.core.protocol import Range
+from LSP.plugin.core.protocol import Range, RangeLsp
 from LSP.plugin.core.registry import LspTextCommand
 from LSP.plugin.core.types import debounced
 from LSP.plugin.core.types import FEATURES_TIMEOUT
@@ -20,6 +20,7 @@ import sublime
 import sublime_plugin
 import weakref
 import urllib.request
+import functools
 
 
 try:
@@ -37,9 +38,10 @@ URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/ru
 
 InlayHint = TypedDict("InlayHint", {
     "kind": str,
-    "range": Range,
+    "range": RangeLsp,
     "label": str,
-})
+}, total=True)
+
 
 def arch() -> str:
     if sublime.arch() == "x64":
@@ -258,30 +260,46 @@ class RustAnalyzer(AbstractPlugin):
         session = self.weaksession()
         if session is None:
             return
-
         params = {
             "textDocument": text_document_identifier(view),
         }
 
-        def callback(hints: List[InlayHint]) -> None:
-            self.on_inlay_hints_async(view, hints)
-
-        session.send_request_async(Request("rust-analyzer/inlayHints", params), callback)
+        session.send_request_async(
+            Request("rust-analyzer/inlayHints", params),
+            functools.partial(self.on_inlay_hints_async, view)
+        )
 
     def on_inlay_hints_async(self, view: sublime.View, hints: List[InlayHint]) -> None:
         session = self.weaksession()
         if session is None:
             return
-
         buffer = session.get_session_buffer_for_uri_async(uri_from_view(view))
-        try:
-            phantom_set = buffer._lsp_rust_analyzer_inlay_hints
-        except AttributeError:
-            phantom_set = sublime.PhantomSet(view, "_lsp_rust_analyzer_inlay_hints")
-            buffer._lsp_rust_analyzer_inlay_hints = phantom_set
-
+        if not buffer:
+            return
+        key = "_lsp_rust_analyzer_inlay_hints"
+        phantom_set = getattr(buffer, key, None)
+        if phantom_set is None:
+            phantom_set = sublime.PhantomSet(view, key)
+            setattr(buffer, key, phantom_set)
         css = inlay_hint_css(view)
         phantoms = [inlay_hint_to_phantom(view, css, hint) for hint in hints]
+        sublime.set_timeout(
+            functools.partial(
+                self.present_inlay_hints,
+                view,
+                phantom_set,
+                phantoms
+            )
+        )
+
+    def present_inlay_hints(
+        self,
+        view: sublime.View,
+        phantom_set: sublime.PhantomSet,
+        phantoms: List[sublime.Phantom]
+    ) -> None:
+        if not view.is_valid():
+            return
         phantom_set.update(phantoms)
 
 
@@ -552,7 +570,7 @@ class EventListener(sublime_plugin.ViewEventListener):
             return
 
         debounced(
-            lambda: plugin.request_inlay_hints_async(self.view),
+            functools.partial(plugin.request_inlay_hints_async, self.view),
             FEATURES_TIMEOUT,
             lambda: self._stored_region == region,
             async_thread=True,
@@ -564,7 +582,6 @@ class EventListener(sublime_plugin.ViewEventListener):
             return
 
         plugin.request_inlay_hints_async(self.view)
-
 
     on_activated_async = on_load_async
 
