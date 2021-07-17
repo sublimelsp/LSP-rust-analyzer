@@ -42,9 +42,5 @@
     {
         "caption": "LSP-rust-analyzer: Find Matching Brace",
         "command": "rust_analyzer_matching_brace"
-    },
-    {
-        "caption": "LSP-rust-analyzer: Join Lines",
-        "command": "rust_analyzer_join_lines"
     }
 ]
