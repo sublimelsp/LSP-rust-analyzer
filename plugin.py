@@ -12,6 +12,7 @@ from LSP.plugin.core.types import FEATURES_TIMEOUT
 from LSP.plugin.core.typing import Optional, Union, List, Tuple, Any, TypedDict, Mapping, Callable, Dict
 from LSP.plugin.core.views import point_to_offset
 from LSP.plugin.core.views import uri_from_view
+from LSP.plugin.locationpicker import LocationPicker
 from html import escape as html_escape
 import gzip
 import os
@@ -203,8 +204,27 @@ class RustAnalyzer(AbstractPlugin):
             raise
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        if command["command"] not in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
+        command_name = command["command"]
+        try:
+            session = self.weaksession()
+            if not session:
+                return False
+            if command_name in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
+                return self._handle_runnable_command(session, command, done_callback)
+            elif command_name == "rust-analyzer.showReferences":
+                return self._handle_show_references(session, command, done_callback)
+            else:
+                return False
+        except Exception as ex:
+            print("Exception handling command {}: {}".format(command_name, ex))
             return False
+
+    def _handle_runnable_command(
+        self,
+        session: Session,
+        command: Mapping[str, Any],
+        done_callback: Callable[[], None]
+    ) -> bool:
         cargo_commands = []
         for c in command["arguments"]:
             if c["kind"] == "cargo":
@@ -214,11 +234,7 @@ class RustAnalyzer(AbstractPlugin):
             done_callback()
             return True
 
-        window = sublime.active_window()
-        if window is None:
-            done_callback()
-            return True
-        view = window.active_view()
+        view = session.window.active_view()
         if not view:
             done_callback()
             return True
@@ -249,7 +265,21 @@ class RustAnalyzer(AbstractPlugin):
             }
             if get_setting(view, "rust-analyzer.terminusUsePanel", False):
                 args["panel_name"] = output["label"]
-            window.run_command("terminus_open", args)
+            session.window.run_command("terminus_open", args)
+        done_callback()
+        return True
+
+    def _handle_show_references(
+        self,
+        session: Session,
+        command: Mapping[str, Any],
+        done_callback: Callable[[], None]
+    ) -> bool:
+        locations = command["arguments"][2]
+        view = session.window.active_view()
+        if not view:
+            return True
+        LocationPicker(view, session, locations, side_by_side=False)
         done_callback()
         return True
 
