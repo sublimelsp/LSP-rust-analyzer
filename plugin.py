@@ -493,24 +493,6 @@ class RustAnalyzerOpenCargoToml(RustAnalyzerCommand):
         session.open_location_async(payload)
 
 
-class RustAnalyzerMatchingBrace(RustAnalyzerCommand):
-
-    def run(self, edit: sublime.Edit) -> None:
-        params = selection_range_params(self.view)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-
-        session.send_request(Request("experimental/matchingBrace", params), self.on_result)
-
-    def on_result(self, payload: List[Dict[str, int]]) -> None:
-        if len(payload) == 0:
-            return
-        res = payload[0]
-        point = self.view.text_point(res["line"], res["character"])
-        self.view.show_at_center(point)
-
-
 class RustAnalyzerSyntaxTree(RustAnalyzerCommand):
 
     def is_enabled(self) -> bool:

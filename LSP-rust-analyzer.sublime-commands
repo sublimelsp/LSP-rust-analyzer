@@ -38,9 +38,5 @@
     {
         "caption": "LSP-rust-analyzer: Open Cargo.toml",
         "command": "rust_analyzer_open_cargo_toml"
-    },
-    {
-        "caption": "LSP-rust-analyzer: Find Matching Brace",
-        "command": "rust_analyzer_matching_brace"
     }
 ]
