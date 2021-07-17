@@ -328,9 +328,9 @@ class RustAnalyzerOpenDocsCommand(RustAnalyzerCommand):
         if session is None:
             return
 
-        session.send_request(Request("experimental/externalDocs", params), self.on_result)
+        session.send_request(Request("experimental/externalDocs", params), self.on_result_async)
 
-    def on_result(self, url: Optional[str]) -> None:
+    def on_result_async(self, url: Optional[str]) -> None:
         window = self.view.window()
         if window is None:
             return
@@ -345,7 +345,10 @@ class RustAnalyzerMemoryUsage(RustAnalyzerCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(Request("rust-analyzer/memoryUsage"), self.on_result)
+        session.send_request(
+            Request("rust-analyzer/memoryUsage"),
+            lambda response: sublime.set_timeout(functools.partial(self.on_result, response))
+        )
 
     def on_result(self, payload: str) -> None:
         window = self.view.window()
@@ -447,9 +450,9 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(Request("experimental/runnables", params), self.on_result)
+        session.send_request(Request("experimental/runnables", params), self.on_result_async)
 
-    def on_result(self, payload: List[Runnable]) -> None:
+    def on_result_async(self, payload: List[Runnable]) -> None:
         items = [item["label"] for item in payload]
         self.items = items
         self.payload = payload
@@ -457,9 +460,7 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         window = view.window()
         if window is None:
             return
-        sublime.set_timeout(
-            lambda: window.show_quick_panel(items, self.callback)
-        )
+        window.show_quick_panel(items, self.callback)
 
     def callback(self, option: int) -> None:
         if option == -1:
@@ -481,9 +482,9 @@ class RustAnalyzerOpenCargoToml(RustAnalyzerCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(Request("experimental/openCargoToml", params), self.on_result)
+        session.send_request(Request("experimental/openCargoToml", params), self.on_result_async)
 
-    def on_result(self, payload: Location) -> None:
+    def on_result_async(self, payload: Location) -> None:
         window = self.view.window()
         if window is None:
             return
@@ -508,7 +509,10 @@ class RustAnalyzerSyntaxTree(RustAnalyzerCommand):
         if session is None:
             return
 
-        session.send_request(Request("rust-analyzer/syntaxTree", params), self.on_result)
+        session.send_request(
+            Request("rust-analyzer/syntaxTree", params),
+            lambda response: sublime.set_timeout(functools.partial(self.on_result, response))
+        )
 
     def on_result(self, out: Optional[str]) -> None:
         window = self.view.window()
@@ -541,13 +545,16 @@ class RustAnalyzerViewItemTree(RustAnalyzerCommand):
 
         return super().is_enabled()
 
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, _: sublime.Edit) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
 
-        session.send_request(Request("rust-analyzer/viewItemTree", params), self.on_result)
+        session.send_request(
+            Request("rust-analyzer/viewItemTree", params),
+            lambda response: sublime.set_timeout(functools.partial(self.on_result, response))
+        )
 
     def on_result(self, out: Optional[str]) -> None:
         window = self.view.window()
@@ -573,7 +580,7 @@ class RustAnalyzerViewItemTree(RustAnalyzerCommand):
 
 class RustAnalyzerReloadProject(RustAnalyzerCommand):
 
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, _: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
@@ -590,13 +597,16 @@ class RustAnalyzerExpandMacro(RustAnalyzerCommand):
 
         return super().is_enabled()
 
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, _: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
 
         params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(Request("rust-analyzer/expandMacro", params), self.on_result)
+        session.send_request(
+            Request("rust-analyzer/expandMacro", params),
+            lambda response: sublime.set_timeout(functools.partial(self.on_result, response))
+        )
 
     def on_result(self, expanded_macro: Optional[Dict[str, str]]) -> None:
         if expanded_macro is None:
