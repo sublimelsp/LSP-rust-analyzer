@@ -1,3 +1,4 @@
+from LSP.plugin.core.protocol import Location
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import register_plugin
 from LSP.plugin import Request
@@ -5,12 +6,11 @@ from LSP.plugin import Session
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.protocol import Range, RangeLsp
 from LSP.plugin.core.registry import LspTextCommand
+from LSP.plugin.core.views import text_document_position_params, selection_range_params, region_to_range, text_document_identifier
 from LSP.plugin.core.types import debounced
 from LSP.plugin.core.types import FEATURES_TIMEOUT
 from LSP.plugin.core.typing import Optional, Union, List, Tuple, Any, TypedDict, Mapping, Callable, Dict
 from LSP.plugin.core.views import point_to_offset
-from LSP.plugin.core.views import text_document_identifier
-from LSP.plugin.core.views import text_document_position_params
 from LSP.plugin.core.views import uri_from_view
 from html import escape as html_escape
 import gzip
@@ -21,6 +21,12 @@ import sublime_plugin
 import weakref
 import urllib.request
 import functools
+
+
+try:
+    import Terminus  # type: ignore
+except ImportError:
+    Terminus = None
 
 
 try:
@@ -303,8 +309,11 @@ class RustAnalyzer(AbstractPlugin):
         phantom_set.update(phantoms)
 
 
-class RustAnalyzerOpenDocsCommand(LspTextCommand):
+class RustAnalyzerCommand(LspTextCommand):
     session_name = "rust-analyzer"
+
+
+class RustAnalyzerOpenDocsCommand(RustAnalyzerCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -330,18 +339,7 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
             window.run_command("open_url", {"url": url})
 
 
-class RustAnalyzerReloadProject(LspTextCommand):
-    session_name = "rust-analyzer"
-
-    def run(self, edit: sublime.Edit) -> None:
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
-
-
-class RustAnalyzerMemoryUsage(LspTextCommand):
-    session_name = "rust-analyzer"
+class RustAnalyzerMemoryUsage(RustAnalyzerCommand):
 
     def run(self, edit: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
@@ -367,6 +365,7 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
             window.select_sheets(sheets)
 
 
+
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
     'cargoExtraArgs': List[str],
@@ -381,8 +380,7 @@ Runnable = TypedDict('Runnable', {
 })
 
 
-class RustAnalyzerExec(LspTextCommand):
-    session_name = "rust-analyzer"
+class RustAnalyzerExec(RustAnalyzerCommand):
 
     def run(self, edit: sublime.Edit) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
@@ -398,7 +396,6 @@ class RustAnalyzerExec(LspTextCommand):
 
         if len(payload) == 0:
             return
-
         output = None
         for item in payload:
             if item["label"].startswith(check_phrase):
@@ -437,7 +434,6 @@ class RustAnalyzerExec(LspTextCommand):
 
 
 class RustAnalyzerRunProject(RustAnalyzerExec):
-    session_name = "rust-analyzer"
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -471,38 +467,121 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         self.run_terminus(self.items[option], self.payload)
 
 
-# class RustAnalyzerCheckProject(RustAnalyzerExec):
-#     session_name = "rust-analyzer"
-#     check_phrase = "cargo check"
+class RustAnalyzerOpenCargoToml(RustAnalyzerCommand):
 
-#     def run(self, edit: sublime.Edit) -> None:
-#         session = self.session_by_name(self.session_name)
-#         if session is None:
-#             return
-#         params = text_document_position_params(self.view, self.view.sel()[0].b)
-#         session.send_request(Request("experimental/runnables", params), self.on_result)
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
 
-#     def on_result(self, payload: List[Any]) -> None:
-#         self.run_terminus(self.check_phrase, payload)
+        return super().is_enabled()
 
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.send_request(Request("experimental/openCargoToml", params), self.on_result)
 
-# class RustAnalyzerTestProject(RustAnalyzerExec):
-#     session_name = "rust-analyzer"
-#     check_phrase = "cargo test"
-
-#     def run(self, edit: sublime.Edit) -> None:
-#         params = text_document_position_params(self.view, self.view.sel()[0].b)
-#         session = self.session_by_name(self.session_name)
-#         if session is None:
-#             return
-#         session.send_request(Request("experimental/runnables", params), self.on_result)
-
-#     def on_result(self, payload: List[Runnable]) -> None:
-#         self.run_terminus(self.check_phrase, payload)
+    def on_result(self, payload: Location) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+        session.open_location_async(payload)
 
 
-class RustAnalyzerExpandMacro(LspTextCommand):
-    session_name = "rust-analyzer"
+class RustAnalyzerSyntaxTree(RustAnalyzerCommand):
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/syntaxTree", params), self.on_result)
+
+    def on_result(self, out: Optional[str]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if out is None:
+            return
+
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("Syntax Tree")
+        # Resource Aware Session Types Syntax highlighting not available
+        view.run_command("append", {"characters": out})
+        view.set_read_only(True)
+
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
+
+
+class RustAnalyzerViewItemTree(RustAnalyzerCommand):
+
+    def is_enabled(self) -> bool:
+        selection = self.view.sel()
+        if len(selection) == 0:
+            return False
+
+        return super().is_enabled()
+
+    def run(self, edit: sublime.Edit) -> None:
+        params = text_document_position_params(self.view, self.view.sel()[0].b)
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/viewItemTree", params), self.on_result)
+
+    def on_result(self, out: Optional[str]) -> None:
+        window = self.view.window()
+        if window is None:
+            return
+
+        if out is None:
+            return
+
+        sheets = window.selected_sheets()
+        view = window.new_file(flags=sublime.TRANSIENT)
+        view.set_scratch(True)
+        view.set_name("View Item Tree")
+        view.assign_syntax("scope:source.rust")
+        view.run_command("append", {"characters": out})
+        view.set_read_only(True)
+
+        sheet = view.sheet()
+        if sheet is not None:
+            sheets.append(sheet)
+            window.select_sheets(sheets)
+
+
+class RustAnalyzerReloadProject(RustAnalyzerCommand):
+
+    def run(self, edit: sublime.Edit) -> None:
+        session = self.session_by_name(self.session_name)
+        if session is None:
+            return
+
+        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
+
+
+class RustAnalyzerExpandMacro(RustAnalyzerCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
