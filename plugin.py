@@ -38,7 +38,7 @@ except ImportError:
 # After changing this tag, go through the server settings
 # again to see if any new server settings are added or
 # old ones removed.
-TAG = "2021-06-07"
+TAG = "2021-07-12"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
 
