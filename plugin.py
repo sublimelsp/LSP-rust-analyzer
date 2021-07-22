@@ -6,7 +6,7 @@ from LSP.plugin import Session
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.protocol import Range, RangeLsp
 from LSP.plugin.core.registry import LspTextCommand
-from LSP.plugin.core.views import text_document_position_params, selection_range_params, region_to_range, text_document_identifier
+from LSP.plugin.core.views import text_document_position_params, text_document_identifier
 from LSP.plugin.core.types import debounced
 from LSP.plugin.core.types import FEATURES_TIMEOUT
 from LSP.plugin.core.typing import Optional, Union, List, Tuple, Any, TypedDict, Mapping, Callable, Dict
@@ -28,6 +28,7 @@ try:
 except ImportError:
     Terminus = None
 
+
 try:
     import Terminus  # type: ignore
 except ImportError:
@@ -35,10 +36,10 @@ except ImportError:
 
 
 SESSION_NAME = "rust-analyzer"
+
 # Update this single git tag to download a newer version.
-# After changing this tag, go through the server settings
-# again to see if any new server settings are added or
-# old ones removed.
+# After changing this tag, go through the server settings again to see
+# if any new server settings are added or old ones removed.
 TAG = "2021-07-12"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"  # noqa: E501
@@ -56,6 +57,7 @@ RunnableArgs = TypedDict('RunnableArgs', {
     'overrideCargo': Optional[str],
     'workspaceRoot': str,
 })
+
 Runnable = TypedDict('Runnable', {
     'args': RunnableArgs,
     'kind': str,
@@ -369,21 +371,6 @@ class RustAnalyzerMemoryUsage(RustAnalyzerCommand):
         if sheet is not None:
             sheets.append(sheet)
             window.select_sheets(sheets)
-
-
-
-RunnableArgs = TypedDict('RunnableArgs', {
-    'cargoArgs': List[str],
-    'cargoExtraArgs': List[str],
-    'executableArgs': List[str],
-    'overrideCargo': Optional[str],
-    'workspaceRoot': str,
-})
-Runnable = TypedDict('Runnable', {
-    'args': RunnableArgs,
-    'kind': str,
-    'label': str,
-})
 
 
 class RustAnalyzerExec(RustAnalyzerCommand):
