@@ -252,7 +252,6 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.debug.sourceFileMap": {
-                      "const": "auto",
                       "default": {
                         "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"
                       },

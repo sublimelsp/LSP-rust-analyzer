@@ -1,2 +1,4 @@
 test.py
 LSP/
+*.sublime-workspace
+*.sublime-project
