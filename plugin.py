@@ -12,6 +12,7 @@ from LSP.plugin.core.types import FEATURES_TIMEOUT
 from LSP.plugin.core.typing import Optional, Union, List, Tuple, Any, TypedDict, Mapping, Callable, Dict
 from LSP.plugin.core.views import point_to_offset
 from LSP.plugin.core.views import uri_from_view
+from LSP.plugin.locationpicker import LocationPicker
 from html import escape as html_escape
 import gzip
 import os
@@ -250,11 +251,36 @@ class RustAnalyzer(AbstractPlugin):
             raise
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        if command["command"] in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
-            open_runnables_in_terminus(sublime.active_window(), command["arguments"])
-            done_callback()
+        command_name = command["command"]
+        try:
+            session = self.weaksession()
+            if not session:
+                return False
+            if command_name in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
+                open_runnables_in_terminus(sublime.active_window(), command["arguments"])
+                done_callback()
+                return True
+            elif command_name == "rust-analyzer.showReferences":
+                return self._handle_show_references(session, command, done_callback)
+            else:
+                return False
+        except Exception as ex:
+            print("Exception handling command {}: {}".format(command_name, ex))
+            return False
+
+    def _handle_show_references(
+        self,
+        session: Session,
+        command: Mapping[str, Any],
+        done_callback: Callable[[], None]
+    ) -> bool:
+        locations = command["arguments"][2]
+        view = session.window.active_view()
+        if not view:
             return True
-        return False
+        LocationPicker(view, session, locations, side_by_side=False)
+        done_callback()
+        return True
 
     def is_valid_for_view(self, view: sublime.View) -> bool:
         session = self.weaksession()
