@@ -31,6 +31,11 @@
                       "description": "Wether or not to spawn a panel at the bottom, or a new tab.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.assist.allowMergingIntoGlobImports": {
+                      "default": true,
+                      "markdownDescription": "Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.assist.importEnforceGranularity": {
                       "default": false,
                       "markdownDescription": "Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.",
@@ -118,6 +123,16 @@
                         "null",
                         "string"
                       ]
+                    },
+                    "rust-analyzer.cargo.unsetTest": {
+                      "default": [
+                        "core"
+                      ],
+                      "items": {
+                        "type": "string"
+                      },
+                      "markdownDescription": "Unsets `#[cfg(test)]` for the specified crates.",
+                      "type": "array"
                     },
                     "rust-analyzer.cargo.useRustcWrapperForBuildScripts": {
                       "default": true,
@@ -324,6 +339,16 @@
                       "markdownDescription": "Use semantic tokens for strings.\n\nIn some editors (e.g. vscode) semantic tokens override other highlighting grammars.\nBy disabling semantic tokens for strings, other grammars can be used to highlight\ntheir contents.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.hover.documentation": {
+                      "default": true,
+                      "markdownDescription": "Whether to show documentation on hover.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.hover.linksInHover": {
+                      "default": true,
+                      "markdownDescription": "Use markdown syntax for links in hover.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.hoverActions.debug": {
                       "default": true,
                       "markdownDescription": "Whether to show `Debug` action. Only applies when\n`#rust-analyzer.hoverActions.enable#` is set.",
@@ -391,6 +416,21 @@
                     "rust-analyzer.inlayHints.typeHints": {
                       "default": true,
                       "markdownDescription": "Whether to show inlay type hints for variables.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.joinLines.joinElseIf": {
+                      "default": true,
+                      "markdownDescription": "Join lines inserts else between consecutive ifs.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.joinLines.removeTrailingComma": {
+                      "default": true,
+                      "markdownDescription": "Join lines removes trailing commas.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.joinLines.unwrapTrivialBlock": {
+                      "default": true,
+                      "markdownDescription": "Join lines unwraps trivial blocks.",
                       "type": "boolean"
                     },
                     "rust-analyzer.lens.debug": {

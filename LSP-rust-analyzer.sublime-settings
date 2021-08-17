@@ -12,6 +12,8 @@
 
 		// Rust-Analyzer Server Settings
 
+		//Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.
+		"rust-analyzer.assist.allowMergingIntoGlobImports": true,
 		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
 		"rust-analyzer.assist.importEnforceGranularity": false,
 		//How imports should be grouped into use statements.
@@ -36,6 +38,8 @@
 		"rust-analyzer.cargo.runBuildScripts": true,
 		//Compilation target (target triple).
 		"rust-analyzer.cargo.target": null,
+		//Unsets `#[cfg(test)]` for the specified crates.
+		"rust-analyzer.cargo.unsetTest": ["core"],
 		//Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to avoid compiling unnecessary things.
 		"rust-analyzer.cargo.useRustcWrapperForBuildScripts": true,
 		//Custom cargo runner extension ID.
@@ -96,6 +100,10 @@
 		"rust-analyzer.files.watcher": "client",
 		//Use semantic tokens for strings.  In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents.
 		"rust-analyzer.highlighting.strings": true,
+		// Whether to show documentation on hover.
+		"rust-analyzer.hover.documentation": true,
+		// Use markdown syntax for links in hover.
+		"rust-analyzer.hover.linksInHover": true,
 		//Whether to show `Debug` action. Only applies when `#rust-analyzer.hoverActions.enable#` is set.
 		"rust-analyzer.hoverActions.debug": true,
 		//Whether to show HoverActions in Rust files.
@@ -122,6 +130,12 @@
 		"rust-analyzer.inlayHints.smallerHints": true,
 		//Whether to show inlay type hints for variables.
 		"rust-analyzer.inlayHints.typeHints": true,
+		//Join lines inserts else between consecutive ifs.
+		"rust-analyzer.joinLines.joinElseIf": true,
+		//Join lines removes trailing commas.
+		"rust-analyzer.joinLines.removeTrailingComma": true,
+		//Join lines unwraps trivial blocks.
+		"rust-analyzer.joinLines.unwrapTrivialBlock": true,
 		//Whether to show `Debug` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
 		"rust-analyzer.lens.debug": true,
 		//Whether to show CodeLens in Rust files.
