@@ -14,7 +14,7 @@ You can edit the global settings by opening the `Preferences: LSP-rust-analyzer 
 
 You can also have a project-specific configuration. Run the `Project: Edit Project` from the Command Palette and edit the following in the `settings` object.
 
-```jsonc
+```js
 {
     // folders: [
     //   ...
