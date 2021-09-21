@@ -4,9 +4,8 @@ This is a helper package that starts the [rust-analyzer](https://github.com/rust
 
 ## Installation
 
-1. Install [LSP](https://packagecontrol.io/packages/LSP) and [LSP-rust-analyzer](https://packagecontrol.io/packages/LSP-rust-analyzer) via Package Control.
-2. Make sure that you have the rust analyzer LSP server installed. Follow its [Installation Guide](https://rust-analyzer.github.io/manual.html#rust-analyzer-language-server-binary).
-3. Optionally install the [RustEnhanced](https://packagecontrol.io/packages/Rust%20Enhanced) syntax. Sublime Text 4 ships with Rust syntax already so only install RustEnhanced if it provides additional benefit to you.
+1. Install [LSP](https://packagecontrol.io/packages/LSP) via Package Control.
+2. Install [LSP-rust-analyzer](https://packagecontrol.io/packages/LSP-rust-analyzer) via Package Control.
 
 ## Configuration
 
