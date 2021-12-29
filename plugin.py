@@ -37,6 +37,7 @@ except ImportError:
 
 
 SESSION_NAME = "rust-analyzer"
+INLAY_HINTS_ENABLE_KEY = "rust-analyzer.inlayHints.enable"
 
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings again to see
@@ -287,8 +288,10 @@ class RustAnalyzer(AbstractPlugin):
         return bool(session and session.session_view_for_view_async(view))
 
     def request_inlay_hints_async(self, view: sublime.View) -> None:
-        if not get_setting(view, "rust-analyzer.inlayHints.enable", True):
+        if not get_setting(view, INLAY_HINTS_ENABLE_KEY, True):
+            self.on_inlay_hints_async(view, [])
             return
+
         session = self.weaksession()
         if session is None:
             return
@@ -584,6 +587,19 @@ class RustAnalyzerExpandMacro(RustAnalyzerCommand):
         if sheet is not None:
             sheets.append(sheet)
             window.select_sheets(sheets)
+
+
+class RustAnalyzerToggleInlayHints(RustAnalyzerCommand):
+
+    def run(self, _: sublime.Edit) -> None:
+        current_value = get_setting(self.view, INLAY_HINTS_ENABLE_KEY);
+        new_value = not current_value
+        if new_value:
+            print("rust-analyzer enabled inlay hints")
+        else:
+            print("rust-analyzer disabled inlay hints")
+
+        self.view.settings().set(INLAY_HINTS_ENABLE_KEY, new_value)
 
 
 class EventListener(sublime_plugin.ViewEventListener):

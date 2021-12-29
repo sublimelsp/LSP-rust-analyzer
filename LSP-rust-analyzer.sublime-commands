@@ -38,5 +38,9 @@
     {
         "caption": "LSP-rust-analyzer: Open Cargo.toml",
         "command": "rust_analyzer_open_cargo_toml"
+    },
+    {
+        "caption": "LSP-rust-analyzer: Toggle Inlay Hints",
+        "command": "rust_analyzer_toggle_inlay_hints"
     }
 ]
