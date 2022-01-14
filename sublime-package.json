@@ -7,7 +7,8 @@
         ],
         "schema": {
           "$id": "sublime://settings/LSP-rust-analyzer",
-          "allOf": [{
+          "allOf": [
+            {
               "$ref": "sublime://settings/LSP-plugin-base"
             },
             {
@@ -302,42 +303,6 @@
                       },
                       "markdownDescription": "Custom completion snippets.",
                       "type": "object"
-                    },
-                    "rust-analyzer.debug.engine": {
-                      "default": "auto",
-                      "description": "Preferred debug engine.",
-                      "enum": [
-                        "auto",
-                        "vadimcn.vscode-lldb",
-                        "ms-vscode.cpptools"
-                      ],
-                      "markdownEnumDescriptions": [
-                        "First try to use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), if it's not installed try to use [MS C++ tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools).",
-                        "Use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)",
-                        "Use [MS C++ tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)"
-                      ],
-                      "type": "string"
-                    },
-                    "rust-analyzer.debug.engineSettings": {
-                      "default": {},
-                      "markdownDescription": "Optional settings passed to the debug engine. Example: `{ \"lldb\": { \"terminal\":\"external\"} }`",
-                      "type": "object"
-                    },
-                    "rust-analyzer.debug.openDebugPane": {
-                      "default": false,
-                      "markdownDescription": "Whether to open up the `Debug Panel` on debugging start.",
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.debug.sourceFileMap": {
-                      "const": "auto",
-                      "default": {
-                        "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"
-                      },
-                      "description": "Optional source file mappings passed to the debug engine.",
-                      "type": [
-                        "object",
-                        "string"
-                      ]
                     },
                     "rust-analyzer.diagnostics.disabled": {
                       "default": [],
@@ -685,42 +650,6 @@
                         "null",
                         "array"
                       ]
-                    },
-                    "rust-analyzer.server.extraEnv": {
-                      "default": null,
-                      "markdownDescription": "Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging.",
-                      "type": [
-                        "null",
-                        "object"
-                      ]
-                    },
-                    "rust-analyzer.server.path": {
-                      "default": null,
-                      "markdownDescription": "Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used",
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "rust-analyzer.trace.extension": {
-                      "default": false,
-                      "description": "Enable logging of VS Code extensions itself.",
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.trace.server": {
-                      "default": "off",
-                      "description": "Trace requests to the rust-analyzer (this is usually overly verbose and not recommended for regular users).",
-                      "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                      ],
-                      "enumDescriptions": [
-                        "No traces",
-                        "Error only",
-                        "Full log"
-                      ],
-                      "type": "string"
                     },
                     "rust-analyzer.workspace.symbol.search.kind": {
                       "default": "only_types",
