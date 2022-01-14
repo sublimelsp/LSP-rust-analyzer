@@ -7,8 +7,7 @@
         ],
         "schema": {
           "$id": "sublime://settings/LSP-rust-analyzer",
-          "allOf": [
-            {
+          "allOf": [{
               "$ref": "sublime://settings/LSP-plugin-base"
             },
             {
@@ -35,6 +34,19 @@
                       "default": true,
                       "markdownDescription": "Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.assist.exprFillDefault": {
+                      "default": "todo",
+                      "enum": [
+                        "todo",
+                        "default"
+                      ],
+                      "enumDescriptions": [
+                        "Fill missing expressions with the `todo` macro",
+                        "Fill missing expressions with reasonable defaults, `new` or `default` constructors."
+                      ],
+                      "markdownDescription": "Placeholder for missing expressions in assists.",
+                      "type": "string"
                     },
                     "rust-analyzer.assist.importEnforceGranularity": {
                       "default": false,
@@ -67,16 +79,21 @@
                       "default": "plain",
                       "enum": [
                         "plain",
-                        "by_self",
-                        "by_crate"
+                        "self",
+                        "crate"
                       ],
                       "enumDescriptions": [
                         "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item.",
-                        "Prefix all import paths with `self` if they don't begin with `self`, `super`, `crate` or a crate name.",
-                        "Force import paths to be absolute by always starting them with `crate` or the crate name they refer to."
+                        "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item. Prefixes `self` in front of the path if it starts with a module.",
+                        "Force import paths to be absolute by always starting them with `crate` or the extern crate name they come from."
                       ],
                       "markdownDescription": "The path structure for newly inserted paths to use.",
                       "type": "string"
+                    },
+                    "rust-analyzer.cache.warmup": {
+                      "default": true,
+                      "markdownDescription": "Warm up caches on project load.",
+                      "type": "boolean"
                     },
                     "rust-analyzer.callInfo.full": {
                       "default": true,
@@ -241,6 +258,51 @@
                       "markdownDescription": "Whether to show postfix snippets like `dbg`, `if`, `not`, etc.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.completion.snippets": {
+                      "default": {
+                        "Arc::new": {
+                          "body": "Arc::new(${receiver})",
+                          "description": "Put the expression into an `Arc`",
+                          "postfix": "arc",
+                          "requires": "std::sync::Arc",
+                          "scope": "expr"
+                        },
+                        "Box::pin": {
+                          "body": "Box::pin(${receiver})",
+                          "description": "Put the expression into a pinned `Box`",
+                          "postfix": "pinbox",
+                          "requires": "std::boxed::Box",
+                          "scope": "expr"
+                        },
+                        "Err": {
+                          "body": "Err(${receiver})",
+                          "description": "Wrap the expression in a `Result::Err`",
+                          "postfix": "err",
+                          "scope": "expr"
+                        },
+                        "Ok": {
+                          "body": "Ok(${receiver})",
+                          "description": "Wrap the expression in a `Result::Ok`",
+                          "postfix": "ok",
+                          "scope": "expr"
+                        },
+                        "Rc::new": {
+                          "body": "Rc::new(${receiver})",
+                          "description": "Put the expression into an `Rc`",
+                          "postfix": "rc",
+                          "requires": "std::rc::Rc",
+                          "scope": "expr"
+                        },
+                        "Some": {
+                          "body": "Some(${receiver})",
+                          "description": "Wrap the expression in an `Option::Some`",
+                          "postfix": "some",
+                          "scope": "expr"
+                        }
+                      },
+                      "markdownDescription": "Custom completion snippets.",
+                      "type": "object"
+                    },
                     "rust-analyzer.debug.engine": {
                       "default": "auto",
                       "description": "Preferred debug engine.",
@@ -267,6 +329,7 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.debug.sourceFileMap": {
+                      "const": "auto",
                       "default": {
                         "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"
                       },
@@ -317,7 +380,7 @@
                       "type": "array"
                     },
                     "rust-analyzer.experimental.procAttrMacros": {
-                      "default": false,
+                      "default": true,
                       "markdownDescription": "Expand attribute macros.",
                       "type": "boolean"
                     },
@@ -326,13 +389,33 @@
                       "items": {
                         "type": "string"
                       },
-                      "markdownDescription": "These directories will be ignored by rust-analyzer.",
+                      "markdownDescription": "These directories will be ignored by rust-analyzer. They are\nrelative to the workspace root, and globs are not supported. You may\nalso need to add the folders to Code's `files.watcherExclude`.",
                       "type": "array"
                     },
                     "rust-analyzer.files.watcher": {
                       "default": "client",
                       "markdownDescription": "Controls file watching implementation.",
                       "type": "string"
+                    },
+                    "rust-analyzer.highlightRelated.breakPoints": {
+                      "default": true,
+                      "markdownDescription": "Enables highlighting of related references while hovering your mouse `break`, `loop`, `while`, or `for` keywords.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.highlightRelated.exitPoints": {
+                      "default": true,
+                      "markdownDescription": "Enables highlighting of all exit points while hovering your mouse above any `return`, `?`, or return type arrow (`->`).",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.highlightRelated.references": {
+                      "default": true,
+                      "markdownDescription": "Enables highlighting of related references while hovering your mouse above any identifier.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.highlightRelated.yieldPoints": {
+                      "default": true,
+                      "markdownDescription": "Enables highlighting of all break points for a loop or block context while hovering your mouse above any `async` or `await` keywords.",
+                      "type": "boolean"
                     },
                     "rust-analyzer.highlighting.strings": {
                       "default": true,
@@ -394,6 +477,11 @@
                       "description": "Whether to show inlay hints.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.inlayHints.hideNamedConstructorHints": {
+                      "default": false,
+                      "markdownDescription": "Whether to hide inlay hints for constructors.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.inlayHints.maxLength": {
                       "default": 25,
                       "markdownDescription": "Maximum length for inlay hints. Set to null to have an unlimited length.",
@@ -448,6 +536,16 @@
                       "markdownDescription": "Whether to show CodeLens in Rust files.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.lens.enumVariantReferences": {
+                      "default": false,
+                      "markdownDescription": "Whether to show `References` lens for Enum Variants.\nOnly applies when `#rust-analyzer.lens.enable#` is set.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.lens.forceCustomCommands": {
+                      "default": true,
+                      "markdownDescription": "Internal config: use custom client-side commands even when the\nclient doesn't set the corresponding capability.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.lens.implementations": {
                       "default": true,
                       "markdownDescription": "Whether to show `Implementations` lens. Only applies when\n`#rust-analyzer.lens.enable#` is set.",
@@ -460,7 +558,7 @@
                     },
                     "rust-analyzer.lens.references": {
                       "default": false,
-                      "markdownDescription": "Whether to show `References` lens. Only applies when\n`#rust-analyzer.lens.enable#` is set.",
+                      "markdownDescription": "Whether to show `References` lens for Struct, Enum, Union and Trait.\nOnly applies when `#rust-analyzer.lens.enable#` is set.",
                       "type": "boolean"
                     },
                     "rust-analyzer.lens.run": {
@@ -497,6 +595,11 @@
                       "default": true,
                       "markdownDescription": "Enable support for procedural macros, implies `#rust-analyzer.cargo.runBuildScripts#`.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.procMacro.ignored": {
+                      "default": {},
+                      "markdownDescription": "These proc-macros will be ignored when trying to expand them.\n\nThis config takes a map of crate names with the exported proc-macro names to ignore as values.",
+                      "type": "object"
                     },
                     "rust-analyzer.procMacro.server": {
                       "default": null,
@@ -553,7 +656,7 @@
                     },
                     "rust-analyzer.rustcSource": {
                       "default": null,
-                      "markdownDescription": "Path to the Cargo.toml of the rust compiler workspace, for usage in rustc_private\nprojects, or \"discover\" to try to automatically find it.\n\nAny project which uses rust-analyzer with the rustcPrivate\ncrates must set `[package.metadata.rust-analyzer] rustc_private=true` to use it.\n\nThis option is not reloaded automatically; you must restart rust-analyzer for it to take effect.",
+                      "markdownDescription": "Path to the Cargo.toml of the rust compiler workspace, for usage in rustc_private\nprojects, or \"discover\" to try to automatically find it if the `rustc-dev` component\nis installed.\n\nAny project which uses rust-analyzer with the rustcPrivate\ncrates must set `[package.metadata.rust-analyzer] rustc_private=true` to use it.\n\nThis option does not take effect until rust-analyzer is restarted.",
                       "type": [
                         "null",
                         "string"
@@ -582,6 +685,42 @@
                         "null",
                         "array"
                       ]
+                    },
+                    "rust-analyzer.server.extraEnv": {
+                      "default": null,
+                      "markdownDescription": "Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging.",
+                      "type": [
+                        "null",
+                        "object"
+                      ]
+                    },
+                    "rust-analyzer.server.path": {
+                      "default": null,
+                      "markdownDescription": "Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used",
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "rust-analyzer.trace.extension": {
+                      "default": false,
+                      "description": "Enable logging of VS Code extensions itself.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.trace.server": {
+                      "default": "off",
+                      "description": "Trace requests to the rust-analyzer (this is usually overly verbose and not recommended for regular users).",
+                      "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                      ],
+                      "enumDescriptions": [
+                        "No traces",
+                        "Error only",
+                        "Full log"
+                      ],
+                      "type": "string"
                     },
                     "rust-analyzer.workspace.symbol.search.kind": {
                       "default": "only_types",
