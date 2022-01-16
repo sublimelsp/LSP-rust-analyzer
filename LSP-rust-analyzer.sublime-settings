@@ -15,7 +15,7 @@
 		//Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.
 		"rust-analyzer.assist.allowMergingIntoGlobImports": true,
 		// Placeholder for missing expressions in assists. Possible values: todo, default
-    	"rust-analyzer.assist.exprFillDefault": "todo",
+		"rust-analyzer.assist.exprFillDefault": "todo",
 		//Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import styles consistent per file.
 		"rust-analyzer.assist.importEnforceGranularity": false,
 		//How imports should be grouped into use statements.
@@ -25,7 +25,7 @@
 		//The path structure for newly inserted paths to use.
 		"rust-analyzer.assist.importPrefix": "plain",
 		// Warm up caches on project load.
-    	"rust-analyzer.cache.warmup": true,
+		"rust-analyzer.cache.warmup": true,
 		//Show function name and docs in parameter hints.
 		"rust-analyzer.callInfo.full": true,
 		//Activate all available features (`--all-features`).
@@ -77,55 +77,47 @@
 		//Whether to show postfix snippets like `dbg`, `if`, `not`, etc.
 		"rust-analyzer.completion.postfix.enable": true,
 		// Custom completion snippets.
-	    "rust-analyzer.completion.snippets": {
-	        "Ok": {
-	            "scope": "expr", 
-	            "body": "Ok(${receiver})", 
-	            "postfix": "ok", 
-	            "description": "Wrap the expression in a `Result::Ok`"
-	        }, 
-	        "Box::pin": {
-	            "requires": "std::boxed::Box", 
-	            "scope": "expr", 
-	            "body": "Box::pin(${receiver})", 
-	            "postfix": "pinbox", 
-	            "description": "Put the expression into a pinned `Box`"
-	        }, 
-	        "Err": {
-	            "scope": "expr", 
-	            "body": "Err(${receiver})", 
-	            "postfix": "err", 
-	            "description": "Wrap the expression in a `Result::Err`"
-	        }, 
-	        "Rc::new": {
-	            "requires": "std::rc::Rc", 
-	            "scope": "expr", 
-	            "body": "Rc::new(${receiver})", 
-	            "postfix": "rc", 
-	            "description": "Put the expression into an `Rc`"
-	        }, 
-	        "Some": {
-	            "scope": "expr", 
-	            "body": "Some(${receiver})", 
-	            "postfix": "some", 
-	            "description": "Wrap the expression in an `Option::Some`"
-	        }, 
-	        "Arc::new": {
-	            "requires": "std::sync::Arc", 
-	            "scope": "expr", 
-	            "body": "Arc::new(${receiver})", 
-	            "postfix": "arc", 
-	            "description": "Put the expression into an `Arc`"
-	        }
-	    },
-		//Preferred debug engine.
-		"rust-analyzer.debug.engine": "auto",
-		//Optional settings passed to the debug engine. Example: `{ "lldb": { "terminal":"external"} }`
-		"rust-analyzer.debug.engineSettings": {},
-		//Whether to open up the `Debug Panel` on debugging start.
-		"rust-analyzer.debug.openDebugPane": false,
-		//Optional source file mappings passed to the debug engine.
-		"rust-analyzer.debug.sourceFileMap": {"/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"},
+		"rust-analyzer.completion.snippets": {
+			"Ok": {
+				"scope": "expr",
+				"body": "Ok(${receiver})",
+				"postfix": "ok",
+				"description": "Wrap the expression in a `Result::Ok`"
+			},
+			"Box::pin": {
+				"requires": "std::boxed::Box",
+				"scope": "expr",
+				"body": "Box::pin(${receiver})",
+				"postfix": "pinbox",
+				"description": "Put the expression into a pinned `Box`"
+			},
+			"Err": {
+				"scope": "expr",
+				"body": "Err(${receiver})",
+				"postfix": "err",
+				"description": "Wrap the expression in a `Result::Err`"
+			},
+			"Rc::new": {
+				"requires": "std::rc::Rc",
+				"scope": "expr",
+				"body": "Rc::new(${receiver})",
+				"postfix": "rc",
+				"description": "Put the expression into an `Rc`"
+			},
+			"Some": {
+				"scope": "expr",
+				"body": "Some(${receiver})",
+				"postfix": "some",
+				"description": "Wrap the expression in an `Option::Some`"
+			},
+			"Arc::new": {
+				"requires": "std::sync::Arc",
+				"scope": "expr",
+				"body": "Arc::new(${receiver})",
+				"postfix": "arc",
+				"description": "Put the expression into an `Arc`"
+			}
+		},
 		//List of rust-analyzer diagnostics to disable.
 		"rust-analyzer.diagnostics.disabled": [],
 		//Whether to show native rust-analyzer diagnostics.
@@ -145,14 +137,14 @@
 		//Controls file watching implementation.
 		"rust-analyzer.files.watcher": "client",
 		// Enables highlighting of related references while hovering your mouse `break`, `loop`, `while`, or `for` keywords.
-	    "rust-analyzer.highlightRelated.breakPoints": true,
-	    // Enables highlighting of all exit points while hovering your mouse above any `return`, `?`, or return type arrow (`->`).
-	    "rust-analyzer.highlightRelated.exitPoints": true,
-	    // Enables highlighting of related references while hovering your mouse above any identifier.
-	    "rust-analyzer.highlightRelated.references": true,
-	    // Enables highlighting of all break points for a loop or block context while hovering your mouse above any `async` or `await` keywords.
-	    "rust-analyzer.highlightRelated.yieldPoints": true,
-	    // Use semantic tokens for strings. In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents. Use semantic tokens for strings.  In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents.
+		"rust-analyzer.highlightRelated.breakPoints": true,
+		// Enables highlighting of all exit points while hovering your mouse above any `return`, `?`, or return type arrow (`->`).
+		"rust-analyzer.highlightRelated.exitPoints": true,
+		// Enables highlighting of related references while hovering your mouse above any identifier.
+		"rust-analyzer.highlightRelated.references": true,
+		// Enables highlighting of all break points for a loop or block context while hovering your mouse above any `async` or `await` keywords.
+		"rust-analyzer.highlightRelated.yieldPoints": true,
+		// Use semantic tokens for strings. In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents. Use semantic tokens for strings.  In some editors (e.g. vscode) semantic tokens override other highlighting grammars. By disabling semantic tokens for strings, other grammars can be used to highlight their contents.
 		"rust-analyzer.highlighting.strings": true,
 		// Whether to show documentation on hover.
 		"rust-analyzer.hover.documentation": true,
@@ -177,7 +169,7 @@
 		//Whether to show inlay hints.
 		"rust-analyzer.inlayHints.enable": true,
 		// Whether to hide inlay hints for constructors.
-    	"rust-analyzer.inlayHints.hideNamedConstructorHints": false,
+		"rust-analyzer.inlayHints.hideNamedConstructorHints": false,
 		//Maximum length for inlay hints. Set to null to have an unlimited length.
 		"rust-analyzer.inlayHints.maxLength": 25,
 		//Whether to show function parameter name inlay hints at the call site.
@@ -199,9 +191,9 @@
 		//Whether to show CodeLens in Rust files.
 		"rust-analyzer.lens.enable": true,
 		// Whether to show `References` lens for Enum Variants. Only applies when `#rust-analyzer.lens.enable#` is set.
-   		"rust-analyzer.lens.enumVariantReferences": false,
-    	// Internal config: use custom client-side commands even when the client doesn't set the corresponding capability.
-    	"rust-analyzer.lens.forceCustomCommands": true,
+		"rust-analyzer.lens.enumVariantReferences": false,
+		// Internal config: use custom client-side commands even when the client doesn't set the corresponding capability.
+		"rust-analyzer.lens.forceCustomCommands": true,
 		//Whether to show `Implementations` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
 		"rust-analyzer.lens.implementations": true,
 		//Whether to show `Method References` lens. Only applies when `#rust-analyzer.lens.enable#` is set.
@@ -219,7 +211,7 @@
 		//Enable support for procedural macros, implies `#rust-analyzer.cargo.runBuildScripts#`.
 		"rust-analyzer.procMacro.enable": true,
 		// These proc-macros will be ignored when trying to expand them. This config takes a map of crate names with the exported proc-macro names to ignore as values.
-    	"rust-analyzer.procMacro.ignored": {},
+		"rust-analyzer.procMacro.ignored": {},
 		//Internal config, path to proc-macro server executable (typically, this is rust-analyzer itself, but we override this in tests).
 		"rust-analyzer.procMacro.server": null,
 		//Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command.
@@ -236,14 +228,6 @@
 		"rust-analyzer.rustfmt.extraArgs": [],
 		//Advanced option, fully override the command rust-analyzer uses for formatting.
 		"rust-analyzer.rustfmt.overrideCommand": null,
-		// Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging.
-    	"rust-analyzer.server.extraEnv": null,
-    	// Path to rust-analyzer executable (points to bundled binary by default). If this is set, then `#rust-analyzer.updates.channel#` setting is not used
-    	"rust-analyzer.server.path": null,
-    	// Enable logging of VS Code extensions itself.
-    	"rust-analyzer.trace.extension": false,
-    	// Trace requests to the rust-analyzer (this is usually overly verbose and not recommended for regular users). possible values: off, messages, verbose
-    	"rust-analyzer.trace.server": "off",
 		//Workspace symbol search kind.
 		"rust-analyzer.workspace.symbol.search.kind": "only_types",
 		//Workspace symbol search scope.
