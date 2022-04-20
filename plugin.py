@@ -246,7 +246,7 @@ class RustAnalyzer(AbstractPlugin):
             os.chmod(serverfile, 0o744)
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
                 fp.write(version)
-        except Exception:
+        except BaseException:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
 
