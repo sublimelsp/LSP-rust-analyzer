@@ -22,15 +22,15 @@
                   "additionalProperties": false,
                   "properties": {
                     "rust-analyzer.terminusAutoClose": {
-                       "default": false,
-                       "description": "Wether or not to automatically close terminus panel/tab upon completion.",
-                       "type": "boolean"
-                     },
-                     "rust-analyzer.terminusUsePanel": {
-                       "default": false,
-                       "description": "Wether or not to spawn a panel at the bottom, or a new tab.",
-                       "type": "boolean"
-                     },
+                      "default": false,
+                      "description": "Wether or not to automatically close terminus panel/tab upon completion.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.terminusUsePanel": {
+                      "default": false,
+                      "description": "Wether or not to spawn a panel at the bottom, or a new tab.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.assist.allowMergingIntoGlobImports": {
                       "default": true,
                       "markdownDescription": "Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.",
@@ -259,11 +259,6 @@
                       "markdownDescription": "Whether to show postfix snippets like `dbg`, `if`, `not`, etc.",
                       "type": "boolean"
                     },
-                    "rust-analyzer.completion.privateEditable.enable": {
-                      "default": false,
-                      "markdownDescription": "Enables completions of private items and fields that are defined in the current workspace even if they are not visible at the current position.",
-                      "type": "boolean"
-                    },
                     "rust-analyzer.completion.snippets": {
                       "default": {
                         "Arc::new": {
@@ -324,7 +319,7 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.diagnostics.enableExperimental": {
-                      "default": false,
+                      "default": true,
                       "markdownDescription": "Whether to show experimental rust-analyzer diagnostics that might\nhave more false positives than usual.",
                       "type": "boolean"
                     },
@@ -422,6 +417,11 @@
                       "markdownDescription": "Whether to show `Implementations` action. Only applies when\n`#rust-analyzer.hoverActions.enable#` is set.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.hoverActions.linksInHover": {
+                      "default": true,
+                      "markdownDescription": "Use markdown syntax for links in hover.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.hoverActions.references": {
                       "default": false,
                       "markdownDescription": "Whether to show `References` action. Only applies when\n`#rust-analyzer.hoverActions.enable#` is set.",
@@ -437,11 +437,6 @@
                       "markdownDescription": "Whether to show inlay type hints for method chains.",
                       "type": "boolean"
                     },
-                    "rust-analyzer.inlayHints.closureReturnTypeHints": {
-                      "default": false,
-                      "markdownDescription": "Whether to show inlay type hints for return types of closures with blocks.",
-                      "type": "boolean"
-                    },
                     "rust-analyzer.inlayHints.enable": {
                       "default": true,
                       "description": "Whether to show inlay hints.",
@@ -450,26 +445,6 @@
                     "rust-analyzer.inlayHints.hideNamedConstructorHints": {
                       "default": false,
                       "markdownDescription": "Whether to hide inlay hints for constructors.",
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.inlayHints.lifetimeElisionHints.enable": {
-                      "default": "never",
-                      "enum": [
-                        "always",
-                        "never",
-                        "skip_trivial"
-                      ],
-                      "enumDescriptions": [
-                        "Always show lifetime elision hints.",
-                        "Never show lifetime elision hints.",
-                        "Only show lifetime elision hints if a return type is involved."
-                      ],
-                      "markdownDescription": "Whether to show inlay type hints for elided lifetimes in function signatures.",
-                      "type": "string"
-                    },
-                    "rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": {
-                      "default": false,
-                      "markdownDescription": "Whether to prefer using parameter names as the name for elided lifetime hints if possible.",
                       "type": "boolean"
                     },
                     "rust-analyzer.inlayHints.maxLength": {
@@ -486,14 +461,9 @@
                       "markdownDescription": "Whether to show function parameter name inlay hints at the call\nsite.",
                       "type": "boolean"
                     },
-                    "rust-analyzer.inlayHints.reborrowHints": {
-                      "default": false,
-                      "markdownDescription": "Whether to show inlay type hints for compiler inserted reborrows.",
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.inlayHints.renderColons": {
+                    "rust-analyzer.inlayHints.smallerHints": {
                       "default": true,
-                      "markdownDescription": "Whether to render trailing colons for parameter hints, and trailing colons for parameter hints.",
+                      "description": "Whether inlay hints font size should be smaller than editor's font size.",
                       "type": "boolean"
                     },
                     "rust-analyzer.inlayHints.typeHints": {
@@ -585,13 +555,6 @@
                       "default": true,
                       "markdownDescription": "Whether to show `can't find Cargo.toml` error message.",
                       "type": "boolean"
-                    },
-                    "rust-analyzer.primeCaches.numThreads": {
-                      "default": 0,
-                      "markdownDescription": "How many worker threads to to handle priming caches. The default `0` means to pick automatically.",
-                      "maximum": 255,
-                      "minimum": 0,
-                      "type": "number"
                     },
                     "rust-analyzer.procMacro.enable": {
                       "default": true,
@@ -700,12 +663,6 @@
                       ],
                       "markdownDescription": "Workspace symbol search kind.",
                       "type": "string"
-                    },
-                    "rust-analyzer.workspace.symbol.search.limit": {
-                      "default": 128,
-                      "markdownDescription": "Limits the number of items returned from a workspace symbol search (Defaults to 128).\nSome clients like vs-code issue new searches on result filtering and don't require all results to be returned in the initial search.\nOther clients requires all results upfront and might require a higher limit.",
-                      "minimum": 0,
-                      "type": "integer"
                     },
                     "rust-analyzer.workspace.symbol.search.scope": {
                       "default": "workspace",
