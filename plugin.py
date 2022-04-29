@@ -244,6 +244,7 @@ class RustAnalyzer(AbstractPlugin):
                     f.write(fp.read())
             os.remove(gzipfile)
             os.chmod(serverfile, 0o744)
+            urllib.request.cleanup()
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
                 fp.write(version)
         except BaseException:
