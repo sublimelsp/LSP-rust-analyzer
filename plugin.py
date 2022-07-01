@@ -217,7 +217,18 @@ class RustAnalyzer(AbstractPlugin):
             return fp.read()
 
     @classmethod
+    def additional_variables(cls) -> Optional[Dict[str, str]]:
+        if sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings", {}).get("rust-analyzer.useSystemBin"):
+            analyzer_bin_path = shutil.which("rust-analyzer") or shutil.which("rust-analyzer.exe") # type: Optional[str]
+            return { "rust_analyzer_binary_path": analyzer_bin_path }
+
+        return { "rust_analyzer_binary_path": cls.basedir() + "/rust-analyzer" }
+
+    @classmethod
     def needs_update_or_installation(cls) -> bool:
+        if sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings", {}).get("rust-analyzer.useSystemBin"):
+            return False
+
         try:
             return cls.server_version() != cls.current_server_version()
         except OSError:
