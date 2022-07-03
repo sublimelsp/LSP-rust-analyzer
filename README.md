@@ -37,7 +37,9 @@ This language server operates on views with the `source.rust` base scope.
 
 ## Installation Location
 
-The server binary is automatically downloaded to `$CACHE/Package Storage/LSP-rust-analyzer`.
+If the variable `rust-analyzer.useSystemBin` is `false` (the default), the server binary is automatically downloaded to `$CACHE/Package Storage/LSP-rust-analyzer`.
+
+Otherwise, the `rust-analyzer` binary installed in your system is used.
 
 ## Custom Command Palette Commands
 

@@ -1,10 +1,12 @@
 {
 	"selector": "source.rust",
-	"command": ["${storage_path}/LSP-rust-analyzer/rust-analyzer"],
+	"command": ["${rust_analyzer_binary_path}"],
 	"settings": {
 
 		// Settings Not Related to rust-analyzer Server
 
+		// Wether to download the rust-analyzer binary or use the system provided binary
+		"rust-analyzer.useSystemBin": false,
 		// Wether or not to automatically close terminus panel/tab upon completion.
 		"rust-analyzer.terminusAutoClose": false,
 		// Wether or not to spawn a panel at the bottom, or a new tab
