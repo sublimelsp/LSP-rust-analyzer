@@ -41,15 +41,9 @@ SESSION_NAME = "rust-analyzer"
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings again to see
 # if any new server settings are added or old ones removed.
-TAG = "2022-01-10"
+TAG = "2022-08-22"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
-
-InlayHint = TypedDict("InlayHint", {
-    "kind": str,
-    "range": RangeLsp,
-    "label": str,
-}, total=True)
 
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
@@ -93,55 +87,6 @@ def platform() -> str:
     else:
         return "unknown-linux-gnu"
 
-
-def inlay_hint_css(view: sublime.View) -> str:
-    style = view.style_for_scope("comment")
-    rules = [
-        "color: {};".format(style["foreground"]),
-    ]
-
-    css = """
-    body {{
-        padding: 0px;
-        margin: 0px;
-        border: 0px;
-        font-size: 0.8em;
-    }}
-
-    .rust-analyzer-inlay-hints {{
-        {0}
-    }}
-    """
-    return css.format('\n'.join(rules))
-
-
-def inlay_hint_to_phantom(view: sublime.View, css: str, hint: InlayHint) -> sublime.Phantom:
-    rng = Range.from_lsp(hint["range"])
-    html = """
-    <body id="rust-analyzer-inlay-hints">
-        <style>{css}</style>
-        <div class="rust-analyzer-inlay-hints">
-            {label}
-        </div>
-    </body>
-    """
-
-    label = html_escape(hint["label"])
-    if hint["kind"] == "TypeHint":
-        # For a type hint, the end range is where you want to put it
-        region = sublime.Region(point_to_offset(rng.end, view))
-        label = ": {}".format(label)
-    elif hint["kind"] == "ParameterHint":
-        # For parameter hints, you actually want it to start where it's started
-        region = sublime.Region(point_to_offset(rng.start, view))
-        label = "{}: ".format(label)
-    else:
-        # The last kind is ChainingHint, we want those at the end too
-        region = sublime.Region(point_to_offset(rng.end, view))
-        label = ": {}".format(label)
-
-    html = html.format(css=css, label=label)
-    return sublime.Phantom(region, html, sublime.LAYOUT_INLINE)
 
 
 def open_runnables_in_terminus(window: Optional[sublime.Window], runnables: List[Runnable]) -> None:
@@ -285,54 +230,6 @@ class RustAnalyzer(AbstractPlugin):
     def is_valid_for_view(self, view: sublime.View) -> bool:
         session = self.weaksession()
         return bool(session and session.session_view_for_view_async(view))
-
-    def request_inlay_hints_async(self, view: sublime.View) -> None:
-        if not get_setting(view, "rust-analyzer.inlayHints.enable", True):
-            return
-        session = self.weaksession()
-        if session is None:
-            return
-        params = {
-            "textDocument": text_document_identifier(view),
-        }
-        session.send_request_async(
-            Request("rust-analyzer/inlayHints", params),
-            functools.partial(self.on_inlay_hints_async, view)
-        )
-
-    def on_inlay_hints_async(self, view: sublime.View, hints: List[InlayHint]) -> None:
-        session = self.weaksession()
-        if session is None:
-            return
-        buffer = session.get_session_buffer_for_uri_async(uri_from_view(view))
-        if not buffer:
-            return
-        key = "_lsp_rust_analyzer_inlay_hints"
-        phantom_set = getattr(buffer, key, None)
-        if phantom_set is None:
-            phantom_set = sublime.PhantomSet(view, key)
-            setattr(buffer, key, phantom_set)
-        css = inlay_hint_css(view)
-        phantoms = [inlay_hint_to_phantom(view, css, hint) for hint in hints]
-        sublime.set_timeout(
-            functools.partial(
-                self.present_inlay_hints,
-                view,
-                phantom_set,
-                phantoms
-            )
-        )
-
-    def present_inlay_hints(
-        self,
-        view: sublime.View,
-        phantom_set: sublime.PhantomSet,
-        phantoms: List[sublime.Phantom]
-    ) -> None:
-        if not view.is_valid():
-            return
-        phantom_set.update(phantoms)
-
 
 class RustAnalyzerCommand(LspTextCommand):
     session_name = SESSION_NAME
@@ -610,7 +507,6 @@ class EventListener(sublime_plugin.ViewEventListener):
         if not different:
             return
         debounced(
-            functools.partial(plugin.request_inlay_hints_async, self.view),
             FEATURES_TIMEOUT,
             lambda: self._stored_region == region,
             async_thread=True,
@@ -620,7 +516,6 @@ class EventListener(sublime_plugin.ViewEventListener):
         plugin = RustAnalyzer.plugin_from_view(self.view)
         if plugin is None:
             return
-        plugin.request_inlay_hints_async(self.view)
 
     on_activated_async = on_load_async
 
