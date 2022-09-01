@@ -3,9 +3,9 @@
 
 		// Settings Not Related to rust-analyzer Server
 
-		// Wether or not to automatically close terminus panel/tab upon completion.
+		// Whether or not to automatically close terminus panel/tab upon completion.
 		"rust-analyzer.terminusAutoClose": false,
-		// Wether or not to spawn a panel at the bottom, or a new tab
+		// Whether or not to spawn a panel at the bottom, or a new tab
 		"rust-analyzer.terminusUsePanel": false,
 
 		// Rust-Analyzer Server Settings
