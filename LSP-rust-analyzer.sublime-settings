@@ -10,6 +10,8 @@
 
 		// Rust-Analyzer Server Settings
 
+		// Whether to insert #[must_use] when generating as_ methods for enum variants.
+		"rust-analyzer.assist.emitMustUse": false,
 		// Placeholder expression to use for missing expressions in assists.
 		// possible values: todo, default
 		"rust-analyzer.assist.expressionFillDefault": "todo",
@@ -22,6 +24,17 @@
 		"rust-analyzer.cargo.autoreload": true,
 		// Run build scripts (`build.rs`) for more precise code analysis.
 		"rust-analyzer.cargo.buildScripts.enable": true,
+		// Specifies the working directory for running build scripts.
+		// - "workspace": run build scripts for a workspace in the workspace’s root directory.
+		// This is incompatible with rust-analyzer.cargo.buildScripts.invocationStrategy set to once.
+		// - "root": run build scripts in the project’s root directory.
+		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
+		"rust-analyzer.cargo.buildScripts.invocationLocation": "workspace",
+		// Specifies the invocation strategy to use when running the build scripts command.
+		// If `per_workspace` is set, the command will be executed for each workspace.
+		// If `once` is set, the command will be executed once.
+		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
+		"rust-analyzer.cargo.buildScripts.invocationStrategy": "per_workspace",
 		// Override the command rust-analyzer uses to run build scripts and
 		// build procedural macros. The command is required to output json
 		// and should therefore include `--message-format=json` or a similar
@@ -36,13 +49,17 @@
 		// Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
+		// Extra environment variables that will be set when running cargo,
+		// rustc or other commands within the workspace. Useful for setting RUSTFLAGS.
+		"rust-analyzer.cargo.extraEnv": {},
 		// List of features to activate.
 		// Set this to `"all"` to pass `--all-features` to cargo.
 		"rust-analyzer.cargo.features": [],
 		// Whether to pass `--no-default-features` to cargo.
 		"rust-analyzer.cargo.noDefaultFeatures": false,
-		// Internal config for debugging, disables loading of sysroot crates.
-		"rust-analyzer.cargo.noSysroot": false,
+		// Relative path to the sysroot, or "discover" to try to automatically find
+		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
+		"rust-analyzer.cargo.sysroot": "discover",
 		// Compilation target override (target triple).
 		"rust-analyzer.cargo.target": null,
 		// Unsets `#[cfg(test)]` for the specified crates.
@@ -59,10 +76,25 @@
 		"rust-analyzer.checkOnSave.enable": true,
 		// Extra arguments for `cargo check`.
 		"rust-analyzer.checkOnSave.extraArgs": [],
+		// Extra environment variables that will be set when running cargo check.
+		// Extends rust-analyzer.cargo.extraEnv.
+		"rust-analyzer.checkOnSave.extraEnv": {},
 		// List of features to activate. Defaults to
 		// `#rust-analyzer.cargo.features#`.
 		// Set to `"all"` to pass `--all-features` to Cargo.
 		"rust-analyzer.checkOnSave.features": null,
+		// Specifies the working directory for running checks.
+		// - "workspace": run checks for workspaces in the corresponding workspaces' root directories.
+		// This falls back to "root" if rust-analyzer.cargo.checkOnSave.invocationStrategy is set to once.
+		// - "root": run checks in the project’s root directory.
+		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
+		"rust-analyzer.checkOnSave.invocationLocation": "workspace",
+		// Specifies the invocation strategy to use when running the checkOnSave command.
+		// If per_workspace is set, the command will be executed for each workspace.
+		// If once is set, the command will be executed once.
+		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
+
+		"rust-analyzer.checkOnSave.invocationStrategy": "per_workspace",
 		// Whether to pass `--no-default-features` to Cargo. Defaults to
 		// `#rust-analyzer.cargo.noDefaultFeatures#`.
 		"rust-analyzer.checkOnSave.noDefaultFeatures": null,
@@ -209,6 +241,8 @@
 		"rust-analyzer.imports.group.enable": true,
 		// Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.
 		"rust-analyzer.imports.merge.glob": true,
+		// Prefer to unconditionally use imports of the core and alloc crate, over the std crate.
+		"rust-analyzer.imports.prefer.no.std": false,
 		// The path structure for newly inserted paths to use.
 		// possible values: plain, self, crate
 		"rust-analyzer.imports.prefix": "plain",
@@ -224,6 +258,8 @@
 		// Whether to show inlay type hints for return types of closures.
 		// possible values: always, never, with_block
 		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
+		// Whether to hide inlay hints for type adjustments outside of unsafe blocks.
+		"rust-analyzer.inlayHints.expressionAdjustmentHints.hideOutsideUnsafe": false,
 		// Whether to show inlay type hints for elided lifetimes in function signatures.
 		// possible values: always, never, skip_trivial
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "never",
@@ -264,6 +300,8 @@
 		// Whether to show `Implementations` lens. Only applies when
 		// `#rust-analyzer.lens.enable#` is set.
 		"rust-analyzer.lens.implementations.enable": true,
+		// Where to render annotations.
+		"rust-analyzer.lens.location": "above_name",
 		// Whether to show `References` lens for Struct, Enum, and Union.
 		// Only applies when `#rust-analyzer.lens.enable#` is set.
 		"rust-analyzer.lens.references.adt.enable": false,
@@ -298,6 +336,8 @@
 		// Internal config, path to proc-macro server executable (typically,
 		// this is rust-analyzer itself, but we override this in tests).
 		"rust-analyzer.procMacro.server": null,
+		// Exclude imports from find-all-references.
+		"rust-analyzer.references.excludeImports": false,
 		// Whether to restart the server automatically when certain settings that require a restart are changed.
 		"rust-analyzer.restartServerOnConfigChange": false,
 		// Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command.
@@ -375,4 +415,3 @@
 	"selector": "source.rust",
 	"command": ["${storage_path}/LSP-rust-analyzer/rust-analyzer"],
 }
-
