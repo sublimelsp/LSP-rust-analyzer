@@ -102,7 +102,7 @@ def open_runnables_in_terminus(window: Optional[sublime.Window], runnables: List
         command_to_run = [cargo_path] + args["cargoArgs"]
         if not shutil.which(command_to_run[0]):
             sublime.error_message(
-                'Cannot run executable "{}". You need to make sure that it is in the PATH.'.format(command_to_run[0]))
+                'Cannot run executable "{}". Ensure that it is in the PATH of the Sublime Text process.'.format(command_to_run[0]))
             return
         if args["cargoExtraArgs"]:
             command_to_run += args["cargoExtraArgs"]
