@@ -93,7 +93,6 @@
 		// If per_workspace is set, the command will be executed for each workspace.
 		// If once is set, the command will be executed once.
 		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
-
 		"rust-analyzer.checkOnSave.invocationStrategy": "per_workspace",
 		// Whether to pass `--no-default-features` to Cargo. Defaults to
 		// `#rust-analyzer.cargo.noDefaultFeatures#`.
