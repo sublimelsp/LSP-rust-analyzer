@@ -259,6 +259,8 @@
 		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
 		// Whether to hide inlay hints for type adjustments outside of unsafe blocks.
 		"rust-analyzer.inlayHints.expressionAdjustmentHints.hideOutsideUnsafe": false,
+		// Whether to use location links for parts of type mentioned in inlay hints.
+		"rust-analyzer.inlayHints.locationLinks": true,
 		// Whether to show inlay type hints for elided lifetimes in function signatures.
 		// possible values: always, never, skip_trivial
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "never",
