@@ -31,6 +31,11 @@
                       "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.assist.emitMustUse": {
+                      "default": false,
+                      "description": "Whether to insert #[must_use] when generating as_ methods for enum variants.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.assist.expressionFillDefault": {
                       "default": "todo",
                       "enum": [
@@ -66,6 +71,32 @@
                       "markdownDescription": "Run build scripts (`build.rs`) for more precise code analysis.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.cargo.buildScripts.invocationLocation": {
+                        "default": "workspace",
+                        "enum": [
+                            "workspace",
+                            "root"
+                        ],
+                        "enumDescriptions": [
+                            "The command will be executed in the corresponding workspace root.",
+                            "The command will be executed in the project root."
+                        ],
+                        "markdownDescription": "Specifies the working directory for running build scripts.\n- \"workspace\": run build scripts for a workspace in the workspace's root directory.\n    This is incompatible with `#rust-analyzer.cargo.buildScripts.invocationStrategy#` set to `once`.\n- \"root\": run build scripts in the project's root directory.\nThis config only has an effect when `#rust-analyzer.cargo.buildScripts.overrideCommand#`\nis set.",
+                        "type": "string"
+                    },
+                    "rust-analyzer.cargo.buildScripts.invocationStrategy": {
+                        "default": "per_workspace",
+                        "enum": [
+                            "per_workspace",
+                            "once"
+                        ],
+                        "enumDescriptions": [
+                            "The command will be executed for each workspace.",
+                            "The command will be executed once."
+                        ],
+                        "markdownDescription": "Specifies the invocation strategy to use when running the build scripts command.\nIf `per_workspace` is set, the command will be executed for each workspace.\nIf `once` is set, the command will be executed once.\nThis config only has an effect when `#rust-analyzer.cargo.buildScripts.overrideCommand#`\nis set.",
+                        "type": "string"
+                    },
                     "rust-analyzer.cargo.buildScripts.overrideCommand": {
                       "default": null,
                       "items": {
@@ -81,6 +112,11 @@
                       "default": true,
                       "markdownDescription": "Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to\navoid checking unnecessary things.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.cargo.extraEnv": {
+                      "default": {},
+                      "markdownDescription": "Extra environment variables that will be set when running cargo, rustc\nor other commands within the workspace. Useful for setting RUSTFLAGS.",
+                      "type": "object"
                     },
                     "rust-analyzer.cargo.features": {
                       "anyOf": [
@@ -108,10 +144,12 @@
                       "markdownDescription": "Whether to pass `--no-default-features` to cargo.",
                       "type": "boolean"
                     },
-                    "rust-analyzer.cargo.noSysroot": {
-                      "default": false,
-                      "markdownDescription": "Internal config for debugging, disables loading of sysroot crates.",
-                      "type": "boolean"
+                    "rust-analyzer.cargo.sysroot": {
+                      "default": "discover",
+                      "markdownDescription": "Relative path to the sysroot, or \"discover\" to try to automatically find it via\n\"rustc --print sysroot\".\n\nUnsetting this disables sysroot loading.\n\nThis option does not take effect until rust-analyzer is restarted.",                      "type": [
+                        "null",
+                        "string"
+                      ]
                     },
                     "rust-analyzer.cargo.target": {
                       "default": null,
@@ -162,6 +200,11 @@
                       "markdownDescription": "Extra arguments for `cargo check`.",
                       "type": "array"
                     },
+                    "rust-analyzer.checkOnSave.extraEnv": {
+                      "default": {},
+                      "markdownDescription": "Extra environment variables that will be set when running cargo check. Extends rust-analyzer.cargo.extraEnv.",
+                      "type": "object"
+                    },
                     "rust-analyzer.checkOnSave.features": {
                       "anyOf": [
                         {
@@ -185,6 +228,32 @@
                       ],
                       "default": null,
                       "markdownDescription": "List of features to activate. Defaults to\n`#rust-analyzer.cargo.features#`.\n\nSet to `\"all\"` to pass `--all-features` to Cargo."
+                    },
+                    "rust-analyzer.checkOnSave.invocationLocation": {
+                      "default": "workspace",
+                      "enum": [
+                        "root",
+                        "workspace"
+                      ],
+                      "enumDescriptions": [
+                        "Run checks in the project’s root directory.",
+                        "Run checks for workspaces in the corresponding workspaces' root directories. This falls back to `root` if rust-analyzer.cargo.checkOnSave.invocationStrategy is set to `once`."
+                      ],
+                      "markdownDescription": "Specifies the working directory for running checks. This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.",
+                      "type": "string"
+                    },
+                    "rust-analyzer.checkOnSave.invocationStrategy": {
+                      "default": "per_workspace",
+                      "enum": [
+                        "once",
+                        "per_workspace"
+                      ],
+                      "enumDescriptions": [
+                        "The command will be executed once.",
+                        "The command will be executed for each workspace."
+                      ],
+                      "markdownDescription": "Specifies the invocation strategy to use when running the checkOnSave command. This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.",
+                      "type": "string"
                     },
                     "rust-analyzer.checkOnSave.noDefaultFeatures": {
                       "default": null,
@@ -487,6 +556,11 @@
                       "markdownDescription": "Whether to allow import insertion to merge new imports into single path glob imports like `use std::fmt::*;`.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.imports.prefer.no.std": {
+                      "default": false,
+                      "markdownDescription": "Prefer to unconditionally use imports of the core and alloc crate, over the std crate.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.imports.prefix": {
                       "default": "plain",
                       "enum": [
@@ -538,6 +612,11 @@
                       "markdownDescription": "Whether to show inlay type hints for return types of closures.",
                       "type": "string"
                     },
+                    "rust-analyzer.inlayHints.expressionAdjustmentHints.hideOutsideUnsafe": {
+                      "default": false,
+                      "markdownDescription": "Whether to hide inlay hints for type adjustments outside of `unsafe` blocks.",
+                      "type": "boolean"
+                    },
                     "rust-analyzer.inlayHints.lifetimeElisionHints.enable": {
                       "default": "never",
                       "enum": [
@@ -556,6 +635,11 @@
                     "rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": {
                       "default": false,
                       "markdownDescription": "Whether to prefer using parameter names as the name for elided lifetime hints if possible.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.inlayHints.locationLinks": {
+                      "default": true,
+                      "markdownDescription": "Whether to use location links for parts of type mentioned in inlay hints.",
                       "type": "boolean"
                     },
                     "rust-analyzer.inlayHints.maxLength": {
@@ -646,6 +730,18 @@
                       "default": true,
                       "markdownDescription": "Whether to show `Implementations` lens. Only applies when\n`#rust-analyzer.lens.enable#` is set.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.lens.location": {
+                      "default": "above_name",
+                      "enum": [
+                          "above_name",
+                          "above_whole_item"
+                      ],
+                      "enumDescriptions": [
+                          "Render annotations above the name of the item.",
+                          "Render annotations above the whole item, including documentation comments and attributes."
+                      ],
+                      "markdownDescription": "Where to render annotations.",
                     },
                     "rust-analyzer.lens.references.adt.enable": {
                       "default": false,
@@ -753,6 +849,11 @@
                       ],
                       "default": null,
                       "markdownDescription": "Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command."
+                    },
+                    "rust-analyzer.references.excludeImports": {
+                      "default": false,
+                      "markdownDescription": "Exclude imports from find-all-references.",
+                      "type": "boolean"
                     },
                     "rust-analyzer.runnables.command": {
                       "default": null,
