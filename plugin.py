@@ -33,7 +33,7 @@ SESSION_NAME = "rust-analyzer"
 # Update this single git tag to download a newer version.
 # After changing this tag, go through the server settings again to see
 # if any new server settings are added or old ones removed.
-TAG = "2022-12-26"
+TAG = "2023-01-09"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
 
