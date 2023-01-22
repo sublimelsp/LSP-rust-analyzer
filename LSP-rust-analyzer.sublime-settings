@@ -68,38 +68,40 @@
 		],
 		// Custom cargo runner extension ID.
 		"rust-analyzer.cargoRunner": null,
+		// Run the check command for diagnostics on save.
+		"rust-analyzer.checkOnSave": true,
 		// Check all targets and tests (`--all-targets`).
-		"rust-analyzer.checkOnSave.allTargets": true,
+		"rust-analyzer.check.allTargets": true,
 		// Cargo command to use for `cargo check`.
-		"rust-analyzer.checkOnSave.command": "check",
-		// Run specified `cargo check` command for diagnostics on save.
-		"rust-analyzer.checkOnSave.enable": true,
+		"rust-analyzer.check.command": "check",
 		// Extra arguments for `cargo check`.
-		"rust-analyzer.checkOnSave.extraArgs": [],
+		"rust-analyzer.check.extraArgs": [],
 		// Extra environment variables that will be set when running cargo check.
 		// Extends rust-analyzer.cargo.extraEnv.
-		"rust-analyzer.checkOnSave.extraEnv": {},
+		"rust-analyzer.check.extraEnv": {},
 		// List of features to activate. Defaults to
 		// `#rust-analyzer.cargo.features#`.
 		// Set to `"all"` to pass `--all-features` to Cargo.
-		"rust-analyzer.checkOnSave.features": null,
+		"rust-analyzer.check.features": null,
 		// Specifies the working directory for running checks.
 		// - "workspace": run checks for workspaces in the corresponding workspaces' root directories.
 		// This falls back to "root" if rust-analyzer.cargo.checkOnSave.invocationStrategy is set to once.
 		// - "root": run checks in the project’s root directory.
 		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
-		"rust-analyzer.checkOnSave.invocationLocation": "workspace",
+		"rust-analyzer.check.invocationLocation": "workspace",
 		// Specifies the invocation strategy to use when running the checkOnSave command.
 		// If per_workspace is set, the command will be executed for each workspace.
 		// If once is set, the command will be executed once.
 		// This config only has an effect when rust-analyzer.cargo.buildScripts.overrideCommand is set.
-		"rust-analyzer.checkOnSave.invocationStrategy": "per_workspace",
+		"rust-analyzer.check.invocationStrategy": "per_workspace",
 		// Whether to pass `--no-default-features` to Cargo. Defaults to
 		// `#rust-analyzer.cargo.noDefaultFeatures#`.
-		"rust-analyzer.checkOnSave.noDefaultFeatures": null,
+		"rust-analyzer.check.noDefaultFeatures": null,
 		// Override the command rust-analyzer uses instead of `cargo check` for
 		// diagnostics on save. The command is required to output json and
-		// should therefor include `--message-format=json` or a similar option.
+		// should therefore include `--message-format=json` or a similar option
+		// (if your client supports the `colorDiagnosticOutput` experimental
+		// capability, you can use `--message-format=json-diagnostic-rendered-ansi`).
 		// If you're changing this because you're using some tool wrapping
 		// Cargo, you might also want to change
 		// `#rust-analyzer.cargo.buildScripts.overrideCommand#`.
@@ -111,10 +113,10 @@
 		// cargo check --workspace --message-format=json --all-targets
 		// ```
 		// .
-		"rust-analyzer.checkOnSave.overrideCommand": null,
+		"rust-analyzer.check.overrideCommand": null,
 		// Check for a specific target. Defaults to
 		// `#rust-analyzer.cargo.target#`.
-		"rust-analyzer.checkOnSave.target": null,
+		"rust-analyzer.check.target": null,
 		// Toggles the additional completions that automatically add imports when completed.
 		// Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
 		"rust-analyzer.completion.autoimport.enable": true,
@@ -181,6 +183,8 @@
 		// Map of prefixes to be substituted when parsing diagnostic file paths.
 		// This should be the reverse mapping of what is passed to `rustc` as `--remap-path-prefix`.
 		"rust-analyzer.diagnostics.remapPrefix": {},
+		// Whether to use the rustc error code.
+		"rust-analyzer.diagnostics.useRustcErrorCode": false,
 		// List of warnings that should be displayed with hint severity.
 		// The warnings will be indicated by faded text or three dots in code
 		// and will not show up in the `Problems Panel`.
@@ -257,8 +261,14 @@
 		// Whether to show inlay type hints for return types of closures.
 		// possible values: always, never, with_block
 		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
+		// Whether to show enum variant discriminant hints.
+		"rust-analyzer.inlayHints.discriminantHints.enable": "never",
+		// Whether to show inlay hints for type adjustments.
+		"rust-analyzer.inlayHints.expressionAdjustmentHints.enable": "never",
 		// Whether to hide inlay hints for type adjustments outside of unsafe blocks.
 		"rust-analyzer.inlayHints.expressionAdjustmentHints.hideOutsideUnsafe": false,
+		// Whether to show inlay hints as postfix ops (`.*` instead of `*`, etc).
+		"rust-analyzer.inlayHints.expressionAdjustmentHints.mode": "prefix",
 		// Whether to show inlay type hints for elided lifetimes in function signatures.
 		// possible values: always, never, skip_trivial
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "never",
@@ -327,6 +337,8 @@
 		"rust-analyzer.lru.capacity": null,
 		// Whether to show `can't find Cargo.toml` error message.
 		"rust-analyzer.notifications.cargoTomlNotFound": true,
+		// How many worker threads in the main loop. The default `null` means to pick automatically.
+		"rust-analyzer.numThreads": null,
 		// Expand attribute macros. Requires `#rust-analyzer.procMacro.enable#` to be set.
 		"rust-analyzer.procMacro.attributes.enable": true,
 		// Enable support for procedural macros, implies `#rust-analyzer.cargo.buildScripts.enable#`.
