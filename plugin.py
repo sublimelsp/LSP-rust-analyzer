@@ -208,6 +208,9 @@ class RustAnalyzer(AbstractPlugin):
                 return True
             elif command_name == "rust-analyzer.showReferences":
                 return self._handle_show_references(session, command, done_callback)
+            elif command_name == "rust-analyzer.triggerParameterHints":
+                done_callback()
+                return True
             else:
                 return False
         except Exception as ex:
