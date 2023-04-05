@@ -52,6 +52,12 @@
 		// Extra environment variables that will be set when running cargo,
 		// rustc or other commands within the workspace. Useful for setting RUSTFLAGS.
 		"rust-analyzer.cargo.extraEnv": {},
+		// Extra arguments that are passed to every cargo invocation.
+		//
+		// ```json
+		// "rust-analyzer.cargo.extraArgs": ["--all-features"],
+		// ```
+		"rust-analyzer.cargo.extraArgs": [],
 		// List of features to activate.
 		// Set this to `"all"` to pass `--all-features` to cargo.
 		"rust-analyzer.cargo.features": [],
@@ -60,6 +66,13 @@
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
+		// Relative path to the sysroot library sources. If left unset, this will default to
+		// `{cargo.sysroot}/lib/rustlib/src/rust/library`.
+		//
+		// ```json
+		// "rust-analyzer.cargo.sysrootSrc": "/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library",
+		// ```
+		"rust-analyzer.cargo.sysrootSrc": null,
 		// Compilation target override (target triple).
 		"rust-analyzer.cargo.target": null,
 		// Unsets `#[cfg(test)]` for the specified crates.
@@ -128,6 +141,14 @@
 		// Whether to add parenthesis and argument snippets when completing function.
 		// possible values: fill_arguments, add_parentheses, none
 		"rust-analyzer.completion.callable.snippets": "fill_arguments",
+		// Maximum number of completions to return. If `null`, the limit is infinite.
+		//
+		// For a maximum of 5, use:
+		//
+		// ```json
+		// "rust-analyzer.completion.limit": 5,
+		// ```
+		"rust-analyzer.completion.limit": null,
 		// Whether to show postfix snippets like `dbg`, `if`, `not`, etc.
 		"rust-analyzer.completion.postfix.enable": true,
 		// Enables completions of private items and fields that are defined in the current workspace even if they are not visible

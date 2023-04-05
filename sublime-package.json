@@ -113,6 +113,11 @@
                       "markdownDescription": "Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to\navoid checking unnecessary things.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.cargo.extraArgs": {
+                      "default": [],
+                      "markdownDescription": "Extra arguments that are passed to every cargo invocation.",
+                      "type": "array"
+                    },
                     "rust-analyzer.cargo.extraEnv": {
                       "default": {},
                       "markdownDescription": "Extra environment variables that will be set when running cargo, rustc\nor other commands within the workspace. Useful for setting RUSTFLAGS.",
@@ -146,10 +151,19 @@
                     },
                     "rust-analyzer.cargo.sysroot": {
                       "default": "discover",
-                      "markdownDescription": "Relative path to the sysroot, or \"discover\" to try to automatically find it via\n\"rustc --print sysroot\".\n\nUnsetting this disables sysroot loading.\n\nThis option does not take effect until rust-analyzer is restarted.",                      "type": [
+                      "markdownDescription": "Relative path to the sysroot, or \"discover\" to try to automatically find it via\n\"rustc --print sysroot\".\n\nUnsetting this disables sysroot loading.\n\nThis option does not take effect until rust-analyzer is restarted.",
+                      "type": [
                         "null",
                         "string"
                       ]
+                    },
+                    "rust-analyzer.cargo.sysrootSrc": {
+                        "markdownDescription": "Relative path to the sysroot library sources. If left unset, this will default to\n`{cargo.sysroot}/lib/rustlib/src/rust/library`.\n\nThis option does not take effect until rust-analyzer is restarted.",
+                        "default": null,
+                        "type": [
+                            "null",
+                            "string"
+                        ]
                     },
                     "rust-analyzer.cargo.target": {
                       "default": null,
@@ -307,6 +321,11 @@
                       ],
                       "markdownDescription": "Whether to add parenthesis and argument snippets when completing function.",
                       "type": "string"
+                    },
+                    "rust-analyzer.completion.limit": {
+                      "default": true,
+                      "markdownDescription": "Maximum number of completions to return. If `null`, the limit is infinite.",
+                      "type": "number"
                     },
                     "rust-analyzer.completion.postfix.enable": {
                       "default": true,
