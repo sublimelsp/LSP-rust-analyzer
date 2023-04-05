@@ -114,9 +114,11 @@
 		// ```
 		// .
 		"rust-analyzer.check.overrideCommand": null,
-		// Check for a specific target. Defaults to
-		// `#rust-analyzer.cargo.target#`.
-		"rust-analyzer.check.target": null,
+		// Check for a specific target. Defaults to `#rust-analyzer.cargo.target#`.
+		//
+		// Can be a single target, e.g. `\"x86_64-unknown-linux-gnu\"` or a list of targets, e.g.
+		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
+		"rust-analyzer.check.targets": null,
 		// Toggles the additional completions that automatically add imports when completed.
 		// Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
 		"rust-analyzer.completion.autoimport.enable": true,

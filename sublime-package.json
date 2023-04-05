@@ -274,12 +274,13 @@
                         "array"
                       ]
                     },
-                    "rust-analyzer.check.target": {
+                    "rust-analyzer.check.targets": {
                       "default": null,
                       "markdownDescription": "Check for a specific target. Defaults to\n`#rust-analyzer.cargo.target#`.",
                       "type": [
                         "null",
-                        "string"
+                        "string",
+                        "array"
                       ]
                     },
                     "rust-analyzer.completion.autoimport.enable": {
