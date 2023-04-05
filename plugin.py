@@ -34,8 +34,30 @@ SESSION_NAME = "rust-analyzer"
 # After changing this tag, go through the server settings again to see
 # if any new server settings are added or old ones removed.
 # Compare the previous and new tags's editors/code/package.json with
-# https://github.com/rust-lang/rust-analyzer/compare/2023-01-16...2023-01-30
-TAG = "2023-01-30"
+# https://github.com/rust-lang/rust-analyzer/compare/2023-01-30...2023-04-04
+#
+# The following script finds the keys that are in the `rust-analyzer`
+# package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
+#
+# ```bash
+# lsp_ra_repo=/path/to/sublimelsp/LSP-rust-analyzer
+# ra_repo=/path/to/rust-analyzer/rust-analyzer
+#
+# lsp_ra_settings=$(rg -o '"rust-analyzer.([^"]+)"' "${lsp_ra_repo}/LSP-rust-analyzer.sublime-settings" | sort)
+# ra_settings=$(jq '.contributes.configuration.properties
+#         | to_entries
+#         | map(.key)
+#         | .[] | select(. != "$generated-start" and . != "$generated-end")' \
+#         "${ra_repo}/editors/code/package.json" | sort)
+#
+# # Missing settings in LSP-rust-analyzer
+# rg -vf <(echo "${lsp_ra_settings}") <(echo "${ra_settings}")
+#
+# # Settings in LSP-rust-analyzer that are no longer relevant
+# rg -vf <(echo "${ra_settings}") <(echo "${lsp_ra_settings}") \
+#     | rg -v 'terminusAutoClose|terminusUsePanel'
+# ```
+TAG = "2023-04-04"
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
 
