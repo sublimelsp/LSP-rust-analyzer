@@ -42,7 +42,7 @@
                         "todo",
                         "default"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Fill missing expressions with the `todo` macro",
                         "Fill missing expressions with reasonable defaults, `new` or `default` constructors."
                       ],
@@ -129,7 +129,7 @@
                           "enum": [
                             "all"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Pass `--all-features` to cargo"
                           ],
                           "type": "string"
@@ -207,12 +207,12 @@
                       "type": "string"
                     },
                     "rust-analyzer.check.extraArgs": {
-                      "default": [],
-                      "items": {
-                        "type": "string"
-                      },
                       "markdownDescription": "Extra arguments for `cargo check`.",
-                      "type": "array"
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                          "type": "string"
+                      }
                     },
                     "rust-analyzer.check.extraEnv": {
                       "default": {},
@@ -225,7 +225,7 @@
                           "enum": [
                             "all"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Pass `--all-features` to cargo"
                           ],
                           "type": "string"
@@ -249,7 +249,7 @@
                         "root",
                         "workspace"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Run checks in the project’s root directory.",
                         "Run checks for workspaces in the corresponding workspaces' root directories. This falls back to `root` if rust-analyzer.cargo.checkOnSave.invocationStrategy is set to `once`."
                       ],
@@ -325,7 +325,11 @@
                     "rust-analyzer.completion.limit": {
                       "default": true,
                       "markdownDescription": "Maximum number of completions to return. If `null`, the limit is infinite.",
-                      "type": "number"
+                      "type": [
+                          "null",
+                          "integer"
+                      ],
+                      "minimum": 0
                     },
                     "rust-analyzer.completion.postfix.enable": {
                       "default": true,
@@ -489,6 +493,11 @@
                       "markdownDescription": "Enables highlighting of related references while the cursor is on `break`, `loop`, `while`, or `for` keywords.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.highlightRelated.closureCaptures.enable": {
+                        "markdownDescription": "Enables highlighting of all captures of a closure while the cursor is on the `|` or move keyword of a closure.",
+                        "default": true,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.highlightRelated.exitPoints.enable": {
                       "default": true,
                       "markdownDescription": "Enables highlighting of all exit points while the cursor is on any `return`, `?`, `fn`, or return type arrow (`->`).",
@@ -546,8 +555,13 @@
                     },
                     "rust-analyzer.hover.links.enable": {
                       "default": true,
-                      "markdownDescription": "Use markdown syntax for links in hover.",
+                      "markdownDescription": "Use markdown syntax for links on hover.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.hover.memoryLayout.enable": {
+                        "markdownDescription": "Whether to show memory layout data on hover.",
+                        "default": true,
+                        "type": "boolean"
                     },
                     "rust-analyzer.imports.granularity.enforce": {
                       "default": false,
@@ -593,7 +607,7 @@
                         "self",
                         "crate"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item.",
                         "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item. Prefixes `self` in front of the path if it starts with a module.",
                         "Force import paths to be absolute by always starting them with `crate` or the extern crate name they come from."
@@ -622,6 +636,11 @@
                       "minimum": 0,
                       "type": "integer"
                     },
+                    "rust-analyzer.inlayHints.closureCaptureHints.enable": {
+                        "markdownDescription": "Whether to show inlay hints for closure captures.",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.inlayHints.closureReturnTypeHints.enable": {
                       "default": "never",
                       "enum": [
@@ -636,6 +655,23 @@
                       ],
                       "markdownDescription": "Whether to show inlay type hints for return types of closures.",
                       "type": "string"
+                    },
+                    "rust-analyzer.inlayHints.closureStyle": {
+                        "markdownDescription": "Closure notation in type and chaining inlay hints.",
+                        "default": "impl_fn",
+                        "type": "string",
+                        "enum": [
+                            "impl_fn",
+                            "rust_analyzer",
+                            "with_id",
+                            "hide"
+                        ],
+                        "markdownEnumDescriptions": [
+                            "`impl FnMut(i32, u64) -> i8`",
+                            "`|i32, u64| -> i8`",
+                            "`{closure#14352}`, where that id is the unique number of the closure in r-a internals",
+                            "Shows `...` for every closure type"
+                        ]
                     },
                     "rust-analyzer.inlayHints.discriminantHints.enable": {
                       "markdownDescription": "Whether to show enum variant discriminant hints.",
@@ -682,11 +718,11 @@
                         "prefer_prefix",
                         "prefer_postfix"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show adjustment hints as prefix (`*expr`).",
                         "Always show adjustment hints as postfix (`expr.*`).",
-                        "Show prefix or postfix depending on which uses less parenthesis, prefering prefix.",
-                        "Show prefix or postfix depending on which uses less parenthesis, prefering postfix."
+                        "Show prefix or postfix depending on which uses less parenthesis, preferring prefix.",
+                        "Show prefix or postfix depending on which uses less parenthesis, preferring postfix."
                       ]
                     },
                     "rust-analyzer.inlayHints.lifetimeElisionHints.enable": {
@@ -762,6 +798,11 @@
                       "default": false,
                       "markdownDescription": "Whether to hide inlay type hints for constructors.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.interpret.tests": {
+                        "markdownDescription": "Enables the experimental support for interpreting tests.",
+                        "default": false,
+                        "type": "boolean"
                     },
                     "rust-analyzer.joinLines.joinAssignments": {
                       "default": true,
@@ -860,6 +901,11 @@
                         "integer"
                       ]
                     },
+                    "rust-analyzer.lru.query.capacities": {
+                        "markdownDescription": "Sets the LRU capacity of the specified queries.",
+                        "default": {},
+                        "type": "object"
+                    },
                     "rust-analyzer.notifications.cargoTomlNotFound": {
                       "default": true,
                       "markdownDescription": "Whether to show `can't find Cargo.toml` error message.",
@@ -891,7 +937,7 @@
                     },
                     "rust-analyzer.procMacro.server": {
                       "default": null,
-                      "markdownDescription": "Internal config, path to proc-macro server executable (typically,\nthis is rust-analyzer itself, but we override this in tests).",
+                      "markdownDescription": "Internal config, path to proc-macro server executable.",
                       "type": [
                         "null",
                         "string"
@@ -973,7 +1019,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "markdownDescription": "Advanced option, fully override the command rust-analyzer uses for\nformatting.",
+                      "markdownDescription": "Advanced option, fully override the command rust-analyzer uses for formatting. This should be the equivalent of `rustfmt` here, and not that of `cargo fmt`. The file contents will be passed on the standard input and the formatted result will be read from the standard output.",
                       "type": [
                         "null",
                         "array"
@@ -989,6 +1035,11 @@
                       "markdownDescription": "Inject additional highlighting into doc comments.\n\nWhen enabled, rust-analyzer will highlight rust source in doc comments as well as intra\ndoc links.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.semanticHighlighting.nonStandardTokens": {
+                        "markdownDescription": "Whether the server is allowed to emit non-standard tokens and modifiers.",
+                        "default": true,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.semanticHighlighting.operator.enable": {
                       "default": true,
                       "markdownDescription": "Use semantic tokens for operators.\n\nWhen disabled, rust-analyzer will emit semantic tokens only for operator tokens when\nthey are tagged with modifiers.",
@@ -1001,7 +1052,7 @@
                     },
                     "rust-analyzer.semanticHighlighting.punctuation.enable": {
                       "default": false,
-                      "markdownDescription": "Use semantic tokens for punctuations.\n\nWhen disabled, rust-analyzer will emit semantic tokens only for punctuation tokens when\nthey are tagged with modifiers or have a special role.",
+                      "markdownDescription": "Use semantic tokens for punctuation.\n\nWhen disabled, rust-analyzer will emit semantic tokens only for punctuation tokens when\nthey are tagged with modifiers or have a special role.",
                       "type": "boolean"
                     },
                     "rust-analyzer.semanticHighlighting.punctuation.separate.macro.bang": {
@@ -1011,7 +1062,7 @@
                     },
                     "rust-analyzer.semanticHighlighting.punctuation.specialization.enable": {
                       "default": false,
-                      "markdownDescription": "Use specialized semantic tokens for punctuations.\n\nWhen enabled, rust-analyzer will emit special token types for punctuation tokens instead\nof the generic `punctuation` token type.",
+                      "markdownDescription": "Use specialized semantic tokens for punctuation.\n\nWhen enabled, rust-analyzer will emit special token types for punctuation tokens instead\nof the generic `punctuation` token type.",
                       "type": "boolean"
                     },
                     "rust-analyzer.semanticHighlighting.strings.enable": {
