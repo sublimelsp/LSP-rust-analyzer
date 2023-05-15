@@ -114,9 +114,12 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.cargo.extraArgs": {
-                      "default": [],
-                      "markdownDescription": "Extra arguments that are passed to every cargo invocation.",
-                      "type": "array"
+                        "markdownDescription": "Extra arguments that are passed to every cargo invocation.",
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "rust-analyzer.cargo.extraEnv": {
                       "default": {},
