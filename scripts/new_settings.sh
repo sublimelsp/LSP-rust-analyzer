@@ -8,7 +8,12 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LSP_REPO_DIR="$SCRIPT_DIR/.."
-RA_REPO_DIR=/usr/local/workspace/github/rust-analyzer/
+
+read -rp 'Provide directory path to the rust-analyzer repository (for example: /usr/local/github/rust-analyzer/): ' RA_REPO_DIR
+if [ ! -d "$RA_REPO_DIR" ]; then
+   echo "Directory path '$RA_REPO_DIR' DOES NOT exist."
+   exit
+fi
 
 lsp_ra_settings=$(rg -o '"rust-analyzer.([^"]+)"' "${LSP_REPO_DIR}/LSP-rust-analyzer.sublime-settings" | sort)
 ra_settings=$(jq '.contributes.configuration.properties
