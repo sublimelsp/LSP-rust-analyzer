@@ -30,12 +30,17 @@ except ImportError:
 
 SESSION_NAME = "rust-analyzer"
 
-# Update this single git tag to download a newer version.
-# After changing this tag, go through the server settings again to see
-# if any new server settings are added or old ones removed.
-# Compare the previous and new tags's editors/code/package.json with
-# https://github.com/rust-lang/rust-analyzer/compare/2023-01-16...2023-01-30
-TAG = "2023-01-30"
+TAG = "2023-05-15"
+"""
+Update this single git tag to download a newer version.
+After changing this tag, go through the server settings again to see
+if any new server settings are added or old ones removed.
+Compare the previous and new tags's editors/code/package.json with
+https://github.com/rust-lang/rust-analyzer/compare/2023-01-30...2023-05-15
+
+The script in `./scripts/new_settings.sh can be used to find the keys that are in the `rust-analyzer`
+package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
+"""
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
 
@@ -186,6 +191,9 @@ class RustAnalyzer(AbstractPlugin):
                 return True
             elif command_name == "rust-analyzer.showReferences":
                 return self._handle_show_references(session, command, done_callback)
+            elif command_name == "rust-analyzer.triggerParameterHints":
+                done_callback()
+                return True
             else:
                 return False
         except Exception as ex:

@@ -52,6 +52,12 @@
 		// Extra environment variables that will be set when running cargo,
 		// rustc or other commands within the workspace. Useful for setting RUSTFLAGS.
 		"rust-analyzer.cargo.extraEnv": {},
+		// Extra arguments that are passed to every cargo invocation.
+		//
+		// ```json
+		// "rust-analyzer.cargo.extraArgs": ["--all-features"],
+		// ```
+		"rust-analyzer.cargo.extraArgs": [],
 		// List of features to activate.
 		// Set this to `"all"` to pass `--all-features` to cargo.
 		"rust-analyzer.cargo.features": [],
@@ -60,6 +66,13 @@
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
+		// Relative path to the sysroot library sources. If left unset, this will default to
+		// `{cargo.sysroot}/lib/rustlib/src/rust/library`.
+		//
+		// ```json
+		// "rust-analyzer.cargo.sysrootSrc": "/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library",
+		// ```
+		"rust-analyzer.cargo.sysrootSrc": null,
 		// Compilation target override (target triple).
 		"rust-analyzer.cargo.target": null,
 		// Unsets `#[cfg(test)]` for the specified crates.
@@ -114,9 +127,11 @@
 		// ```
 		// .
 		"rust-analyzer.check.overrideCommand": null,
-		// Check for a specific target. Defaults to
-		// `#rust-analyzer.cargo.target#`.
-		"rust-analyzer.check.target": null,
+		// Check for a specific target. Defaults to `#rust-analyzer.cargo.target#`.
+		//
+		// Can be a single target, e.g. `\"x86_64-unknown-linux-gnu\"` or a list of targets, e.g.
+		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
+		"rust-analyzer.check.targets": null,
 		// Toggles the additional completions that automatically add imports when completed.
 		// Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
 		"rust-analyzer.completion.autoimport.enable": true,
@@ -126,6 +141,14 @@
 		// Whether to add parenthesis and argument snippets when completing function.
 		// possible values: fill_arguments, add_parentheses, none
 		"rust-analyzer.completion.callable.snippets": "fill_arguments",
+		// Maximum number of completions to return. If `null`, the limit is infinite.
+		//
+		// For a maximum of 5, use:
+		//
+		// ```json
+		// "rust-analyzer.completion.limit": 5,
+		// ```
+		"rust-analyzer.completion.limit": null,
 		// Whether to show postfix snippets like `dbg`, `if`, `not`, etc.
 		"rust-analyzer.completion.postfix.enable": true,
 		// Enables completions of private items and fields that are defined in the current workspace even if they are not visible
@@ -202,6 +225,8 @@
 		"rust-analyzer.files.watcher": "client",
 		// Enables highlighting of related references while the cursor is on `break`, `loop`, `while`, or `for` keywords.
 		"rust-analyzer.highlightRelated.breakPoints.enable": true,
+		// Enables highlighting of all captures of a closure while the cursor is on the `|` or move keyword of a closure.
+		"rust-analyzer.highlightRelated.closureCaptures.enable": true,
 		// Enables highlighting of all exit points while the cursor is on any `return`, `?`, `fn`, or return type arrow (`->`).
 		"rust-analyzer.highlightRelated.exitPoints.enable": true,
 		// Enables highlighting of related references while the cursor is on any identifier.
@@ -231,8 +256,10 @@
 		// Whether to show keyword hover popups. Only applies when
 		// `#rust-analyzer.hover.documentation.enable#` is set.
 		"rust-analyzer.hover.documentation.keywords.enable": true,
-		// Use markdown syntax for links in hover.
+		// Use markdown syntax for links on hover.
 		"rust-analyzer.hover.links.enable": true,
+		// Whether to show memory layout data on hover.
+		"rust-analyzer.hover.memoryLayout.enable": true,
 		// Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import
 		// styles consistent per file.
 		"rust-analyzer.imports.granularity.enforce": false,
@@ -258,9 +285,13 @@
 		// Minimum number of lines required before the `}` until the hint is shown (set to 0 or 1
 		// to always show them).
 		"rust-analyzer.inlayHints.closingBraceHints.minLines": 25,
+		// Whether to show inlay hints for closure captures.
+		"rust-analyzer.inlayHints.closureCaptureHints.enable": false,
 		// Whether to show inlay type hints for return types of closures.
 		// possible values: always, never, with_block
 		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
+		// Closure notation in type and chaining inlay hints.
+		"rust-analyzer.inlayHints.closureStyle": "impl_fn",
 		// Whether to show enum variant discriminant hints.
 		"rust-analyzer.inlayHints.discriminantHints.enable": "never",
 		// Whether to show inlay hints for type adjustments.
@@ -290,6 +321,8 @@
 		"rust-analyzer.inlayHints.typeHints.hideClosureInitialization": false,
 		// Whether to hide inlay type hints for constructors.
 		"rust-analyzer.inlayHints.typeHints.hideNamedConstructor": false,
+		// Enables the experimental support for interpreting tests.
+		"rust-analyzer.interpret.tests": false,
 		// Join lines merges consecutive declaration and initialization of an assignment.
 		"rust-analyzer.joinLines.joinAssignments": true,
 		// Join lines inserts else between consecutive ifs.
@@ -333,6 +366,8 @@
 		"rust-analyzer.linkedProjects": [],
 		// Number of syntax trees rust-analyzer keeps in memory. Defaults to 128.
 		"rust-analyzer.lru.capacity": null,
+		// Sets the LRU capacity of the specified queries.
+		"rust-analyzer.lru.query.capacities": {},
 		// Whether to show `can't find Cargo.toml` error message.
 		"rust-analyzer.notifications.cargoTomlNotFound": true,
 		// How many worker threads in the main loop. The default `null` means to pick automatically.
@@ -344,8 +379,7 @@
 		// These proc-macros will be ignored when trying to expand them.
 		// This config takes a map of crate names with the exported proc-macro names to ignore as values.
 		"rust-analyzer.procMacro.ignored": {},
-		// Internal config, path to proc-macro server executable (typically,
-		// this is rust-analyzer itself, but we override this in tests).
+		// Internal config, path to proc-macro server executable.
 		"rust-analyzer.procMacro.server": null,
 		// Exclude imports from find-all-references.
 		"rust-analyzer.references.excludeImports": false,
@@ -367,8 +401,9 @@
 		"rust-analyzer.rustc.source": null,
 		// Additional arguments to `rustfmt`.
 		"rust-analyzer.rustfmt.extraArgs": [],
-		// Advanced option, fully override the command rust-analyzer uses for
-		// formatting.
+		// Advanced option, fully override the command rust-analyzer uses for formatting. This should be the equivalent
+		// of `rustfmt` here, and not that of `cargo fmt`. The file contents will be passed on the standard input and
+		// the formatted result will be read from the standard output.
 		"rust-analyzer.rustfmt.overrideCommand": null,
 		// Enables the use of rustfmt's unstable range formatting command for the
 		// `textDocument/rangeFormatting` request. The rustfmt option is unstable and only
@@ -378,6 +413,8 @@
 		// When enabled, rust-analyzer will highlight rust source in doc comments as well as intra
 		// doc links.
 		"rust-analyzer.semanticHighlighting.doc.comment.inject.enable": true,
+		// Whether the server is allowed to emit non-standard tokens and modifiers.
+		"rust-analyzer.semanticHighlighting.nonStandardTokens": true,
 		// Use semantic tokens for operators.
 		// When disabled, rust-analyzer will emit semantic tokens only for operator tokens when
 		// they are tagged with modifiers.
@@ -386,14 +423,14 @@
 		// When enabled, rust-analyzer will emit special token types for operator tokens instead
 		// of the generic `operator` token type.
 		"rust-analyzer.semanticHighlighting.operator.specialization.enable": false,
-		// Use semantic tokens for punctuations.
+		// Use semantic tokens for punctuation.
 		// When disabled, rust-analyzer will emit semantic tokens only for punctuation tokens when
 		// they are tagged with modifiers or have a special role.
 		"rust-analyzer.semanticHighlighting.punctuation.enable": false,
 		// When enabled, rust-analyzer will emit a punctuation semantic token for the `!` of macro
 		// calls.
 		"rust-analyzer.semanticHighlighting.punctuation.separate.macro.bang": false,
-		// Use specialized semantic tokens for punctuations.
+		// Use specialized semantic tokens for punctuation.
 		// When enabled, rust-analyzer will emit special token types for punctuation tokens instead
 		// of the generic `punctuation` token type.
 		"rust-analyzer.semanticHighlighting.punctuation.specialization.enable": false,
