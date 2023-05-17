@@ -333,7 +333,7 @@
 		"rust-analyzer.joinLines.unwrapTrivialBlock": true,
 		// Whether to show `Debug` lens. Only applies when
 		// `#rust-analyzer.lens.enable#` is set.
-		"rust-analyzer.lens.debug.enable": true,
+		"rust-analyzer.lens.debug.enable": false,
 		// Whether to show CodeLens in Rust files.
 		"rust-analyzer.lens.enable": true,
 		// Internal config: use custom client-side commands even when the
