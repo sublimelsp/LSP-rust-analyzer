@@ -517,7 +517,7 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.hover.actions.debug.enable": {
-                      "default": true,
+                      "default": false,
                       "markdownDescription": "Whether to show `Debug` action. Only applies when\n`#rust-analyzer.hover.actions.enable#` is set.",
                       "type": "boolean"
                     },
