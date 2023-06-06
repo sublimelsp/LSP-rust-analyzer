@@ -4,8 +4,13 @@ from LSP.plugin import Request
 from LSP.plugin import Session
 from LSP.plugin import unregister_plugin
 from LSP.plugin.core.protocol import Location
+from LSP.plugin.core.protocol import Position
 from LSP.plugin.core.registry import LspTextCommand
 from LSP.plugin.core.typing import Optional, Union, List, Any, TypedDict, Mapping, Callable, Dict
+from LSP.plugin.core.views import first_selection_region
+from LSP.plugin.core.views import Point
+from LSP.plugin.core.views import point_to_offset
+from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_position_params
 from LSP.plugin.locationpicker import LocationPicker
 import gzip
@@ -178,6 +183,21 @@ class RustAnalyzer(AbstractPlugin):
         except BaseException:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
+
+    def on_pre_send_request_async(self, request_id: int, request: Request) -> None:
+        if request.method == 'textDocument/hover' and request.view:
+            session = self.weaksession()
+            if not session:
+                return
+            if not session.get_capability('experimental.hoverRange'):
+                return
+            view = request.view
+            region = first_selection_region(view)
+            if region is not None:
+                position = request.params['position']  # type: Position
+                point = point_to_offset(Point.from_lsp(position), view)
+                if region.contains(point):
+                    request.params['position'] = region_to_range(view, region)
 
     def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
         command_name = command["command"]
