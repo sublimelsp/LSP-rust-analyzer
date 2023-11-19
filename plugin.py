@@ -27,12 +27,6 @@ except ImportError:
     Terminus = None
 
 
-try:
-    import Terminus  # type: ignore
-except ImportError:
-    Terminus = None
-
-
 SESSION_NAME = "rust-analyzer"
 
 TAG = "2023-05-15"
