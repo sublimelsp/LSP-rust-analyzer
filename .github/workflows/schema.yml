@@ -1,0 +1,70 @@
+name: Check update RA settings
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  repository-projects: write
+
+jobs:
+  new_settings:
+    name: Check updated RA settings
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - name: Get TAG from PR
+        id: tag-to
+        run: echo "TAG=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get TAG from main
+        id: tag-from
+        run: echo "TAG=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
+
+      - name: Run new_settings.sh script
+        id: new_settings
+        run: |
+          {
+            echo 'CHANGES<<EOF'
+            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }}
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Find Comment
+        if: steps.new_settings.outputs.CHANGES != 'No changes'
+        uses: peter-evans/find-comment@v2
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+
+      - name: Create or update comment
+        if: steps.new_settings.outputs.CHANGES != 'No changes'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Found the following changes in https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json between tags ${{ steps.tag-from.outputs.TAG }} and ${{ steps.tag-to.outputs.TAG }}
+
+            <details>
+              <summary>New settings</summary>
+
+              ```diff
+              ${{ steps.new_settings.outputs.CHANGES }}
+              ```
+            </details>
+          edit-mode: replace
