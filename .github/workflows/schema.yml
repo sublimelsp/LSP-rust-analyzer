@@ -1,0 +1,55 @@
+name: Check update RA settings
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  repository-projects: write
+
+jobs:
+  new_settings:
+    name: Check updated RA settings
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get TAG from PR
+        id: tag-from
+        run: echo ::set-output name=TAG::$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get TAG from main
+        id: tag-to
+        run: echo ::set-output name=TAG::$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")
+
+      - name: Run new_settings.sh script
+        id: new_settings
+        run: echo ::set-output name=CHANGES::$(./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }})
+
+      - name: Find Comment
+        if: steps.new_settings.outputs.CHANGES
+        uses: peter-evans/find-comment@v2
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Build output
+
+      - name: Create or update comment
+        if: steps.new_settings.outputs.CHANGES
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            schema-update output:
+
+            ${{ steps.update-schema.outputs.UPDATE_OUTPUT }}
+          edit-mode: replace

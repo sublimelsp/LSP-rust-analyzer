@@ -1,30 +1,48 @@
 #!/usr/bin/env bash
 
-# The following script finds the keys that are in the `rust-analyzer`
-# package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
+# The following script prints differences in `rust-analyzer` settings
+# between two tags.
 
 # exit when any command fails
 set -e
 
+RA_REPO_URL="https://github.com/rust-lang/rust-analyzer"
+RA_REPO_DIR=$(echo "${RA_REPO_URL}" | command grep -oE '[^/]*$')
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LSP_REPO_DIR="$SCRIPT_DIR/.."
 
-read -rp 'Provide directory path to the rust-analyzer repository (for example: /usr/local/github/rust-analyzer/): ' RA_REPO_DIR
-if [ ! -d "$RA_REPO_DIR" ]; then
-   echo "Directory path '$RA_REPO_DIR' DOES NOT exist."
-   exit
+if [ "$#" -ne 2 ]; then
+   echo 'You must provide 2 arguments - two tags between which to check for diffrences in settings.'
+   exit 1
 fi
 
-lsp_ra_settings=$(rg -o '"rust-analyzer.([^"]+)"' "${LSP_REPO_DIR}/LSP-rust-analyzer.sublime-settings" | sort)
-ra_settings=$(jq '.contributes.configuration.properties
-        | to_entries
-        | map(.key)
-        | .[] | select(. != "$generated-start" and . != "$generated-end")' \
-        "${RA_REPO_DIR}/editors/code/package.json" | sort)
+function download_rust_by_tag {
+   tag=$1
 
-# Missing settings in LSP-rust-analyzer
-rg -vf <(echo "${lsp_ra_settings}") <(echo "${ra_settings}")
+   if [ ! "$tag" ]; then
+      exit "No tag provided"
+   fi
 
-# Settings in LSP-rust-analyzer that are no longer relevant
-rg -vf <(echo "${ra_settings}") <(echo "${lsp_ra_settings}") \
-   | rg -v 'terminusAutoClose|terminusUsePanel'
+   pushd "${LSP_REPO_DIR}" || exit
+
+   archive_url="${RA_REPO_URL}/archive/${tag}.zip"
+   temp_zip="src-${tag}.zip"
+   curl -L "${RA_REPO_URL}/archive/${tag}.zip" -o "${temp_zip}" --silent --show-error
+   unzip -q "${temp_zip}"
+   rm -f "${temp_zip}" || exit
+   mv "${RA_REPO_DIR}-"* "${RA_REPO_DIR}"
+}
+
+tag_from=$1
+tag_to=$2
+
+download_rust_by_tag "$tag_from"
+settings_from=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
+rm -rf "${RA_REPO_DIR}"
+
+download_rust_by_tag "$tag_to"
+settings_to=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
+rm -rf "${RA_REPO_DIR}"
+
+diff -u <(echo "$settings_from") <(echo "$settings_to")
