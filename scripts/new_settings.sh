@@ -45,4 +45,4 @@ download_rust_by_tag "$tag_to"
 settings_to=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
 rm -rf "${RA_REPO_DIR}"
 
-diff -u <(echo "$settings_from") <(echo "$settings_to")
+diff -u <(echo "$settings_from") <(echo "$settings_to") || echo "No changes"

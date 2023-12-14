@@ -34,7 +34,7 @@ jobs:
         run: echo ::set-output name=CHANGES::$(./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }})
 
       - name: Find Comment
-        if: steps.new_settings.outputs.CHANGES
+        if: steps.new_settings.outputs.CHANGES != "No changes"
         uses: peter-evans/find-comment@v2
         id: find-comment
         with:
@@ -43,13 +43,19 @@ jobs:
           body-includes: Build output
 
       - name: Create or update comment
-        if: steps.new_settings.outputs.CHANGES
+        if: steps.new_settings.outputs.CHANGES != "No changes"
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            schema-update output:
+            Changes in https://github.com/rust-lang/rust-analyzer/blob/master/editors/code/package.json
 
-            ${{ steps.update-schema.outputs.UPDATE_OUTPUT }}
+            <details>
+              <summary>New settings</summary>
+
+              ```diff
+              ${{ steps.new_settings.outputs.CHANGES }}
+              ```
+            </details>
           edit-mode: replace
