@@ -93,8 +93,7 @@
 		// Extra environment variables that will be set when running cargo check.
 		// Extends rust-analyzer.cargo.extraEnv.
 		"rust-analyzer.check.extraEnv": {},
-		// List of features to activate. Defaults to
-		// `#rust-analyzer.cargo.features#`.
+		// List of features to activate. Defaults to `rust-analyzer.cargo.features`.
 		// Set to `"all"` to pass `--all-features` to Cargo.
 		"rust-analyzer.check.features": null,
 		// List of `cargo check` (or other command specified in `check.command`) diagnostics to ignore.
@@ -102,17 +101,16 @@
 		"rust-analyzer.check.ignore": [],
 		// Specifies the working directory for running checks.
 		// - "workspace": run checks for workspaces in the corresponding workspaces' root directories.
-		//    This falls back to "root" if `#rust-analyzer.cargo.check.invocationStrategy#` is set to `once`.
+		//    This falls back to "root" if `rust-analyzer.cargo.check.invocationStrategy` is set to `once`.
 		// - "root": run checks in the project's root directory.
-		//This config only has an effect when `#rust-analyzer.cargo.check.overrideCommand#` is set.
+		//This config only has an effect when `rust-analyzer.cargo.check.overrideCommand` is set.
 		"rust-analyzer.check.invocationLocation": "workspace",
 		// Specifies the invocation strategy to use when running the check command.
 		// If `per_workspace` is set, the command will be executed for each workspace.
 		// If `once` is set, the command will be executed once.
-		// This config only has an effect when `#rust-analyzer.cargo.check.overrideCommand#` is set.
+		// This config only has an effect when `rust-analyzer.cargo.check.overrideCommand` is set.
 		"rust-analyzer.check.invocationStrategy": "per_workspace",
-		// Whether to pass `--no-default-features` to Cargo. Defaults to
-		// `#rust-analyzer.cargo.noDefaultFeatures#`.
+		// Whether to pass `--no-default-features` to Cargo. Defaults to `rust-analyzer.cargo.noDefaultFeatures`.
 		"rust-analyzer.check.noDefaultFeatures": null,
 		// Override the command rust-analyzer uses instead of `cargo check` for
 		// diagnostics on save. The command is required to output json and
@@ -121,14 +119,13 @@
 		// capability, you can use `--message-format=json-diagnostic-rendered-ansi`).
 		//
 		// If you're changing this because you're using some tool wrapping
-		// Cargo, you might also want to change
-		// `#rust-analyzer.cargo.buildScripts.overrideCommand#`.
+		// Cargo, you might also want to change `rust-analyzer.cargo.buildScripts.overrideCommand`.
 		//
 		// If there are multiple linked projects/workspaces, this command is invoked for
 		// each of them, with the working directory being the workspace root
 		// (i.e., the folder containing the `Cargo.toml`). This can be overwritten
-		// by changing `#rust-analyzer.cargo.check.invocationStrategy#` and
-		// `#rust-analyzer.cargo.check.invocationLocation#`.
+		// by changing `rust-analyzer.cargo.check.invocationStrategy` and
+		// `rust-analyzer.cargo.check.invocationLocation`.
 		//
 		// An example command would be:
 		//
@@ -136,7 +133,7 @@
 		// cargo check --workspace --message-format=json --all-targets
 		// ```
 		"rust-analyzer.check.overrideCommand": null,
-		// Check for a specific target. Defaults to `#rust-analyzer.cargo.target#`.
+		// Check for a specific target. Defaults to `rust-analyzer.cargo.target`.
 		//
 		// Can be a single target, e.g. `\"x86_64-unknown-linux-gnu\"` or a list of targets, e.g.
 		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
@@ -246,27 +243,21 @@
 		// Enables highlighting of all break points for a loop or block context while the cursor is on any `async` or `await`
 		// keywords.
 		"rust-analyzer.highlightRelated.yieldPoints.enable": true,
-		// Whether to show `Debug` action. Only applies when
-		// `#rust-analyzer.hover.actions.enable#` is set.
+		// Whether to show `Debug` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.debug.enable": true,
 		// Whether to show HoverActions in Rust files.
 		"rust-analyzer.hover.actions.enable": true,
-		// Whether to show `Go to Type Definition` action. Only applies when
-		// `#rust-analyzer.hover.actions.enable#` is set.
+		// Whether to show `Go to Type Definition` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.gotoTypeDef.enable": true,
-		// Whether to show `Implementations` action. Only applies when
-		// `#rust-analyzer.hover.actions.enable#` is set.
+		// Whether to show `Implementations` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.implementations.enable": true,
-		// Whether to show `References` action. Only applies when
-		// `#rust-analyzer.hover.actions.enable#` is set.
+		// Whether to show `References` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.references.enable": false,
-		// Whether to show `Run` action. Only applies when
-		// `#rust-analyzer.hover.actions.enable#` is set.
+		// Whether to show `Run` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.run.enable": true,
 		// Whether to show documentation on hover.
 		"rust-analyzer.hover.documentation.enable": true,
-		// Whether to show keyword hover popups. Only applies when
-		// `#rust-analyzer.hover.documentation.enable#` is set.
+		// Whether to show keyword hover popups. Only applies when `rust-analyzer.hover.documentation.enable` is set.
 		"rust-analyzer.hover.documentation.keywords.enable": true,
 		// Use markdown syntax for links on hover.
 		"rust-analyzer.hover.links.enable": true,
@@ -341,7 +332,7 @@
 		// Whether to show inlay type hints for variables.
 		"rust-analyzer.inlayHints.typeHints.enable": true,
 		// Whether to hide inlay type hints for `let` statements that initialize to a closure.
-		// Only applies to closures with blocks, same as `#rust-analyzer.inlayHints.closureReturnTypeHints.enable#`.
+		// Only applies to closures with blocks, same as `rust-analyzer.inlayHints.closureReturnTypeHints.enable`.
 		"rust-analyzer.inlayHints.typeHints.hideClosureInitialization": false,
 		// Whether to hide inlay type hints for constructors.
 		"rust-analyzer.inlayHints.typeHints.hideNamedConstructor": false,
@@ -355,33 +346,27 @@
 		"rust-analyzer.joinLines.removeTrailingComma": true,
 		// Join lines unwraps trivial blocks.
 		"rust-analyzer.joinLines.unwrapTrivialBlock": true,
-		// Whether to show `Debug` lens. Only applies when
-		// `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `Debug` lens. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.debug.enable": false,
 		// Whether to show CodeLens in Rust files.
 		"rust-analyzer.lens.enable": true,
 		// Internal config: use custom client-side commands even when the
 		// client doesn't set the corresponding capability.
 		"rust-analyzer.lens.forceCustomCommands": true,
-		// Whether to show `Implementations` lens. Only applies when
-		// `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `Implementations` lens. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.implementations.enable": true,
 		// Where to render annotations.
 		"rust-analyzer.lens.location": "above_name",
 		// Whether to show `References` lens for Struct, Enum, and Union.
-		// Only applies when `#rust-analyzer.lens.enable#` is set.
+		// Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.references.adt.enable": false,
-		// Whether to show `References` lens for Enum Variants.
-		// Only applies when `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `References` lens for Enum Variants. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.references.enumVariant.enable": false,
-		// Whether to show `Method References` lens. Only applies when
-		// `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `Method References` lens. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.references.method.enable": false,
-		// Whether to show `References` lens for Trait.
-		// Only applies when `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `References` lens for Trait. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.references.trait.enable": false,
-		// Whether to show `Run` lens. Only applies when
-		// `#rust-analyzer.lens.enable#` is set.
+		// Whether to show `Run` lens. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.run.enable": true,
 		// Disable project auto-discovery in favor of explicitly specified set
 		// of projects.
@@ -396,9 +381,9 @@
 		"rust-analyzer.notifications.cargoTomlNotFound": true,
 		// How many worker threads in the main loop. The default `null` means to pick automatically.
 		"rust-analyzer.numThreads": null,
-		// Expand attribute macros. Requires `#rust-analyzer.procMacro.enable#` to be set.
+		// Expand attribute macros. Requires `rust-analyzer.procMacro.enable` to be set.
 		"rust-analyzer.procMacro.attributes.enable": true,
-		// Enable support for procedural macros, implies `#rust-analyzer.cargo.buildScripts.enable#`.
+		// Enable support for procedural macros, implies `rust-analyzer.cargo.buildScripts.enable`.
 		"rust-analyzer.procMacro.enable": true,
 		// These proc-macros will be ignored when trying to expand them.
 		// This config takes a map of crate names with the exported proc-macro names to ignore as values.
