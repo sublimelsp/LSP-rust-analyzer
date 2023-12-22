@@ -24,7 +24,7 @@ function download_rust_by_tag {
       exit "No tag provided"
    fi
 
-   pushd "${LSP_REPO_DIR}" || exit
+   pushd "${LSP_REPO_DIR}" > /dev/null || exit
 
    archive_url="${RA_REPO_URL}/archive/${tag}.zip"
    temp_zip="src-${tag}.zip"
@@ -45,4 +45,5 @@ download_rust_by_tag "$tag_to"
 settings_to=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
 rm -rf "${RA_REPO_DIR}"
 
-diff -u <(echo "$settings_from") <(echo "$settings_to") || echo "No changes"
+# This will exit with error code on changes. Make sure to not rely on anything running after it.
+diff -u <(echo "$settings_from") <(echo "$settings_to") && echo "No changes"

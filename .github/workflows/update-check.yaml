@@ -1,0 +1,56 @@
+name: Check/update to latest RA version
+
+on:
+  schedule:
+    # Ru every day at 7:15
+    - cron: 15 7 * * *
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Check RA version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.SUBLIMELSP_APP_ID }}
+          private-key: ${{ secrets.SUBLIMELSP_APP_PRIVATE_KEY }}
+
+      - name: Get latest release of rust-analyzer
+        uses: pozetroninc/github-action-get-latest-release@v0.7.0
+        id: latest_ra
+        with:
+          excludes: 'prerelease,draft'
+          repository: 'rust-lang/rust-analyzer'
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get current TAG from main
+        id: current_release
+        run: |
+          release=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+
+      - if: steps.current_release.outputs.release != steps.latest_ra.outputs.release
+        name: Update current version
+        run: sed -i 's/${{ steps.current_release.outputs.release }}/${{ steps.latest_ra.outputs.release }}/' plugin.py
+
+      - if: steps.current_release.outputs.release != steps.latest_ra.outputs.release
+        name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
+          delete-branch: true
+          title: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
+          body: 'Update rust-analyzer server to [${{ steps.latest_ra.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.latest_ra.outputs.release }})'
+          token: ${{ steps.app-token.outputs.token }}

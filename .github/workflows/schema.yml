@@ -1,4 +1,4 @@
-name: Check update RA settings
+name: Check/update RA settings
 
 on:
   pull_request:
@@ -46,7 +46,6 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Find Comment
-        if: steps.new_settings.outputs.CHANGES != 'No changes'
         uses: peter-evans/find-comment@v2
         id: find-comment
         with:
@@ -54,19 +53,14 @@ jobs:
           comment-author: 'github-actions[bot]'
 
       - name: Create or update comment
-        if: steps.new_settings.outputs.CHANGES != 'No changes'
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Found the following changes in https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json between tags ${{ steps.tag-from.outputs.TAG }} and ${{ steps.tag-to.outputs.TAG }}
+            Changes in https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json between tags `${{ steps.tag-from.outputs.TAG }}` and `${{ steps.tag-to.outputs.TAG }}`:
 
-            <details>
-              <summary>New settings</summary>
-
-              ```diff
-              ${{ steps.new_settings.outputs.CHANGES }}
-              ```
-            </details>
+            ```diff
+            ${{ steps.new_settings.outputs.CHANGES }}
+            ```
           edit-mode: replace
