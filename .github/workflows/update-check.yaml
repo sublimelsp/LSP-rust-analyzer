@@ -1,0 +1,41 @@
+name: Check and update to latest rust-analyzer version
+
+on:
+  schedule:
+    # Ru every day at 7:15
+    - cron: 15 7 * * *
+
+jobs:
+  build:
+    name: Check RA version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest release of rust-analyzer
+        uses: rez0n/actions-github-release@v2.0
+        id: latest_ra
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: 'rust-lang/rust-analyzer'
+          type: stable
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get current TAG from main
+        id: current_release
+        run: echo "release=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
+
+      - if: steps.current_release.outputs.release != steps.latest_ra.outputs.release
+        name: Update current version
+        run: sed -i 's/${{ steps.current_release.outputs.release }}/${{ steps.latest_ra.outputs.release }}/' plugin.py
+
+      - if: steps.current_release.outputs.release != steps.latest_ra.outputs.release
+        name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
+          delete-branch: true
+          title: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
+          body: 'Update rust-analyzer server to [${{ steps.latest_ra.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.latest_ra.outputs.release }}'
