@@ -58,7 +58,7 @@ jobs:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Changes to [settings schema](https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json) between tags `${{ steps.tag-from.outputs.TAG }}` and `${{ steps.tag-to.outputs.TAG }}`:
+            Following are the [settings schema](https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json) changes between tags `${{ steps.tag-from.outputs.TAG }}` and `${{ steps.tag-to.outputs.TAG }}`. Make sure that those are reflected in `LSP-rust-analyzer.sublime-commands` and `sublime-package.json` files.
 
             ```diff
             ${{ steps.new_settings.outputs.CHANGES }}
