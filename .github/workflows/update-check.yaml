@@ -52,5 +52,5 @@ jobs:
           commit-message: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
           delete-branch: true
           title: update rust-analyzer to ${{ steps.latest_ra.outputs.release }}
-          body: 'Update rust-analyzer from [${{ steps.current_release.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.current_release.outputs.release }}) to [${{ steps.latest_ra.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.latest_ra.outputs.release }})'
+          body: 'Update rust-analyzer from [${{ steps.current_release.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.current_release.outputs.release }}) to [${{ steps.latest_ra.outputs.release }}](https://github.com/rust-lang/rust-analyzer/releases/tag/${{ steps.latest_ra.outputs.release }}) (see [all changes](https://github.com/rust-lang/rust-analyzer/compare/${{ steps.current_release.outputs.release }}...${{ steps.latest_ra.outputs.release }})).'
           token: ${{ steps.app-token.outputs.token }}
