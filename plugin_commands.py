@@ -34,7 +34,8 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
 
     def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error]) -> None:
         if isinstance(edits, Error):
-            print('[LSP-rust-analyzer] Error handling the "{}" request. Falling back to native join.')
+            print('[{}] Error handling the "{}" request. Falling back to native join.'.format(
+                self.session_name, JoinLinesRequest.Type))
             self.view.run_command('join_lines')
             return
         if edits:
