@@ -49,6 +49,12 @@ Select a cargo command from the submenu. This spawns a shell with [Terminus](htt
 
 ![Example](./images/commands.gif)
 
+### LSP-rust-analyzer: Join Lines
+
+Joins lines accounting for rust-specific logic.
+
+Also bound to the default join-lines key binding.
+
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
 Opens the URL to documentation for the symbol under the cursor, if available.
