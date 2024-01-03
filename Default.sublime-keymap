@@ -1,0 +1,9 @@
+[
+    {
+        "keys": ["primary+shift+j"],
+        "command": "rust_analyzer_join_lines",
+        "context": [
+            {"key": "lsp.session_with_name", "operand": "rust-analyzer"}
+        ]
+    },
+]
