@@ -12,6 +12,16 @@
         "command": "rust_analyzer_join_lines"
     },
     {
+        "caption": "LSP-rust-analyzer: Move Item Down",
+        "command": "rust_analyzer_move_item",
+        "args": {"direction": "Down"}
+    },
+    {
+        "caption": "LSP-rust-analyzer: Move Item Up",
+        "command": "rust_analyzer_move_item",
+        "args": {"direction": "Up"}
+    },
+    {
         "caption": "LSP-rust-analyzer: Open Docs Under Cursor",
         "command": "rust_analyzer_open_docs"
     },
