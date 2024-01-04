@@ -40,10 +40,13 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
             'ranges': [region_to_range(self.view, region) for region in self.view.sel()],
         }  # type: JoinLinesRequest.ParamsType
         request = Request(JoinLinesRequest.Type, params)  # type: Request[JoinLinesRequest.ReturnType]
+        document_version = self.view.change_count()
         view_listener.purge_changes_async()
-        session.send_request_task(request).then(lambda result: self.on_result_async(result))
+        session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
 
-    def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error]) -> None:
+    def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error], document_version: int) -> None:
+        if document_version != self.view.change_count():
+            return
         if isinstance(edits, Error):
             print('[{}] Error handling the "{}" request. Falling back to native join.'.format(
                 self.session_name, JoinLinesRequest.Type))
