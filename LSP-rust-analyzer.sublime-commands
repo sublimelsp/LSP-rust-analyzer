@@ -8,6 +8,10 @@
         }
     },
     {
+        "caption": "LSP-rust-analyzer: Join Lines",
+        "command": "rust_analyzer_join_lines"
+    },
+    {
         "caption": "LSP-rust-analyzer: Open Docs Under Cursor",
         "command": "rust_analyzer_open_docs"
     },
