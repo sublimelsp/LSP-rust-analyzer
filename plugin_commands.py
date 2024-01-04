@@ -23,14 +23,25 @@ class JoinLinesRequest:
 class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
 
     def run(self, edit: sublime.Edit) -> None:
+        sublime.set_timeout_async(self.make_request_async)
+
+    def make_request_async(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
+            return
+        session_view = session.session_view_for_view_async(self.view)
+        if not session_view:
+            return
+        view_listener = session_view.listener()
+        if not view_listener:
             return
         params = {
             'textDocument': text_document_identifier(self.view),
             'ranges': [region_to_range(self.view, region) for region in self.view.sel()],
         }  # type: JoinLinesRequest.ParamsType
-        session.send_request(Request(JoinLinesRequest.Type, params), self.on_result_async)
+        request = Request(JoinLinesRequest.Type, params)  # type: Request[JoinLinesRequest.ReturnType]
+        view_listener.purge_changes_async()
+        session.send_request_task(request).then(lambda result: self.on_result_async(result))
 
     def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error]) -> None:
         if isinstance(edits, Error):
