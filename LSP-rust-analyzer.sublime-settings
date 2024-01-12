@@ -1,14 +1,11 @@
 {
 	"settings": {
 		// Settings Not Related to rust-analyzer Server
-
 		// Whether or not to automatically close terminus panel/tab upon completion.
 		"rust-analyzer.terminusAutoClose": false,
 		// Whether or not to spawn a panel at the bottom, or a new tab
 		"rust-analyzer.terminusUsePanel": false,
-
 		// Rust-Analyzer Server Settings
-
 		// Whether to insert #[must_use] when generating as_ methods for enum variants.
 		"rust-analyzer.assist.emitMustUse": false,
 		// Placeholder expression to use for missing expressions in assists.
@@ -45,6 +42,9 @@
 		// ```
 		// .
 		"rust-analyzer.cargo.buildScripts.overrideCommand": null,
+		// Rerun proc-macros building/build-scripts running when proc-macro
+		// or build-script sources change and are saved.
+		"rust-analyzer.cargo.buildScripts.rebuildOnSave": false,
 		// Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
@@ -101,14 +101,14 @@
 		"rust-analyzer.check.ignore": [],
 		// Specifies the working directory for running checks.
 		// - "workspace": run checks for workspaces in the corresponding workspaces' root directories.
-		//    This falls back to "root" if `rust-analyzer.cargo.check.invocationStrategy` is set to `once`.
+		//    This falls back to "root" if `rust-analyzer.check.invocationStrategy` is set to `once`.
 		// - "root": run checks in the project's root directory.
-		//This config only has an effect when `rust-analyzer.cargo.check.overrideCommand` is set.
+		// This config only has an effect when `rust-analyzer.check.overrideCommand` is set.
 		"rust-analyzer.check.invocationLocation": "workspace",
 		// Specifies the invocation strategy to use when running the check command.
 		// If `per_workspace` is set, the command will be executed for each workspace.
 		// If `once` is set, the command will be executed once.
-		// This config only has an effect when `rust-analyzer.cargo.check.overrideCommand` is set.
+		// This config only has an effect when `rust-analyzer.check.overrideCommand` is set.
 		"rust-analyzer.check.invocationStrategy": "per_workspace",
 		// Whether to pass `--no-default-features` to Cargo. Defaults to `rust-analyzer.cargo.noDefaultFeatures`.
 		"rust-analyzer.check.noDefaultFeatures": null,
@@ -124,8 +124,8 @@
 		// If there are multiple linked projects/workspaces, this command is invoked for
 		// each of them, with the working directory being the workspace root
 		// (i.e., the folder containing the `Cargo.toml`). This can be overwritten
-		// by changing `rust-analyzer.cargo.check.invocationStrategy` and
-		// `rust-analyzer.cargo.check.invocationLocation`.
+		// by changing `rust-analyzer.check.invocationStrategy` and
+		// `rust-analyzer.check.invocationLocation`.
 		//
 		// An example command would be:
 		//
@@ -324,6 +324,8 @@
 		"rust-analyzer.inlayHints.maxLength": 25,
 		// Whether to show function parameter name inlay hints at the call site.
 		"rust-analyzer.inlayHints.parameterHints.enable": true,
+		// Whether to show exclusive range inlay hints.
+		"rust-analyzer.inlayHints.rangeExclusiveHints.enable": false,
 		// Whether to show inlay type hints for compiler inserted reborrows.
 		// possible values: always, never, mutable
 		"rust-analyzer.inlayHints.reborrowHints.enable": "never",
