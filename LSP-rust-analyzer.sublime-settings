@@ -1,11 +1,14 @@
 {
 	"settings": {
 		// Settings Not Related to rust-analyzer Server
+
 		// Whether or not to automatically close terminus panel/tab upon completion.
 		"rust-analyzer.terminusAutoClose": false,
 		// Whether or not to spawn a panel at the bottom, or a new tab
 		"rust-analyzer.terminusUsePanel": false,
+
 		// Rust-Analyzer Server Settings
+
 		// Whether to insert #[must_use] when generating as_ methods for enum variants.
 		"rust-analyzer.assist.emitMustUse": false,
 		// Placeholder expression to use for missing expressions in assists.
