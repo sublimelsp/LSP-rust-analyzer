@@ -1,4 +1,5 @@
 from .plugin import RustAnalyzerCommand
+from LSP.plugin import apply_text_edits
 from LSP.plugin import Request
 from LSP.plugin.core.protocol import Error
 from LSP.plugin.core.protocol import Range
@@ -7,7 +8,6 @@ from LSP.plugin.core.protocol import TextEdit
 from LSP.plugin.core.typing import List, TypedDict, Union
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_identifier
-from LSP.plugin.formatting import apply_text_edits_to_view
 import sublime
 
 
@@ -45,12 +45,9 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
 
     def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error], document_version: int) -> None:
-        if document_version != self.view.change_count():
-            return
         if isinstance(edits, Error):
             print('[{}] Error handling the "{}" request. Falling back to native join.'.format(
                 self.session_name, JoinLinesRequest.Type))
             self.view.run_command('join_lines')
             return
-        if edits:
-            apply_text_edits_to_view(edits, self.view)
+        apply_text_edits(self.view, edits, required_view_version=document_version)
