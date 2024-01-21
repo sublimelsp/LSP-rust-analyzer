@@ -45,5 +45,10 @@ download_rust_by_tag "$tag_to"
 settings_to=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
 rm -rf "${RA_REPO_DIR}"
 
-# This will exit with error code on changes. Make sure to not rely on anything running after it.
-diff -u <(echo "$settings_from") <(echo "$settings_to") && echo "No changes"
+# Returns with error code when there are changes.
+changes=$(diff -u <(echo "$settings_from") <(echo "$settings_to") || echo "")
+if [ "$changes" = "" ]; then
+   echo "No changes"
+else
+   echo "$changes"
+fi
