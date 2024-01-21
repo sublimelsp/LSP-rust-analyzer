@@ -105,4 +105,4 @@ class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
         if not edits:
             sublime.status_message('Did not find anything to move.')
             return
-        apply_text_edits_to_view(edits, self.view, process_snippets=True)
+        apply_text_edits(self.view, edits, process_placeholders=True)
