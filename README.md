@@ -55,6 +55,10 @@ Joins lines accounting for rust-specific logic.
 
 Also bound to the default join-lines key binding (<kbd>ctrl</kbd><kbd>shift</kbd><kbd>j</kbd> or <kbd>command</kbd><kbd>shift</kbd><kbd>j</kbd> on Windows/Linux and Mac respectively).
 
+### LSP-rust-analyzer: Move Item Down / Move Item Up
+
+Moves item under cursor/selection in specified direction.
+
 ### LSP-rust-analyzer: Open Docs Under Cursor
 
 Opens the URL to documentation for the symbol under the cursor, if available.
