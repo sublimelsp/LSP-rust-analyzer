@@ -70,6 +70,11 @@
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
+		// Whether to run cargo metadata on the sysroot library allowing rust-analyzer to analyze
+		// third-party dependencies of the standard libraries.
+		// This will cause `cargo` to create a lockfile in your sysroot directory. rust-analyzer
+		// will attempt to clean up afterwards, but nevertheless requires the location to be writable to.
+		"rust-analyzer.cargo.sysrootQueryMetadata": false,
 		// Relative path to the sysroot library sources. If left unset, this will default to
 		// `{cargo.sysroot}/lib/rustlib/src/rust/library`.
 		//
@@ -278,7 +283,7 @@
 		// styles consistent per file.
 		"rust-analyzer.imports.granularity.enforce": false,
 		// How imports should be grouped into use statements.
-		// possible values: preserve, crate, module, item
+		// possible values: preserve, crate, module, item, one
 		"rust-analyzer.imports.granularity.group": "crate",
 		// Group inserted imports by the [following order](https://rust-analyzer.github.io/manual.html#auto-import). Groups are
 		// separated by newlines.
@@ -397,6 +402,8 @@
 		"rust-analyzer.procMacro.server": null,
 		// Exclude imports from find-all-references.
 		"rust-analyzer.references.excludeImports": false,
+		// Allow renaming of items not belonging to the loaded workspaces.
+		"rust-analyzer.rename.allowExternalItems": false,
 		// Whether to restart the server automatically when certain settings that require a restart are changed.
 		"rust-analyzer.restartServerOnConfigChange": false,
 		// Command to be executed instead of 'cargo' for runnables.
