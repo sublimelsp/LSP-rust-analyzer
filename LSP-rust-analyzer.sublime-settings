@@ -402,6 +402,8 @@
 		"rust-analyzer.procMacro.server": null,
 		// Exclude imports from find-all-references.
 		"rust-analyzer.references.excludeImports": false,
+		// Exclude tests from find-all-references.
+		"rust-analyzer.references.excludeTests": false,
 		// Allow renaming of items not belonging to the loaded workspaces.
 		"rust-analyzer.rename.allowExternalItems": false,
 		// Whether to restart the server automatically when certain settings that require a restart are changed.
