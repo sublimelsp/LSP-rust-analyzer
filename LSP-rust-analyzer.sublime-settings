@@ -47,7 +47,7 @@
 		"rust-analyzer.cargo.buildScripts.overrideCommand": null,
 		// Rerun proc-macros building/build-scripts running when proc-macro
 		// or build-script sources change and are saved.
-		"rust-analyzer.cargo.buildScripts.rebuildOnSave": false,
+		"rust-analyzer.cargo.buildScripts.rebuildOnSave": true,
 		// Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
@@ -135,6 +135,11 @@
 		// by changing `rust-analyzer.check.invocationStrategy` and
 		// `rust-analyzer.check.invocationLocation`.
 		//
+		// If `$saved_file` is part of the command, rust-analyzer will pass
+		// the absolute path of the saved file to the provided command. This is
+		// intended to be used with non-Cargo build systems.
+		// Note that `$saved_file` is experimental and may be removed in the future.
+		//
 		// An example command would be:
 		//
 		// ```bash
@@ -146,6 +151,9 @@
 		// Can be a single target, e.g. `\"x86_64-unknown-linux-gnu\"` or a list of targets, e.g.
 		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
 		"rust-analyzer.check.targets": null,
+		// Whether `--workspace` should be passed to `cargo check`.
+		// If false, `-p <package>` will be passed instead.
+		"rust-analyzer.check.workspace": true,
 		// Toggles the additional completions that automatically add imports when completed.
 		// Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
 		"rust-analyzer.completion.autoimport.enable": true,
@@ -212,6 +220,8 @@
 				"scope": "expr"
 			}
 		},
+		// Whether to enable term search based snippets like `Some(foo.bar().baz())`.
+		"rust-analyzer.completion.termSearch.enable": false,
 		// List of rust-analyzer diagnostics to disable.
 		"rust-analyzer.diagnostics.disabled": [],
 		// Whether to show native rust-analyzer diagnostics.
@@ -389,6 +399,8 @@
 		"rust-analyzer.lru.query.capacities": {},
 		// Whether to show `can't find Cargo.toml` error message.
 		"rust-analyzer.notifications.cargoTomlNotFound": true,
+		// Whether to send an UnindexedProject notification to the client.
+		"rust-analyzer.notifications.unindexedProject": false,
 		// How many worker threads in the main loop. The default `null` means to pick automatically.
 		"rust-analyzer.numThreads": null,
 		// Expand attribute macros. Requires `rust-analyzer.procMacro.enable` to be set.
@@ -404,8 +416,6 @@
 		"rust-analyzer.references.excludeImports": false,
 		// Exclude tests from find-all-references.
 		"rust-analyzer.references.excludeTests": false,
-		// Allow renaming of items not belonging to the loaded workspaces.
-		"rust-analyzer.rename.allowExternalItems": false,
 		// Whether to restart the server automatically when certain settings that require a restart are changed.
 		"rust-analyzer.restartServerOnConfigChange": false,
 		// Command to be executed instead of 'cargo' for runnables.
