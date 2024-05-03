@@ -31,6 +31,11 @@
                       "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.testExplorer": {
+                      "markdownDescription": "Whether to show the test explorer.",
+                      "default": false,
+                      "type": "boolean"
+                    },
                     "rust-analyzer.assist.emitMustUse": {
                       "default": false,
                       "description": "Whether to insert #[must_use] when generating as_ methods for enum variants.",
@@ -60,6 +65,11 @@
                       "maximum": 255,
                       "minimum": 0,
                       "type": "number"
+                    },
+                    "rust-analyzer.cargo.allTargets": {
+                      "markdownDescription": "Pass `--all-targets` to cargo invocation.",
+                      "default": true,
+                      "type": "boolean"
                     },
                     "rust-analyzer.cargo.autoreload": {
                       "default": true,
@@ -120,7 +130,10 @@
                     },
                     "rust-analyzer.cargo.cfgs": {
                       "markdownDescription": "List of cfg options to enable with the given values.",
-                      "default": {},
+                      "default": {
+                        "debug_assertions": null,
+                        "miri": null
+                      },
                       "type": "object"
                     },
                     "rust-analyzer.cargo.extraArgs": {
@@ -191,16 +204,6 @@
                         "string"
                       ]
                     },
-                    "rust-analyzer.cargo.unsetTest": {
-                      "default": [
-                        "core"
-                      ],
-                      "items": {
-                        "type": "string"
-                      },
-                      "markdownDescription": "Unsets the implicit `#[cfg(test)]` for the specified crates.",
-                      "type": "array"
-                    },
                     "rust-analyzer.cargoRunner": {
                       "default": null,
                       "description": "Custom cargo runner extension ID.",
@@ -209,15 +212,33 @@
                         "string"
                       ]
                     },
+                    "rust-analyzer.cargo.targetDir": {
+                      "markdownDescription": "Optional path to a rust-analyzer specific target directory.\nThis prevents rust-analyzer's `cargo check` and initial build-script and proc-macro\nbuilding from locking the `Cargo.lock` at the expense of duplicating build artifacts.\n\nSet to `true` to use a subdirectory of the existing target directory or\nset to a path relative to the workspace to use that path.",
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
                     "rust-analyzer.checkOnSave": {
                       "markdownDescription": "Run the check command for diagnostics on save.",
                       "default": true,
                       "type": "boolean"
                     },
                     "rust-analyzer.check.allTargets": {
-                      "default": true,
-                      "markdownDescription": "Check all targets and tests (`--all-targets`).",
-                      "type": "boolean"
+                      "markdownDescription": "Check all targets and tests (`--all-targets`). Defaults to\n`#rust-analyzer.cargo.allTargets#`.",
+                      "default": null,
+                      "type": [
+                        "null",
+                        "boolean"
+                      ]
                     },
                     "rust-analyzer.check.command": {
                       "default": "check",
@@ -501,6 +522,11 @@
                       "markdownDescription": "List of warnings that should be displayed with hint severity.\n\nThe warnings will be indicated by faded text or three dots in code\nand will not show up in the `Problems Panel`.",
                       "type": "array"
                     },
+                    "rust-analyzer.diagnostics.styleLints.enable": {
+                      "markdownDescription": "Whether to run additional style lints.",
+                      "default": false,
+                      "type": "boolean"
+                    },
                     "rust-analyzer.diagnostics.warningsAsInfo": {
                       "default": [],
                       "items": {
@@ -696,6 +722,33 @@
                           ]
                         }
                       ]
+                    },
+                    "rust-analyzer.hover.show.enumVariants": {
+                      "markdownDescription": "How many variants of an enum to display when hovering on. Show none if empty.",
+                      "default": 5,
+                      "type": [
+                        "null",
+                        "integer"
+                      ],
+                      "minimum": 0
+                    },
+                    "rust-analyzer.hover.show.fields": {
+                      "markdownDescription": "How many fields of a struct, variant or union to display when hovering on. Show none if empty.",
+                      "default": 5,
+                      "type": [
+                        "null",
+                        "integer"
+                      ],
+                      "minimum": 0
+                    },
+                    "rust-analyzer.hover.show.traitAssocItems": {
+                      "markdownDescription": "How many associated items of a trait to display when hovering a trait.",
+                      "default": null,
+                      "type": [
+                        "null",
+                        "integer"
+                      ],
+                      "minimum": 0
                     },
                     "rust-analyzer.imports.granularity.enforce": {
                       "default": false,
@@ -1035,7 +1088,7 @@
                           "object"
                         ]
                       },
-                      "markdownDescription": "Disable project auto-discovery in favor of explicitly specified set\nof projects.\n\nElements must be paths pointing to `Cargo.toml`,\n`rust-project.json`, or JSON objects in `rust-project.json` format.",
+                      "markdownDescription": "Disable project auto-discovery in favor of explicitly specified set\nof projects.\n\nElements must be paths pointing to `Cargo.toml`,\n`rust-project.json`, `.rs` files (which will be treated as standalone files) or JSON\nobjects in `rust-project.json` format.",
                       "type": "array"
                     },
                     "rust-analyzer.lru.capacity": {
@@ -1186,20 +1239,15 @@
                       "markdownDescription": "Additional arguments to be passed to cargo for runnables such as\ntests or binaries. For example, it may be `--release`.",
                       "type": "array"
                     },
-                    "rust-analyzer.rust.analyzerTargetDir": {
-                      "markdownDescription": "Optional path to a rust-analyzer specific target directory.\nThis prevents rust-analyzer's `cargo check` from locking the `Cargo.lock`\nat the expense of duplicating build artifacts.\n\nSet to `true` to use a subdirectory of the existing target directory or\nset to a path relative to the workspace to use that path.",
-                      "default": null,
-                      "anyOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "type": "boolean"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
+                    "rust-analyzer.runnables.extraTestBinaryArgs": {
+                      "markdownDescription": "Additional arguments to be passed through Cargo to launched tests, benchmarks, or\ndoc-tests.\n\nUnless the launched target uses a\n[custom test harness](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-harness-field),\nthey will end up being interpreted as options to\n[`rustc`’s built-in test harness (“libtest”)](https://doc.rust-lang.org/rustc/tests/index.html#cli-arguments).",
+                      "default": [
+                        "--show-output"
+                      ],
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "rust-analyzer.rustc.source": {
                       "default": null,

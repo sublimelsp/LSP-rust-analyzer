@@ -9,6 +9,8 @@
 
 		// Rust-Analyzer Server Settings
 
+		// Whether to show the test explorer.
+		"rust-analyzer.testExplorer": false,
 		// Whether to insert #[must_use] when generating as_ methods for enum variants.
 		"rust-analyzer.assist.emitMustUse": false,
 		// Placeholder expression to use for missing expressions in assists.
@@ -18,6 +20,8 @@
 		"rust-analyzer.cachePriming.enable": true,
 		// How many worker threads to handle priming caches. The default `0` means to pick automatically.
 		"rust-analyzer.cachePriming.numThreads": 0,
+		// Pass `--all-targets` to cargo invocation.
+		"rust-analyzer.cargo.allTargets": true,
 		// Automatically refresh project info via `cargo metadata` on
 		// `Cargo.toml` or `.cargo/config.toml` changes.
 		"rust-analyzer.cargo.autoreload": true,
@@ -52,7 +56,10 @@
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
 		// List of cfg options to enable with the given values.
-		"rust-analyzer.cargo.cfgs": {},
+		"rust-analyzer.cargo.cfgs": {
+			"debug_assertions": null,
+			"miri": null
+		},
 		// Extra arguments that are passed to every cargo invocation.
 		//
 		// ```json
@@ -84,15 +91,18 @@
 		"rust-analyzer.cargo.sysrootSrc": null,
 		// Compilation target override (target triple).
 		"rust-analyzer.cargo.target": null,
-		// Unsets the implicit `#[cfg(test)]` for the specified crates.
-		"rust-analyzer.cargo.unsetTest": [
-			"core"
-		],
 		// Custom cargo runner extension ID.
 		"rust-analyzer.cargoRunner": null,
+		// Optional path to a rust-analyzer specific target directory.
+		// This prevents rust-analyzer's `cargo check` and initial build-script and proc-macro
+		// building from locking the `Cargo.lock` at the expense of duplicating build artifacts.
+		// Set to `true` to use a subdirectory of the existing target directory or
+		// set to a path relative to the workspace to use that path.
+		"rust-analyzer.cargo.targetDir": null,
 		// Run the check command for diagnostics on save.
 		"rust-analyzer.checkOnSave": true,
 		// Check all targets and tests (`--all-targets`).
+		// Defaults to `#rust-analyzer.cargo.allTargets#`
 		"rust-analyzer.check.allTargets": true,
 		// Cargo command to use for `cargo check`.
 		"rust-analyzer.check.command": "check",
@@ -235,6 +245,8 @@
 		// Whether to show diagnostics using the original rustc error code. If this is false, all rustc diagnostics
 		// will have the code 'rustc(Click for full compiler diagnostics)'
 		"rust-analyzer.diagnostics.useRustcErrorCode": false,
+		// Whether to run additional style lints.
+		"rust-analyzer.diagnostics.styleLints.enable": false,
 		// List of warnings that should be displayed with hint severity.
 		// The warnings will be indicated by faded text or three dots in code
 		// and will not show up in the `Problems Panel`.
@@ -289,6 +301,12 @@
 		"rust-analyzer.hover.memoryLayout.offset": "hexadecimal",
 		// How to render the size information in a memory layout hover.
 		"rust-analyzer.hover.memoryLayout.size": "both",
+		// How many variants of an enum to display when hovering on. Show none if empty.
+		"rust-analyzer.hover.show.enumVariants": 5,
+		// How many fields of a struct, variant or union to display when hovering on. Show none if empty.
+		"rust-analyzer.hover.show.fields": 5,
+		// How many associated items of a trait to display when hovering a trait.
+		"rust-analyzer.hover.show.traitAssocItems": null,
 		// Whether to enforce the import granularity setting for all files. If set to false rust-analyzer will try to keep import
 		// styles consistent per file.
 		"rust-analyzer.imports.granularity.enforce": false,
@@ -391,7 +409,8 @@
 		// Disable project auto-discovery in favor of explicitly specified set
 		// of projects.
 		// Elements must be paths pointing to `Cargo.toml`,
-		// `rust-project.json`, or JSON objects in `rust-project.json` format.
+		// `rust-project.json`, `.rs` files (which will be treated as standalone files) or JSON
+		// objects in `rust-project.json` format.
 		"rust-analyzer.linkedProjects": [],
 		// Number of syntax trees rust-analyzer keeps in memory. Defaults to 128.
 		"rust-analyzer.lru.capacity": null,
@@ -425,13 +444,15 @@
 		"rust-analyzer.runnables.extraArgs": [],
 		// Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command.
 		"rust-analyzer.runnables.extraEnv": null,
-		// Optional path to a rust-analyzer specific target directory.
-		// This prevents rust-analyzer's `cargo check` from locking the `Cargo.lock`
-		// at the expense of duplicating build artifacts.
-		//
-		// Set to `true` to use a subdirectory of the existing target directory or
-		// set to a path relative to the workspace to use that path.
-		"rust-analyzer.rust.analyzerTargetDir": null,
+		// Additional arguments to be passed through Cargo to launched tests, benchmarks, or
+		// doc-tests.
+		// Unless the launched target uses a
+		// [custom test harness](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-harness-field),
+		// they will end up being interpreted as options to
+		// [`rustc`’s built-in test harness (“libtest”)](https://doc.rust-lang.org/rustc/tests/index.html#cli-arguments).
+		"rust-analyzer.runnables.extraTestBinaryArgs": [
+			"--show-output"
+		],
 		// Path to the Cargo.toml of the rust compiler workspace, for usage in rustc_private
 		// projects, or "discover" to try to automatically find it if the `rustc-dev` component
 		// is installed.
