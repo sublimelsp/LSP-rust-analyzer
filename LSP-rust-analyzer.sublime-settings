@@ -16,6 +16,8 @@
 		// Placeholder expression to use for missing expressions in assists.
 		// possible values: todo, default
 		"rust-analyzer.assist.expressionFillDefault": "todo",
+		// Term search fuel in \"units of work\" for assists (Defaults to 400).
+		"rust-analyzer.assist.termSearch.fuel": 400,
 		// Warm up caches on project load.
 		"rust-analyzer.cachePriming.enable": true,
 		// How many worker threads to handle priming caches. The default `0` means to pick automatically.
@@ -232,6 +234,8 @@
 		},
 		// Whether to enable term search based snippets like `Some(foo.bar().baz())`.
 		"rust-analyzer.completion.termSearch.enable": false,
+		// Term search fuel in \"units of work\" for autocompletion (Defaults to 200).
+		"rust-analyzer.completion.termSearch.fuel": 200,
 		// List of rust-analyzer diagnostics to disable.
 		"rust-analyzer.diagnostics.disabled": [],
 		// Whether to show native rust-analyzer diagnostics.
