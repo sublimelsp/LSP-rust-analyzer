@@ -38,11 +38,11 @@ tag_from=$1
 tag_to=$2
 
 download_rust_by_tag "$tag_from"
-settings_from=$(jq ".contributes.configuration" "${RA_REPO_DIR}/editors/code/package.json")
+settings_from=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
 rm -rf "${RA_REPO_DIR}"
 
 download_rust_by_tag "$tag_to"
-settings_to=$(jq ".contributes.configuration" "${RA_REPO_DIR}/editors/code/package.json")
+settings_to=$(jq ".contributes.configuration.properties" "${RA_REPO_DIR}/editors/code/package.json")
 rm -rf "${RA_REPO_DIR}"
 
 # Returns with error code when there are changes.
