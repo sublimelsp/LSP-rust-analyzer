@@ -29,6 +29,7 @@ except ImportError:
 
 SESSION_NAME = "rust-analyzer"
 
+
 TAG = "2024-06-24"
 """
 Update this single git tag to download a newer version.
