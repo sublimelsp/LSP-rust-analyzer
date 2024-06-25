@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'plugin.py'
+  workflow_dispatch:
 
 permissions:
   pull-requests: write
