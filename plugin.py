@@ -29,7 +29,7 @@ except ImportError:
 
 SESSION_NAME = "rust-analyzer"
 
-TAG = "2024-09-16"
+TAG = "2024-10-07"
 """
 Update this single git tag to download a newer version.
 After changing this tag, go through the server settings again to see
