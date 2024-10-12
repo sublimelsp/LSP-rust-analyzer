@@ -95,6 +95,8 @@
 		// Set to `true` to use a subdirectory of the existing target directory or
 		// set to a path relative to the workspace to use that path.
 		"rust-analyzer.cargo.targetDir": null,
+		// Set `cfg(test)` for local crates. Defaults to true.
+		"rust-analyzer.cfg.setTest": true,
 		// Run the check command for diagnostics on save.
 		"rust-analyzer.checkOnSave": true,
 		// Check all targets and tests (`--all-targets`).
