@@ -60,8 +60,8 @@
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
 		// List of cfg options to enable with the given values.
 		"rust-analyzer.cargo.cfgs": {
-			"debug_assertions": null,
-			"miri": null
+			"miri": null,
+			"debug_assertions": null
 		},
 		// Extra arguments that are passed to every cargo invocation.
 		//
@@ -183,43 +183,43 @@
 		"rust-analyzer.completion.privateEditable.enable": false,
 		// Custom completion snippets.
 		"rust-analyzer.completion.snippets.custom": {
-			"Arc::new": {
-				"body": "Arc::new(${receiver})",
-				"description": "Put the expression into an `Arc`",
-				"postfix": "arc",
-				"requires": "std::sync::Arc",
-				"scope": "expr"
-			},
-			"Rc::new": {
-				"body": "Rc::new(${receiver})",
-				"description": "Put the expression into an `Rc`",
-				"postfix": "rc",
-				"requires": "std::rc::Rc",
+			"Ok": {
+				"postfix": "ok",
+				"body": "Ok(${receiver})",
+				"description": "Wrap the expression in a `Result::Ok`",
 				"scope": "expr"
 			},
 			"Box::pin": {
-				"body": "Box::pin(${receiver})",
-				"description": "Put the expression into a pinned `Box`",
 				"postfix": "pinbox",
+				"body": "Box::pin(${receiver})",
 				"requires": "std::boxed::Box",
+				"description": "Put the expression into a pinned `Box`",
 				"scope": "expr"
 			},
-			"Err": {
-				"body": "Err(${receiver})",
-				"description": "Wrap the expression in a `Result::Err`",
-				"postfix": "err",
+			"Arc::new": {
+				"postfix": "arc",
+				"body": "Arc::new(${receiver})",
+				"requires": "std::sync::Arc",
+				"description": "Put the expression into an `Arc`",
 				"scope": "expr"
 			},
 			"Some": {
+				"postfix": "some",
 				"body": "Some(${receiver})",
 				"description": "Wrap the expression in an `Option::Some`",
-				"postfix": "some",
 				"scope": "expr"
 			},
-			"Ok": {
-				"body": "Ok(${receiver})",
-				"description": "Wrap the expression in a `Result::Ok`",
-				"postfix": "ok",
+			"Err": {
+				"postfix": "err",
+				"body": "Err(${receiver})",
+				"description": "Wrap the expression in a `Result::Err`",
+				"scope": "expr"
+			},
+			"Rc::new": {
+				"postfix": "rc",
+				"body": "Rc::new(${receiver})",
+				"requires": "std::rc::Rc",
+				"description": "Put the expression into an `Rc`",
 				"scope": "expr"
 			}
 		},
@@ -431,7 +431,7 @@
 		"rust-analyzer.procMacro.server": null,
 		// Exclude imports from find-all-references.
 		"rust-analyzer.references.excludeImports": false,
-		// Exclude tests from find-all-references.
+		// Exclude tests from find-all-references and call-hierarchy.
 		"rust-analyzer.references.excludeTests": false,
 		// Whether to restart the server automatically when certain settings that require a restart are changed.
 		"rust-analyzer.restartServerOnConfigChange": false,
