@@ -129,8 +129,8 @@
                     "rust-analyzer.cargo.cfgs": {
                       "markdownDescription": "List of cfg options to enable with the given values.",
                       "default": {
-                        "debug_assertions": null,
-                        "miri": null
+                        "miri": null,
+                        "debug_assertions": null
                       },
                       "type": "object"
                     },
@@ -388,63 +388,67 @@
                     },
                     "rust-analyzer.completion.snippets.custom": {
                       "default": {
-                        "Arc::new": {
-                          "body": "Arc::new(${receiver})",
-                          "description": "Put the expression into an `Arc`",
-                          "postfix": "arc",
-                          "requires": "std::sync::Arc",
-                          "scope": "expr"
-                        },
-                        "Rc::new": {
-                          "body": "Rc::new(${receiver})",
-                          "description": "Put the expression into an `Rc`",
-                          "postfix": "rc",
-                          "requires": "std::rc::Rc",
-                          "scope": "expr"
-                        },
-                        "Box::pin": {
-                          "body": "Box::pin(${receiver})",
-                          "description": "Put the expression into a pinned `Box`",
-                          "postfix": "pinbox",
-                          "requires": "std::boxed::Box",
-                          "scope": "expr"
-                        },
-                        "Err": {
-                          "body": "Err(${receiver})",
-                          "description": "Wrap the expression in a `Result::Err`",
-                          "postfix": "err",
-                          "scope": "expr"
-                        },
-                        "Some": {
-                          "body": "Some(${receiver})",
-                          "description": "Wrap the expression in an `Option::Some`",
-                          "postfix": "some",
-                          "scope": "expr"
-                        },
-                        "Ok": {
-                          "body": "Ok(${receiver})",
-                          "description": "Wrap the expression in a `Result::Ok`",
-                          "postfix": "ok",
-                          "scope": "expr"
-                        }
+                          "Ok": {
+                              "postfix": "ok",
+                              "body": "Ok(${receiver})",
+                              "description": "Wrap the expression in a `Result::Ok`",
+                              "scope": "expr"
+                          },
+                          "Box::pin": {
+                              "postfix": "pinbox",
+                              "body": "Box::pin(${receiver})",
+                              "requires": "std::boxed::Box",
+                              "description": "Put the expression into a pinned `Box`",
+                              "scope": "expr"
+                          },
+                          "Arc::new": {
+                              "postfix": "arc",
+                              "body": "Arc::new(${receiver})",
+                              "requires": "std::sync::Arc",
+                              "description": "Put the expression into an `Arc`",
+                              "scope": "expr"
+                          },
+                          "Some": {
+                              "postfix": "some",
+                              "body": "Some(${receiver})",
+                              "description": "Wrap the expression in an `Option::Some`",
+                              "scope": "expr"
+                          },
+                          "Err": {
+                              "postfix": "err",
+                              "body": "Err(${receiver})",
+                              "description": "Wrap the expression in a `Result::Err`",
+                              "scope": "expr"
+                          },
+                          "Rc::new": {
+                              "postfix": "rc",
+                              "body": "Rc::new(${receiver})",
+                              "requires": "std::rc::Rc",
+                              "description": "Put the expression into an `Rc`",
+                              "scope": "expr"
+                          }
                       },
                       "markdownDescription": "Custom completion snippets.",
                       "type": "object"
                     },
                     // "rust-analyzer.debug.engine": {
-                    //   "default": "auto",
-                    //   "description": "Preferred debug engine.",
+                    //   "type": "string",
                     //   "enum": [
                     //     "auto",
+                    //     "llvm-vs-code-extensions.lldb-dap",
                     //     "vadimcn.vscode-lldb",
-                    //     "ms-vscode.cpptools"
+                    //     "ms-vscode.cpptools",
+                    //     "webfreak.debug"
                     //   ],
+                    //   "default": "auto",
+                    //   "description": "Preferred debug engine.",
                     //   "markdownEnumDescriptions": [
-                    //     "First try to use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), if it's not installed try to use [MS C++ tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools).",
-                    //     "Use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)",
-                    //     "Use [MS C++ tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)"
-                    //   ],
-                    //   "type": "string"
+                    //       "Use the first available extension out of [LLDB DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap), [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), [C/C++ for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools), and [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug).",
+                    //       "Use [LLDB DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap)",
+                    //       "Use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)",
+                    //       "Use [C/C++ for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)",
+                    //       "Use [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug)"
+                    //   ]
                     // },
                     // "rust-analyzer.debug.buildBeforeRestart": {
                     //   "markdownDescription": "Whether to rebuild the project modules before debugging the same test again",
@@ -1220,7 +1224,7 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.references.excludeTests": {
-                      "markdownDescription": "Exclude tests from find-all-references.",
+                      "markdownDescription": "Exclude tests from find-all-references and call-hierarchy.",
                       "default": false,
                       "type": "boolean"
                     },
