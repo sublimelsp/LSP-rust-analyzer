@@ -19,6 +19,7 @@ import shutil
 import sublime
 import urllib.request
 import functools
+import zipfile
 
 
 try:
@@ -41,7 +42,7 @@ The script in `./scripts/new_settings.sh can be used to find the keys that are i
 package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
 """
 
-URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
+URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.{ext}"
 
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
@@ -158,18 +159,25 @@ class RustAnalyzer(AbstractPlugin):
                 shutil.rmtree(cls.basedir())
             os.makedirs(cls.basedir(), exist_ok=True)
             version = cls.server_version()
-            url = URL.format(tag=TAG, arch=arch(), platform=platform())
-            gzipfile = os.path.join(cls.basedir(), "rust-analyzer.gz")
+            is_windows = sublime.platform() == "windows"
+            extension = "zip" if is_windows else "gz"
+            url = URL.format(tag=TAG, arch=arch(), platform=platform(), ext=extension)
+            gzipfile = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
             serverfile = os.path.join(
                 cls.basedir(),
-                "rust-analyzer.exe" if sublime.platform() == "windows" else "rust-analyzer"
+                "rust-analyzer.exe" if is_windows else "rust-analyzer"
             )
             with urllib.request.urlopen(url) as fp:
                 with open(gzipfile, "wb") as f:
                     f.write(fp.read())
-            with gzip.open(gzipfile, "rb") as fp:
-                with open(serverfile, "wb") as f:
-                    f.write(fp.read())
+
+            if is_windows:
+                with zipfile.ZipFile(gzipfile, "r") as zip_ref:
+                    zip_ref.extract("rust-analyzer.exe", cls.basedir())
+            else:
+                with gzip.open(gzipfile, "rb") as fp:
+                    with open(serverfile, "wb") as f:
+                        f.write(fp.read())
             os.remove(gzipfile)
             os.chmod(serverfile, 0o744)
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
