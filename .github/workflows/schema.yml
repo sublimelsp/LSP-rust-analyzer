@@ -37,7 +37,8 @@ jobs:
         id: tag-from
         run: echo "TAG=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
 
-      - name: Run new_settings.sh script
+      - if: steps.tag-from.outputs.TAG != steps.tag-to.outputs.TAG
+        name: Run new_settings.sh script
         id: new_settings
         run: |
           {
@@ -46,14 +47,16 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      - name: Find Comment
+      - if: steps.tag-from.outputs.TAG != steps.tag-to.outputs.TAG
+        name: Find Comment
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
 
-      - name: Create or update comment
+      - if: steps.tag-from.outputs.TAG != steps.tag-to.outputs.TAG
+        name: Create or update comment
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
