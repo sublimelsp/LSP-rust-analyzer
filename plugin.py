@@ -171,7 +171,7 @@ class RustAnalyzer(AbstractPlugin):
 
             if is_windows:
                 with zipfile.ZipFile(archive_file, "r") as zip_ref:
-                    zip_ref.extract("rust-analyzer.exe", cls.basedir())
+                    zip_ref.extract(rust_analyzer_filename, cls.basedir())
             else:
                 with gzip.open(archive_file, "rb") as fp:
                     with open(rust_analyzer_path, "wb") as f:
