@@ -19,6 +19,7 @@ import shutil
 import sublime
 import urllib.request
 import functools
+import zipfile
 
 
 try:
@@ -41,7 +42,7 @@ The script in `./scripts/new_settings.sh can be used to find the keys that are i
 package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
 """
 
-URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.gz"
+URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.{ext}"
 
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
@@ -158,20 +159,25 @@ class RustAnalyzer(AbstractPlugin):
                 shutil.rmtree(cls.basedir())
             os.makedirs(cls.basedir(), exist_ok=True)
             version = cls.server_version()
-            url = URL.format(tag=TAG, arch=arch(), platform=platform())
-            gzipfile = os.path.join(cls.basedir(), "rust-analyzer.gz")
-            serverfile = os.path.join(
-                cls.basedir(),
-                "rust-analyzer.exe" if sublime.platform() == "windows" else "rust-analyzer"
-            )
+            is_windows = sublime.platform() == "windows"
+            extension = "zip" if is_windows else "gz"
+            url = URL.format(tag=TAG, arch=arch(), platform=platform(), ext=extension)
+            archive_file = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
+            rust_analyzer_filename = "rust-analyzer.exe" if is_windows else "rust-analyzer"
+            rust_analyzer_path = os.path.join(cls.basedir(), rust_analyzer_filename)
             with urllib.request.urlopen(url) as fp:
-                with open(gzipfile, "wb") as f:
+                with open(archive_file, "wb") as f:
                     f.write(fp.read())
-            with gzip.open(gzipfile, "rb") as fp:
-                with open(serverfile, "wb") as f:
-                    f.write(fp.read())
-            os.remove(gzipfile)
-            os.chmod(serverfile, 0o744)
+
+            if is_windows:
+                with zipfile.ZipFile(archive_file, "r") as zip_ref:
+                    zip_ref.extract(rust_analyzer_filename, cls.basedir())
+            else:
+                with gzip.open(archive_file, "rb") as fp:
+                    with open(rust_analyzer_path, "wb") as f:
+                        f.write(fp.read())
+            os.remove(archive_file)
+            os.chmod(rust_analyzer_path, 0o744)
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
                 fp.write(version)
         except BaseException:
