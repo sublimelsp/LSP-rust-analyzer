@@ -162,23 +162,23 @@ class RustAnalyzer(AbstractPlugin):
             is_windows = sublime.platform() == "windows"
             extension = "zip" if is_windows else "gz"
             url = URL.format(tag=TAG, arch=arch(), platform=platform(), ext=extension)
-            gzipfile = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
+            archive_file = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
             serverfile = os.path.join(
                 cls.basedir(),
                 "rust-analyzer.exe" if is_windows else "rust-analyzer"
             )
             with urllib.request.urlopen(url) as fp:
-                with open(gzipfile, "wb") as f:
+                with open(archive_file, "wb") as f:
                     f.write(fp.read())
 
             if is_windows:
-                with zipfile.ZipFile(gzipfile, "r") as zip_ref:
+                with zipfile.ZipFile(archive_file, "r") as zip_ref:
                     zip_ref.extract("rust-analyzer.exe", cls.basedir())
             else:
-                with gzip.open(gzipfile, "rb") as fp:
+                with gzip.open(archive_file, "rb") as fp:
                     with open(serverfile, "wb") as f:
                         f.write(fp.read())
-            os.remove(gzipfile)
+            os.remove(archive_file)
             os.chmod(serverfile, 0o744)
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
                 fp.write(version)
