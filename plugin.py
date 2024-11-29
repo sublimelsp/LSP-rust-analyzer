@@ -163,10 +163,8 @@ class RustAnalyzer(AbstractPlugin):
             extension = "zip" if is_windows else "gz"
             url = URL.format(tag=TAG, arch=arch(), platform=platform(), ext=extension)
             archive_file = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
-            serverfile = os.path.join(
-                cls.basedir(),
-                "rust-analyzer.exe" if is_windows else "rust-analyzer"
-            )
+            rust_analyzer_filename = "rust-analyzer.exe" if is_windows else "rust-analyzer"
+            rust_analyzer_path = os.path.join(cls.basedir(), rust_analyzer_filename)
             with urllib.request.urlopen(url) as fp:
                 with open(archive_file, "wb") as f:
                     f.write(fp.read())
@@ -176,10 +174,10 @@ class RustAnalyzer(AbstractPlugin):
                     zip_ref.extract("rust-analyzer.exe", cls.basedir())
             else:
                 with gzip.open(archive_file, "rb") as fp:
-                    with open(serverfile, "wb") as f:
+                    with open(rust_analyzer_path, "wb") as f:
                         f.write(fp.read())
             os.remove(archive_file)
-            os.chmod(serverfile, 0o744)
+            os.chmod(rust_analyzer_path, 0o744)
             with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
                 fp.write(version)
         except BaseException:
