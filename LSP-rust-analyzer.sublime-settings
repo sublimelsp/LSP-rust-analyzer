@@ -80,6 +80,11 @@
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
+		// How to query metadata for the sysroot crate. Using cargo metadata allows rust-analyzer to analyze third-party
+		// dependencies of the standard libraries.
+		// - none - Do not query sysroot metadata, always use stitched sysroot.
+		// - cargo_metadata - Use `cargo metadata` to query sysroot metadata.
+		"rust-analyzer.cargo.sysrootQueryMetadata": "cargo_metadata",
 		// Relative path to the sysroot library sources. If left unset, this will default to
 		// `{cargo.sysroot}/lib/rustlib/src/rust/library`.
 		//
