@@ -622,4 +622,8 @@
 	"command": [
 		"${storage_path}/LSP-rust-analyzer/rust-analyzer"
 	],
+	"disabled_capabilities": {
+		// Workaround for https://github.com/sublimelsp/LSP/issues/2572
+		"diagnosticProvider": true,
+	}
 }
