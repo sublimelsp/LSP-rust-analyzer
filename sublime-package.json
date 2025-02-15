@@ -31,6 +31,11 @@
                       "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
                       "type": "boolean"
                     },
+                    // "rust-analyzer.showSyntaxTree": {
+                    //     "markdownDescription": "Whether to show the syntax tree view.",
+                    //     "default": false,
+                    //     "type": "boolean"
+                    // },
                     "rust-analyzer.testExplorer": {
                       "markdownDescription": "Whether to show the test explorer.",
                       "default": false,
@@ -128,11 +133,14 @@
                     },
                     "rust-analyzer.cargo.cfgs": {
                       "markdownDescription": "List of cfg options to enable with the given values.",
-                      "default": {
-                        "miri": null,
-                        "debug_assertions": null
-                      },
-                      "type": "object"
+                      "default": [
+                        "debug_assertions",
+                        "miri"
+                      ],
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "rust-analyzer.cargo.extraArgs": {
                       "markdownDescription": "Extra arguments that are passed to every cargo invocation.",
@@ -181,19 +189,6 @@
                         "string"
                       ]
                     },
-                    "rust-analyzer.cargo.sysrootQueryMetadata": {
-                        "markdownDescription": "How to query metadata for the sysroot crate. Using cargo metadata allows rust-analyzer\nto analyze third-party dependencies of the standard libraries.",
-                        "default": "cargo_metadata",
-                        "type": "string",
-                        "enum": [
-                            "none",
-                            "cargo_metadata"
-                        ],
-                        "enumDescriptions": [
-                            "Do not query sysroot metadata, always use stitched sysroot.",
-                            "Use `cargo metadata` to query sysroot metadata."
-                        ]
-                    },
                     "rust-analyzer.cargo.sysrootSrc": {
                       "markdownDescription": "Relative path to the sysroot library sources. If left unset, this will default to\n`{cargo.sysroot}/lib/rustlib/src/rust/library`.\n\nThis option does not take effect until rust-analyzer is restarted.",
                       "default": null,
@@ -204,7 +199,7 @@
                     },
                     "rust-analyzer.cargo.target": {
                       "default": null,
-                      "markdownDescription": "Compilation target override (target triple).",
+                      "markdownDescription": "Compilation target override (target tuple).",
                       "type": [
                         "null",
                         "string"
@@ -336,7 +331,7 @@
                       ]
                     },
                     "rust-analyzer.check.workspace": {
-                      "markdownDescription": "Whether `--workspace` should be passed to `cargo check`.\nIf false, `-p <package>` will be passed instead.",
+                      "markdownDescription": "Whether `--workspace` should be passed to `cargo check`.\nIf false, `-p <package>` will be passed instead if applicable. In case it is not, no\ncheck will be performed.",
                       "default": true,
                       "type": "boolean"
                     },
@@ -345,10 +340,60 @@
                         "default": true,
                         "type": "boolean"
                     },
+                    "rust-analyzer.completion.autoAwait.enable": {
+                        "markdownDescription": "Toggles the additional completions that automatically show method calls and field accesses with `await` prefixed to them when completing on a future.",
+                        "default": true,
+                        "type": "boolean"
+                    },
+                    "rust-analyzer.completion.autoIter.enable": {
+                        "markdownDescription": "Toggles the additional completions that automatically show method calls with `iter()` or `into_iter()` prefixed to them when completing on a type that has them.",
+                        "default": true,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.completion.autoimport.enable": {
                       "default": true,
                       "markdownDescription": "Toggles the additional completions that automatically add imports when completed.\nNote that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.completion.autoimport.exclude": {
+                        "markdownDescription": "A list of full paths to items to exclude from auto-importing completions.\n\nTraits in this list won't have their methods suggested in completions unless the trait\nis in scope.\n\nYou can either specify a string path which defaults to type \"always\" or use the more verbose\nform `{ \"path\": \"path::to::item\", type: \"always\" }`.\n\nFor traits the type \"methods\" can be used to only exclude the methods but not the trait itself.\n\nThis setting also inherits `#rust-analyzer.completion.excludeTraits#`.",
+                        "default": [
+                            {
+                                "path": "core::borrow::Borrow",
+                                "type": "methods"
+                            },
+                            {
+                                "path": "core::borrow::BorrowMut",
+                                "type": "methods"
+                            }
+                        ],
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "always",
+                                                "methods"
+                                            ],
+                                            "enumDescriptions": [
+                                                "Do not show this item or its methods (if it is a trait) in auto-import completions.",
+                                                "Do not show this traits methods in auto-import completions."
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "rust-analyzer.completion.autoself.enable": {
                       "default": true,
@@ -369,6 +414,14 @@
                       ],
                       "markdownDescription": "Whether to add parenthesis and argument snippets when completing function.",
                       "type": "string"
+                    },
+                    "rust-analyzer.completion.excludeTraits": {
+                        "markdownDescription": "A list of full paths to traits whose methods to exclude from completion.\n\nMethods from these traits won't be completed, even if the trait is in scope. However, they will still be suggested on expressions whose type is `dyn Trait`, `impl Trait` or `T where T: Trait`.\n\nNote that the trait themselves can still be completed.",
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "rust-analyzer.completion.fullFunctionSignatures.enable": {
                       "markdownDescription": "Whether to show full function/method signatures in completion docs.",
@@ -636,6 +689,11 @@
                       "markdownDescription": "Whether to show `Run` action. Only applies when\n`#rust-analyzer.hover.actions.enable#` is set.",
                       "type": "boolean"
                     },
+                    "rust-analyzer.hover.actions.updateTest.enable": {
+                        "markdownDescription": "Whether to show `Update Test` action. Only applies when\n`#rust-analyzer.hover.actions.enable#` and `#rust-analyzer.hover.actions.run.enable#` are set.",
+                        "default": true,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.hover.documentation.enable": {
                       "default": true,
                       "markdownDescription": "Whether to show documentation on hover.",
@@ -650,6 +708,24 @@
                       "default": true,
                       "markdownDescription": "Use markdown syntax for links on hover.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.hover.maxSubstitutionLength": {
+                        "markdownDescription": "Whether to show what types are used as generic arguments in calls etc. on hover, and what is their max length to show such types, beyond it they will be shown with ellipsis.\n\nThis can take three values: `null` means \"unlimited\", the string `\"hide\"` means to not show generic substitutions at all, and a number means to limit them to X characters.\n\nThe default is 20 characters.",
+                        "default": 20,
+                        "anyOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "hide"
+                                ]
+                            },
+                            {
+                                "type": "integer"
+                            }
+                        ]
                     },
                     "rust-analyzer.hover.memoryLayout.alignment": {
                       "markdownDescription": "How to render the align information in a memory layout hover.",
@@ -951,6 +1027,11 @@
                       "default": false,
                       "type": "boolean"
                     },
+                    "rust-analyzer.inlayHints.implicitSizedBoundHints.enable": {
+                        "markdownDescription": "Whether to show inlay hints for the implied type parameter `Sized` bound.",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "rust-analyzer.inlayHints.lifetimeElisionHints.enable": {
                       "default": "never",
                       "enum": [
@@ -1019,6 +1100,11 @@
                       "default": false,
                       "markdownDescription": "Whether to hide inlay type hints for `let` statements that initialize to a closure.\nOnly applies to closures with blocks, same as `#rust-analyzer.inlayHints.closureReturnTypeHints.enable#`.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.inlayHints.typeHints.hideClosureParameter": {
+                        "markdownDescription": "Whether to hide inlay parameter type hints for closures.",
+                        "default": false,
+                        "type": "boolean"
                     },
                     "rust-analyzer.inlayHints.typeHints.hideNamedConstructor": {
                       "default": false,
@@ -1101,6 +1187,11 @@
                       "default": true,
                       "markdownDescription": "Whether to show `Run` lens. Only applies when\n`#rust-analyzer.lens.enable#` is set.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.lens.updateTest.enable": {
+                        "markdownDescription": "Whether to show `Update Test` lens. Only applies when\n`#rust-analyzer.lens.enable#` and `#rust-analyzer.lens.run.enable#` are set.",
+                        "default": true,
+                        "type": "boolean"
                     },
                     "rust-analyzer.linkedProjects": {
                       "default": [],
@@ -1218,6 +1309,11 @@
                     //     ],
                     //     "markdownDescription": "Problem matchers to use for `rust-analyzer.run` command, eg `[\"$rustc\", \"$rust-panic\"]`."
                     // },
+                    // "rust-analyzer.runnables.askBeforeUpdateTest": {
+                    //     "type": "boolean",
+                    //     "default": true,
+                    //     "markdownDescription": "Ask before updating the test when running it."
+                    // }
                     // "rust-analyzer.statusBar.clickAction": {
                     //     "type": "string",
                     //     "enum": [
@@ -1400,10 +1496,21 @@
                     //   ],
                     //   "type": "string"
                     // },
-                    "rust-analyzer.typing.autoClosingAngleBrackets.enable": {
-                      "default": false,
-                      "markdownDescription": "Whether to insert closing angle brackets when typing an opening angle bracket of a generic argument list.",
-                      "type": "boolean"
+                    "rust-analyzer.typing.triggerChars": {
+                        "markdownDescription": "Specify the characters allowed to invoke special on typing triggers.\n- typing `=` after `let` tries to smartly add `;` if `=` is followed by an existing expression\n- typing `=` between two expressions adds `;` when in statement position\n- typing `=` to turn an assignment into an equality comparison removes `;` when in expression position\n- typing `.` in a chain method call auto-indents\n- typing `{` or `(` in front of an expression inserts a closing `}` or `)` after the expression\n- typing `{` in a use item adds a closing `}` in the right place\n- typing `>` to complete a return type `->` will insert a whitespace after it\n- typing `<` in a path or type position inserts a closing `>` after the path or type.",
+                        "default": "=.",
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "rust-analyzer.vfs.extraIncludes": {
+                        "markdownDescription": "Additional paths to include in the VFS. Generally for code that is\ngenerated or otherwise managed by a build system outside of Cargo,\nthough Cargo might be the eventual consumer.",
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "rust-analyzer.workspace.discoverConfig": {
                         "markdownDescription": "Enables automatic discovery of projects using [`DiscoverWorkspaceConfig::command`].\n\n[`DiscoverWorkspaceConfig`] also requires setting `progress_label` and `files_to_watch`.\n`progress_label` is used for the title in progress indicators, whereas `files_to_watch`\nis used to determine which build system-specific files should be watched in order to\nreload rust-analyzer.\n\nBelow is an example of a valid configuration:\n```json\n\"rust-analyzer.workspace.discoverConfig\": {\n        \"command\": [\n                \"rust-project\",\n                \"develop-json\"\n        ],\n        \"progressLabel\": \"rust-analyzer\",\n        \"filesToWatch\": [\n                \"BUCK\"\n        ]\n}\n```\n\n## On `DiscoverWorkspaceConfig::command`\n\n**Warning**: This format is provisional and subject to change.\n\n[`DiscoverWorkspaceConfig::command`] *must* return a JSON object\ncorresponding to `DiscoverProjectData::Finished`:\n\n```norun\n#[derive(Debug, Clone, Deserialize, Serialize)]\n#[serde(tag = \"kind\")]\n#[serde(rename_all = \"snake_case\")]\nenum DiscoverProjectData {\n        Finished { buildfile: Utf8PathBuf, project: ProjectJsonData },\n        Error { error: String, source: Option<String> },\n        Progress { message: String },\n}\n```\n\nAs JSON, `DiscoverProjectData::Finished` is:\n\n```json\n{\n        // the internally-tagged representation of the enum.\n        \"kind\": \"finished\",\n        // the file used by a non-Cargo build system to define\n        // a package or target.\n        \"buildfile\": \"rust-analyzer/BUILD\",\n        // the contents of a rust-project.json, elided for brevity\n        \"project\": {\n                \"sysroot\": \"foo\",\n                \"crates\": []\n        }\n}\n```\n\nIt is encouraged, but not required, to use the other variants on\n`DiscoverProjectData` to provide a more polished end-user experience.\n\n`DiscoverWorkspaceConfig::command` may *optionally* include an `{arg}`,\nwhich will be substituted with the JSON-serialized form of the following\nenum:\n\n```norun\n#[derive(PartialEq, Clone, Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\npub enum DiscoverArgument {\n     Path(AbsPathBuf),\n     Buildfile(AbsPathBuf),\n}\n```\n\nThe JSON representation of `DiscoverArgument::Path` is:\n\n```json\n{\n        \"path\": \"src/main.rs\"\n}\n```\n\nSimilarly, the JSON representation of `DiscoverArgument::Buildfile` is:\n\n```\n{\n        \"buildfile\": \"BUILD\"\n}\n```\n\n`DiscoverArgument::Path` is used to find and generate a `rust-project.json`,\nand therefore, a workspace, whereas `DiscoverArgument::buildfile` is used to\nto update an existing workspace. As a reference for implementors,\nbuck2's `rust-project` will likely be useful:\nhttps://github.com/facebook/buck2/tree/main/integrations/rust-project.",

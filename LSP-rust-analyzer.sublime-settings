@@ -59,10 +59,10 @@
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
 		// List of cfg options to enable with the given values.
-		"rust-analyzer.cargo.cfgs": {
-			"miri": null,
-			"debug_assertions": null
-		},
+		"rust-analyzer.cargo.cfgs": [
+			"debug_assertions",
+			"miri"
+		],
 		// Extra arguments that are passed to every cargo invocation.
 		//
 		// ```json
@@ -80,11 +80,6 @@
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
-		// How to query metadata for the sysroot crate. Using cargo metadata allows rust-analyzer to analyze third-party
-		// dependencies of the standard libraries.
-		// - none - Do not query sysroot metadata, always use stitched sysroot.
-		// - cargo_metadata - Use `cargo metadata` to query sysroot metadata.
-		"rust-analyzer.cargo.sysrootQueryMetadata": "cargo_metadata",
 		// Relative path to the sysroot library sources. If left unset, this will default to
 		// `{cargo.sysroot}/lib/rustlib/src/rust/library`.
 		//
@@ -92,7 +87,7 @@
 		// "rust-analyzer.cargo.sysrootSrc": "/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library",
 		// ```
 		"rust-analyzer.cargo.sysrootSrc": null,
-		// Compilation target override (target triple).
+		// Compilation target override (target tuple).
 		"rust-analyzer.cargo.target": null,
 		// Optional path to a rust-analyzer specific target directory.
 		// This prevents rust-analyzer's `cargo check` and initial build-script and proc-macro
@@ -154,21 +149,50 @@
 		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
 		"rust-analyzer.check.targets": null,
 		// Whether `--workspace` should be passed to `cargo check`.
-		// If false, `-p <package>` will be passed instead.
+		// If false, `-p <package>` will be passed instead if applicable. 
+		// In case it is not, check will be performed.
 		"rust-analyzer.check.workspace": true,
 		// Whether to automatically add a semicolon when completing unit-returning functions.
 		//
 		// In `match` arms it completes a comma instead.
 		"rust-analyzer.completion.addSemicolonToUnit": true,
+		// Toggles the additional completions that automatically show method calls 
+		// and field accesses with `await` prefixed to them when completing on a future.
+		"rust-analyzer.completion.autoAwait.enable": true,
+		// Toggles the additional completions that automatically show method calls 
+		// with `iter()` or `into_iter()` prefixed to them when completing on a type that has them.
+		"rust-analyzer.completion.autoIter.enable": true,
 		// Toggles the additional completions that automatically add imports when completed.
 		// Note that your client must specify the `additionalTextEdits` LSP client capability to truly have this feature enabled.
 		"rust-analyzer.completion.autoimport.enable": true,
+		// A list of full paths to items to exclude from auto-importing completions.
+		// Traits in this list won't have their methods suggested in completions unless the trait is in scope.
+		// You can either specify a string path which defaults to type "always" or use the more verbose
+		// form `{ "path": "path::to::item", type: "always" }`.
+		// For traits the type "methods" can be used to only exclude the methods but not the trait itself.
+		// This setting also inherits `#rust-analyzer.completion.excludeTraits#`.
+		"rust-analyzer.completion.autoimport.exclude": [
+			{
+				"path": "core::borrow::Borrow",
+				"type": "methods"
+			},
+			{
+				"path": "core::borrow::BorrowMut",
+				"type": "methods"
+			}
+		],
 		// Toggles the additional completions that automatically show method calls and field accesses
 		// with `self` prefixed to them when inside a method.
 		"rust-analyzer.completion.autoself.enable": true,
 		// Whether to add parenthesis and argument snippets when completing function.
 		// possible values: fill_arguments, add_parentheses, none
 		"rust-analyzer.completion.callable.snippets": "fill_arguments",
+		// A list of full paths to traits whose methods to exclude from completion.
+		// Methods from these traits won't be completed, even if the trait is in scope. 
+		// However, they will still be suggested on expressions whose type is `dyn Trait`, 
+		// `impl Trait` or `T where T: Trait`.
+		// Note that the trait themselves can still be completed.
+		"rust-analyzer.completion.excludeTraits": [],
 		// Whether to show full function/method signatures in completion docs.
 		"rust-analyzer.completion.fullFunctionSignatures.enable": false,
 		// Whether to omit deprecated items from autocompletion. By default they are marked as deprecated but not hidden.
@@ -285,12 +309,21 @@
 		"rust-analyzer.hover.actions.references.enable": false,
 		// Whether to show `Run` action. Only applies when `rust-analyzer.hover.actions.enable` is set.
 		"rust-analyzer.hover.actions.run.enable": true,
+		// Whether to show `Update Test` action. Only applies when
+		// `#rust-analyzer.hover.actions.enable#` and `#rust-analyzer.hover.actions.run.enable#` are set.
+		"rust-analyzer.hover.actions.updateTest.enable": true,
 		// Whether to show documentation on hover.
 		"rust-analyzer.hover.documentation.enable": true,
 		// Whether to show keyword hover popups. Only applies when `rust-analyzer.hover.documentation.enable` is set.
 		"rust-analyzer.hover.documentation.keywords.enable": true,
 		// Use markdown syntax for links on hover.
 		"rust-analyzer.hover.links.enable": true,
+		// Whether to show what types are used as generic arguments in calls etc. on hover, 
+		// and what is their max length to show such types, beyond it they will be shown with ellipsis.
+		// This can take three values: `null` means "unlimited", the string `"hide"` means to 
+		// not show generic substitutions at all, and a number means to limit them to X characters. 
+		// The default is 20 characters.
+		"rust-analyzer.hover.maxSubstitutionLength": 20,
 		// How to render the align information in a memory layout hover.
 		"rust-analyzer.hover.memoryLayout.alignment": "hexadecimal",
 		// Whether to show memory layout data on hover.
@@ -359,6 +392,8 @@
 		"rust-analyzer.inlayHints.genericParameterHints.type.enable": false,
 		// Whether to show implicit drop hints.
 		"rust-analyzer.inlayHints.implicitDrops.enable": false,
+		// Whether to show inlay hints for the implied type parameter `Sized` bound.
+		"rust-analyzer.inlayHints.implicitSizedBoundHints.enable": false,
 		// Whether to show inlay type hints for elided lifetimes in function signatures.
 		// possible values: always, never, skip_trivial
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "never",
@@ -380,6 +415,8 @@
 		// Whether to hide inlay type hints for `let` statements that initialize to a closure.
 		// Only applies to closures with blocks, same as `rust-analyzer.inlayHints.closureReturnTypeHints.enable`.
 		"rust-analyzer.inlayHints.typeHints.hideClosureInitialization": false,
+		// Whether to hide inlay parameter type hints for closures.
+		"rust-analyzer.inlayHints.typeHints.hideClosureParameter": false,
 		// Whether to hide inlay type hints for constructors.
 		"rust-analyzer.inlayHints.typeHints.hideNamedConstructor": false,
 		// Enables the experimental support for interpreting tests.
@@ -411,6 +448,9 @@
 		"rust-analyzer.lens.references.trait.enable": false,
 		// Whether to show `Run` lens. Only applies when `rust-analyzer.lens.enable` is set.
 		"rust-analyzer.lens.run.enable": true,
+		// Whether to show `Update Test` lens. Only applies when
+		// `#rust-analyzer.lens.enable#` and `#rust-analyzer.lens.run.enable#` are set.
+		"rust-analyzer.lens.updateTest.enable": true,
 		// Disable project auto-discovery in favor of explicitly specified set
 		// of projects.
 		// Elements must be paths pointing to `Cargo.toml`,
@@ -508,8 +548,21 @@
 		"rust-analyzer.signatureInfo.detail": "full",
 		// Show documentation.
 		"rust-analyzer.signatureInfo.documentation.enable": true,
+		// Specify the characters allowed to invoke special on typing triggers.
+		// - typing `=` after `let` tries to smartly add `;` if `=` is followed by an existing expression
+		// - typing `=` between two expressions adds `;` when in statement position
+		// - typing `=` to turn an assignment into an equality comparison removes `;` when in expression position
+		// - typing `.` in a chain method call auto-indents
+		// - typing `{` or `(` in front of an expression inserts a closing `}` or `)` after the expression
+		// - typing `{` in a use item adds a closing `}` in the right place
+		// - typing `>` to complete a return type `->` will insert a whitespace after it
+		// - typing `<` in a path or type position inserts a closing `>` after the path or type.
+		"rust-analyzer.typing.triggerChars": "=.",
+		// Additional paths to include in the VFS. Generally for code that is
+		// generated or otherwise managed by a build system outside of Cargo,
+		// though Cargo might be the eventual consumer.
+		"rust-analyzer.vfs.extraIncludes": [],
 		// Whether to insert closing angle brackets when typing an opening angle bracket of a generic argument list.
-		"rust-analyzer.typing.autoClosingAngleBrackets.enable": false,
 		// Enables automatic discovery of projects using [`DiscoverWorkspaceConfig::command`].
 		//
 		// [`DiscoverWorkspaceConfig`] also requires setting `progress_label` and `files_to_watch`.
