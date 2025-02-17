@@ -613,12 +613,12 @@
                     //     "default": true,
                     //     "type": "boolean"
                     // },
-                    "rust-analyzer.files.excludeDirs": {
+                    "rust-analyzer.files.exclude": {
                       "default": [],
                       "items": {
                         "type": "string"
                       },
-                      "markdownDescription": "These directories will be ignored by rust-analyzer. They are\nrelative to the workspace root, and globs are not supported. You may\nalso need to add the folders to Code's `files.watcherExclude`.",
+                      "markdownDescription": "These paths (file/directories) will be ignored by rust-analyzer. They are\nrelative to the workspace root, and globs are not supported. You may\nalso need to add the folders to Code's `files.watcherExclude`.",
                       "type": "array"
                     },
                     "rust-analyzer.files.watcher": {
