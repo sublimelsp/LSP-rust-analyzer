@@ -58,7 +58,10 @@
 		// Use `RUSTC_WRAPPER=rust-analyzer` when running build scripts to
 		// avoid checking unnecessary things.
 		"rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
-		// List of cfg options to enable with the given values.
+		// LList of cfg options to enable with the given values.
+		// To enable a name without a value, use `"key"`.
+		// To enable a name with a value, use `"key=value"`.
+		// To disable, prefix the entry with a `!`.
 		"rust-analyzer.cargo.cfgs": [
 			"debug_assertions",
 			"miri"
@@ -77,6 +80,9 @@
 		"rust-analyzer.cargo.features": [],
 		// Whether to pass `--no-default-features` to cargo.
 		"rust-analyzer.cargo.noDefaultFeatures": false,
+		// Whether to skip fetching dependencies. If set to "true", the analysis is performed
+		// entirely offline, and Cargo metadata for dependencies is not fetched.
+		"rust-analyzer.cargo.noDeps": false,
 		// Relative path to the sysroot, or "discover" to try to automatically find
 		// it via "rustc --print sysroot". Unsetting this disables sysroot loading.
 		"rust-analyzer.cargo.sysroot": "discover",
@@ -145,8 +151,8 @@
 		"rust-analyzer.check.overrideCommand": null,
 		// Check for a specific target. Defaults to `rust-analyzer.cargo.target`.
 		//
-		// Can be a single target, e.g. `\"x86_64-unknown-linux-gnu\"` or a list of targets, e.g.
-		//`[\"aarch64-apple-darwin\", \"x86_64-apple-darwin\"]`
+		// Can be a single target, e.g. `"x86_64-unknown-linux-gnu"` or a list of targets, e.g.
+		//`["aarch64-apple-darwin", "x86_64-apple-darwin"]`
 		"rust-analyzer.check.targets": null,
 		// Whether `--workspace` should be passed to `cargo check`.
 		// If false, `-p <package>` will be passed instead if applicable. 
@@ -316,6 +322,8 @@
 		"rust-analyzer.hover.documentation.enable": true,
 		// Whether to show keyword hover popups. Only applies when `rust-analyzer.hover.documentation.enable` is set.
 		"rust-analyzer.hover.documentation.keywords.enable": true,
+		// Whether to show drop glue information on hover.
+		"rust-analyzer.hover.dropGlue.enable": true,
 		// Use markdown syntax for links on hover.
 		"rust-analyzer.hover.links.enable": true,
 		// Whether to show what types are used as generic arguments in calls etc. on hover, 

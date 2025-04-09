@@ -132,7 +132,7 @@
                       "type": "boolean"
                     },
                     "rust-analyzer.cargo.cfgs": {
-                      "markdownDescription": "List of cfg options to enable with the given values.",
+                      "markdownDescription": "List of cfg options to enable with the given values.\n\nTo enable a name without a value, use `\"key\"`.\nTo enable a name with a value, use `\"key=value\"`.\nTo disable, prefix the entry with a `!`.",
                       "default": [
                         "debug_assertions",
                         "miri"
@@ -179,6 +179,11 @@
                     "rust-analyzer.cargo.noDefaultFeatures": {
                       "default": false,
                       "markdownDescription": "Whether to pass `--no-default-features` to cargo.",
+                      "type": "boolean"
+                    },
+                    "rust-analyzer.cargo.noDeps": {
+                      "markdownDescription": "Whether to skip fetching dependencies. If set to \"true\", the analysis is performed\nentirely offline, and Cargo metadata for dependencies is not fetched.",
+                      "default": false,
                       "type": "boolean"
                     },
                     "rust-analyzer.cargo.sysroot": {
@@ -703,6 +708,11 @@
                       "default": true,
                       "markdownDescription": "Whether to show keyword hover popups. Only applies when\n`#rust-analyzer.hover.documentation.enable#` is set.",
                       "type": "boolean"
+                    },
+                    "rust-analyzer.hover.dropGlue.enable": {
+                        "markdownDescription": "Whether to show drop glue information on hover.",
+                        "default": true,
+                        "type": "boolean"
                     },
                     "rust-analyzer.hover.links.enable": {
                       "default": true,
