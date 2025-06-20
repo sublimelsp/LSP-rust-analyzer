@@ -46,7 +46,6 @@ URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/ru
 
 RunnableArgs = TypedDict('RunnableArgs', {
     'cargoArgs': List[str],
-    'cargoExtraArgs': List[str],
     'executableArgs': List[str],
     'overrideCargo': Optional[str],
     'workspaceRoot': str,
@@ -109,8 +108,6 @@ def open_runnables_in_terminus(window: Optional[sublime.Window], runnables: List
             sublime.error_message(
                 'Cannot run executable "{}". Ensure that it is in the PATH of the Sublime Text process.'.format(command_to_run[0]))
             return
-        if args.get("cargoExtraArgs"):
-            command_to_run += args["cargoExtraArgs"]
         if args.get("executableArgs"):
             command_to_run += ['--'] + args["executableArgs"]
         terminus_args = {
