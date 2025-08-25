@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install packages
         run: |
@@ -29,7 +29,7 @@ jobs:
         id: tag-to
         run: echo "TAG=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
 
