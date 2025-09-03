@@ -1,2 +1,4 @@
 images/ export-ignore
 scripts/ export-ignore
+renovate.json export-ignore
+tox.ini export-ignore
