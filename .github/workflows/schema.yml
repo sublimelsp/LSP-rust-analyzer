@@ -57,7 +57,7 @@ jobs:
 
       - if: steps.tag-from.outputs.TAG != steps.tag-to.outputs.TAG
         name: Create or update comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
