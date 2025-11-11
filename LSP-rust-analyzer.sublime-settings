@@ -124,6 +124,7 @@
 		"rust-analyzer.diagnostics.warningsAsInfo": [],
 		"rust-analyzer.files.exclude": [],
 		"rust-analyzer.files.watcher": "client",
+		"rust-analyzer.gotoImplementations.filterAdjacentDerives": false,
 		"rust-analyzer.highlightRelated.branchExitPoints.enable": true,
 		"rust-analyzer.highlightRelated.breakPoints.enable": true,
 		"rust-analyzer.highlightRelated.closureCaptures.enable": true,
@@ -167,6 +168,7 @@
 		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
 		"rust-analyzer.inlayHints.closureStyle": "impl_fn",
 		"rust-analyzer.inlayHints.discriminantHints.enable": "never",
+		"rust-analyzer.inlayHints.expressionAdjustmentHints.disableReborrows": true,
 		"rust-analyzer.inlayHints.expressionAdjustmentHints.enable": "never",
 		"rust-analyzer.inlayHints.expressionAdjustmentHints.hideOutsideUnsafe": false,
 		"rust-analyzer.inlayHints.expressionAdjustmentHints.mode": "prefix",
@@ -210,6 +212,7 @@
 		"rust-analyzer.procMacro.enable": true,
 		"rust-analyzer.procMacro.ignored": {},
 		"rust-analyzer.procMacro.server": null,
+		"rust-analyzer.profiling.memoryProfile": null,
 		"rust-analyzer.references.excludeImports": false,
 		"rust-analyzer.references.excludeTests": false,
 		"rust-analyzer.restartServerOnConfigChange": false,
@@ -217,12 +220,13 @@
 		"rust-analyzer.runnables.extraArgs": [],
 		"rust-analyzer.runnables.extraEnv": null,
 		"rust-analyzer.runnables.extraTestBinaryArgs": [
-			"--show-output"
+			"--nocapture"
 		],
 		"rust-analyzer.rustc.source": null,
 		"rust-analyzer.rustfmt.extraArgs": [],
 		"rust-analyzer.rustfmt.overrideCommand": null,
 		"rust-analyzer.rustfmt.rangeFormatting.enable": false,
+		"rust-analyzer.semanticHighlighting.comments.enable": true,
 		"rust-analyzer.semanticHighlighting.doc.comment.inject.enable": true,
 		"rust-analyzer.semanticHighlighting.nonStandardTokens": true,
 		"rust-analyzer.semanticHighlighting.operator.enable": true,
