@@ -2,5 +2,19 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>sublimelsp/renovate-preset"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^plugin\\.py$/"
+      ],
+      "matchStrings": [
+        "TAG = \"(?<currentValue>.+?)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "rust-lang/rust-analyzer",
+      "versioningTemplate": "regex:^(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)$"
+    }
   ]
 }
