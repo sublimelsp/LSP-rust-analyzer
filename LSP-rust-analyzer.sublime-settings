@@ -177,6 +177,7 @@
 		"rust-analyzer.inlayHints.genericParameterHints.type.enable": false,
 		"rust-analyzer.inlayHints.implicitDrops.enable": false,
 		"rust-analyzer.inlayHints.implicitSizedBoundHints.enable": false,
+		"rust-analyzer.inlayHints.impliedDynTraitHints.enable": true,
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "never",
 		"rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": false,
 		"rust-analyzer.inlayHints.maxLength": 25,
