@@ -1,35 +1,38 @@
+from __future__ import annotations
 from .plugin import RustAnalyzerCommand
 from LSP.plugin import apply_text_edits
 from LSP.plugin import Request
 from LSP.plugin.core.protocol import Error
-from LSP.plugin.core.protocol import Range
-from LSP.plugin.core.protocol import TextDocumentIdentifier
-from LSP.plugin.core.protocol import TextEdit
-from LSP.plugin.core.typing import List, Literal, Optional, TypedDict, Union
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_identifier
+from LSP.protocol import Range
+from LSP.protocol import TextDocumentIdentifier
+from LSP.protocol import TextEdit
+from typing import Literal, TypedDict
 import sublime
 
 
 class JoinLinesRequest:
+
+    class ParamsType(TypedDict):
+        textDocument: TextDocumentIdentifier
+        ranges: list[Range]
+
     Type = 'experimental/joinLines'
-    ParamsType = TypedDict('ParamsType', {
-        'textDocument': TextDocumentIdentifier,
-        'ranges': List[Range],
-    })
-    ReturnType = List[TextEdit]
+    ReturnType = list[TextEdit]
 
 
 class MoveItemRequest:
+
+    class ParamsType(TypedDict):
+        textDocument: TextDocumentIdentifier
+        range: Range
+        direction: MoveItemRequest.Direction
+
     Type = 'experimental/moveItem'
     Direction = Literal['Up', 'Down']
-    ParamsType = TypedDict('ParamsType', {
-        'textDocument': TextDocumentIdentifier,
-        'range': Range,
-        'direction': Direction,
-    })
-    ReturnType = List[TextEdit]
+    ReturnType = list[TextEdit]
 
 
 class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
@@ -56,10 +59,10 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
 
-    def on_result_async(self, edits: Union[JoinLinesRequest.ReturnType, Error], document_version: int) -> None:
+    def on_result_async(self, edits: JoinLinesRequest.ReturnType | Error, document_version: int) -> None:
         if isinstance(edits, Error):
-            sublime.status_message('Error handling the "{}" request. Falling back to native join.'.format(
-                JoinLinesRequest.Type))
+            sublime.status_message(
+                f'Error handling the "{JoinLinesRequest.Type}" request. Falling back to native join.')
             self.view.run_command('join_lines')
             return
         apply_text_edits(self.view, edits, required_view_version=document_version)
@@ -67,7 +70,7 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
 
 class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
 
-    def run(self, edit: sublime.Edit, direction: Optional[MoveItemRequest.Direction] = None) -> None:
+    def run(self, edit: sublime.Edit, direction: MoveItemRequest.Direction | None = None) -> None:
         if direction not in ('Up', 'Down'):
             sublime.status_message('Error running command: direction must be either "Up" or "Down".')
             return
@@ -96,11 +99,11 @@ class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
 
-    def on_result_async(self, edits: Union[MoveItemRequest.ReturnType, Error], document_version: int) -> None:
+    def on_result_async(self, edits: MoveItemRequest.ReturnType | Error, document_version: int) -> None:
         if document_version != self.view.change_count():
             return
         if isinstance(edits, Error):
-            sublime.status_message('Error handling the "{}" request.'.format(MoveItemRequest.Type))
+            sublime.status_message(f'Error handling the "{MoveItemRequest.Type}" request.')
             return
         if not edits:
             sublime.status_message('Did not find anything to move.')
