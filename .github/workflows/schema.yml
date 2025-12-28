@@ -18,11 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-      - run: npm install -g diff2html-cli
-
       - uses: actions/checkout@v6
 
       - name: Install packages
@@ -48,7 +43,7 @@ jobs:
         run: |
           {
             echo 'CHANGES<<EOF'
-            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }} | diff2html
+            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }}
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
