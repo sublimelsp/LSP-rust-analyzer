@@ -18,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm install -g diff2html-cli
+
       - uses: actions/checkout@v6
 
       - name: Install packages
@@ -43,7 +48,7 @@ jobs:
         run: |
           {
             echo 'CHANGES<<EOF'
-            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }}
+            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }} | diff2html-cli
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
@@ -64,7 +69,5 @@ jobs:
           body: |
             Following are the [settings schema](https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json) changes between tags `${{ steps.tag-from.outputs.TAG }}` and `${{ steps.tag-to.outputs.TAG }}`. Make sure that those are reflected in `LSP-rust-analyzer.sublime-settings` and `sublime-package.json` files.
 
-            ```diff
             ${{ steps.new_settings.outputs.CHANGES }}
-            ```
           edit-mode: replace
