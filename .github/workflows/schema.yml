@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
+      - run: npm install -g diff2html-cli
 
       - uses: actions/checkout@v6
 
@@ -47,7 +48,7 @@ jobs:
         run: |
           {
             echo 'CHANGES<<EOF'
-            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }} | npx diff2html-cli@latest
+            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }} | diff2html
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
