@@ -6,13 +6,11 @@ from urllib.request import urlopen
 import argparse
 import difflib
 import json
-import os
 import shutil
 import subprocess
 import sys
 import tempfile
 import zipfile
-
 
 Json = dict[str, Any]
 
@@ -108,6 +106,14 @@ def main() -> None:
 
             if added:
                 output.append(f'Added keys:\n\n```json\n{json_format(added)}\n```')
+
+                sublime_settings: list[str] = []
+                for key, value in added.items():
+                    description: str = value['markdownDescription'] if 'markdownDescription' in value else value['description']
+                    wrapped_description: str = '\n'.join([f'// {line}'.rstrip() for line in description.splitlines()])
+                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_format(value['default'])}')
+                sublime_settings_str = '\n\n'.join(sublime_settings)
+                output.append(f'New entries for package settings:\n\n```\n{sublime_settings_str}\n```')
 
             if changed:
                 output.append(f'Changed keys:\n\n```json\n{json_format(changed)}\n```')
