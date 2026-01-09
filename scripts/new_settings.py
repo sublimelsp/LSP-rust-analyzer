@@ -111,7 +111,7 @@ def main() -> None:
                 for key, value in added.items():
                     description: str = value['markdownDescription'] if 'markdownDescription' in value else value['description']
                     wrapped_description: str = '\n'.join([f'// {line}'.rstrip() for line in description.splitlines()])
-                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_format(value['default'])}')
+                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_format(value['default'])},')
                 sublime_settings_str = '\n\n'.join(sublime_settings)
                 output.append(f'New entries for package settings:\n\n```\n{sublime_settings_str}\n```')
 
