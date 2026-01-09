@@ -38,12 +38,12 @@ jobs:
         run: echo "TAG=$(rg -o 'TAG = "([^"]+)"' -r \$1 "plugin.py")" >> "$GITHUB_OUTPUT"
 
       - if: steps.tag-from.outputs.TAG != steps.tag-to.outputs.TAG
-        name: Run new_settings.sh script
+        name: Run new_settings script
         id: new_settings
         run: |
           {
             echo 'CHANGES<<EOF'
-            ./scripts/new_settings.sh ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }}
+            ./scripts/new_settings.py ${{ steps.tag-from.outputs.TAG }} ${{ steps.tag-to.outputs.TAG }}
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
@@ -61,10 +61,5 @@ jobs:
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Following are the [settings schema](https://github.com/rust-lang/rust-analyzer/blob/${{ steps.tag-to.outputs.TAG }}/editors/code/package.json) changes between tags `${{ steps.tag-from.outputs.TAG }}` and `${{ steps.tag-to.outputs.TAG }}`. Make sure that those are reflected in `LSP-rust-analyzer.sublime-settings` and `sublime-package.json` files.
-
-            ```diff
-            ${{ steps.new_settings.outputs.CHANGES }}
-            ```
+          body: ${{ steps.new_settings.outputs.CHANGES }}
           edit-mode: replace
