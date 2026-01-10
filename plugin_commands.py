@@ -9,7 +9,7 @@ from LSP.plugin.core.views import text_document_identifier
 from LSP.protocol import Range
 from LSP.protocol import TextDocumentIdentifier
 from LSP.protocol import TextEdit
-from typing import Literal, TypedDict
+from typing import List, Literal, TypedDict
 import sublime
 
 
@@ -17,10 +17,10 @@ class JoinLinesRequest:
 
     class ParamsType(TypedDict):
         textDocument: TextDocumentIdentifier
-        ranges: list[Range]
+        ranges: List[Range]
 
     Type = 'experimental/joinLines'
-    ReturnType = list[TextEdit]
+    ReturnType = List[TextEdit]
 
 
 class MoveItemRequest:
@@ -32,7 +32,7 @@ class MoveItemRequest:
 
     Type = 'experimental/moveItem'
     Direction = Literal['Up', 'Down']
-    ReturnType = list[TextEdit]
+    ReturnType = List[TextEdit]
 
 
 class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
