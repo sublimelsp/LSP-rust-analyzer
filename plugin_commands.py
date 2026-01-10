@@ -17,7 +17,7 @@ class JoinLinesRequest:
 
     class ParamsType(TypedDict):
         textDocument: TextDocumentIdentifier
-        ranges: List[Range]
+        ranges: list[Range]
 
     Type = 'experimental/joinLines'
     ReturnType = List[TextEdit]
@@ -50,11 +50,11 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
         view_listener = session_view.listener()
         if not view_listener:
             return
-        params = {
+        params: JoinLinesRequest.ParamsType = {
             'textDocument': text_document_identifier(self.view),
             'ranges': [region_to_range(self.view, region) for region in self.view.sel()],
-        }  # type: JoinLinesRequest.ParamsType
-        request = Request(JoinLinesRequest.Type, params)  # type: Request[JoinLinesRequest.ReturnType]
+        }
+        request: Request[JoinLinesRequest.ReturnType] = Request(JoinLinesRequest.Type, params)
         document_version = self.view.change_count()
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
@@ -89,12 +89,12 @@ class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
         first_selection = first_selection_region(self.view)
         if first_selection is None:
             return
-        params = {
+        params: MoveItemRequest.ParamsType = {
             'textDocument': text_document_identifier(self.view),
             'range': region_to_range(self.view, first_selection),
             'direction': direction,
-        }  # type: MoveItemRequest.ParamsType
-        request = Request(MoveItemRequest.Type, params)  # type: Request[MoveItemRequest.ReturnType]
+        }
+        request: Request[MoveItemRequest.ReturnType] = Request(MoveItemRequest.Type, params)
         document_version = self.view.change_count()
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
