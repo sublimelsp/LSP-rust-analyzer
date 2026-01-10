@@ -465,8 +465,8 @@ class RustAnalyzerExpandMacro(RustAnalyzerCommand):
         window = self.view.window()
         if window is None:
             return
-        header = f"Recursive expansion of {expanded_macro["name"]}! macro"
-        content = f"// {header}\n// {(1 + len(header)) * "="}\n\n{expanded_macro["expansion"]}"
+        header = f"Recursive expansion of {expanded_macro['name']}! macro"
+        content = f"// {header}\n// {(1 + len(header)) * "="}\n\n{expanded_macro['expansion']}"
         sheets = window.selected_sheets()
         view = window.new_file(flags=sublime.TRANSIENT)
         view.set_scratch(True)
