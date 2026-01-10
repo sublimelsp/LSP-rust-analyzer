@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Prints differences in server settings between two tags."""
+
 from pathlib import Path
 from typing import Any
 from urllib.request import urlopen
@@ -14,8 +16,11 @@ import zipfile
 
 Json = dict[str, Any]
 
-REPOSITORY_URL = 'https://github.com/rust-lang/rust-analyzer'
+GITHUB_REPOSITORY_URL = 'https://github.com/rust-lang/rust-analyzer'
+# File path relative to github repository URL.
 CONFIGURATION_FILE_PATH = '/editors/code/package.json'
+# JQ query to get all configuration settings converted to a flat list and with null values filtered out.
+JQ_CONFIGURATION_SETTINGS_QUERY = '[.contributes.configuration[].properties | select(. != null)] | add'
 
 
 def download_github_artifact_by_tag(repository_url: str, tag: str, target_dir: str) -> Path:
@@ -38,15 +43,13 @@ def extract_configuration_file(zip_path: Path, configuration_path: str, target_d
 
 
 def compare_json(contents_1: str, contents_2: str) -> tuple[Json, Json, list[str]]:
-    # Filters out null values and flattens the result.
-    jq_query = '[.contributes.configuration[].properties | select(. != null)] | add'
     flatten_settings_1: Json = json.loads(subprocess.check_output(  # noqa: S603
-        ['jq', jq_query],  # noqa: S607
+        ['jq', JQ_CONFIGURATION_SETTINGS_QUERY],  # noqa: S607
         input=contents_1,
         text=True,
         encoding='utf-8'))
     flatten_settings_2: Json = json.loads(subprocess.check_output(  # noqa: S603
-        ['jq', jq_query],  # noqa: S607
+        ['jq', JQ_CONFIGURATION_SETTINGS_QUERY],  # noqa: S607
         input=contents_2,
         text=True,
         encoding='utf-8'))
@@ -66,8 +69,18 @@ def compare_json(contents_1: str, contents_2: str) -> tuple[Json, Json, list[str
     return (added, changed, removed)
 
 
-def json_format(contents: Any) -> str:
+def json_serialize(contents: Any) -> str:
     return json.dumps(contents, indent=2)
+
+
+def markdown_collapsible_section(summary: str, contents: str) -> str:
+    return f"""<details>
+
+<summary>{summary}</summary>
+
+{contents}
+
+</details>"""
 
 
 def main() -> None:
@@ -80,9 +93,9 @@ def main() -> None:
     tag_to: str = args.tag_to
 
     with tempfile.TemporaryDirectory() as tempdir:
-        archive_path_1 = download_github_artifact_by_tag(REPOSITORY_URL, tag_from, tempdir)
+        archive_path_1 = download_github_artifact_by_tag(GITHUB_REPOSITORY_URL, tag_from, tempdir)
         configuration_path_1 = extract_configuration_file(archive_path_1, CONFIGURATION_FILE_PATH, tempdir)
-        archive_path_2 = download_github_artifact_by_tag(REPOSITORY_URL, tag_to, tempdir)
+        archive_path_2 = download_github_artifact_by_tag(GITHUB_REPOSITORY_URL, tag_to, tempdir)
         configuration_path_2 = extract_configuration_file(archive_path_2, CONFIGURATION_FILE_PATH, tempdir)
 
         with Path.open(configuration_path_1, encoding='utf-8') as f1, \
@@ -98,31 +111,33 @@ def main() -> None:
             lineterm=''))
 
         output: list[str] = [
-            f'Following are the [settings schema]({REPOSITORY_URL}/blob/{tag_to}{CONFIGURATION_FILE_PATH}) changes between tags `{tag_from}` and `{tag_to}`. Make sure that those are reflected in the package settings and the `sublime-package.json` file.\n'
+            f'Following are the [settings schema]({GITHUB_REPOSITORY_URL}/blob/{tag_to}{CONFIGURATION_FILE_PATH}) changes between tags `{tag_from}` and `{tag_to}`. Make sure that those are reflected in the package settings and the `sublime-package.json` file.\n'
         ]
 
         if diff:
             added, changed, removed = compare_json(configuration_1, configuration_2)
 
             if added:
-                output.append(f'Added keys:\n\n```json\n{json_format(added)}\n```')
+                output.append(markdown_collapsible_section('Added keys', f'```json\n{json_serialize(added)}\n```'))
 
                 sublime_settings: list[str] = []
                 for key, value in added.items():
                     description: str = value['markdownDescription'] if 'markdownDescription' in value else value['description']
                     wrapped_description: str = '\n'.join([f'// {line}'.rstrip() for line in description.splitlines()])
-                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_format(value['default'])},')
+                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_serialize(value['default'])},')
                 sublime_settings_str = '\n\n'.join(sublime_settings)
-                output.append(f'New entries for package settings:\n\n```\n{sublime_settings_str}\n```')
+                output.append(markdown_collapsible_section('New entries for package settings',
+                                                           f'```\n{sublime_settings_str}\n```'))
 
             if changed:
-                output.append(f'Changed keys:\n\n```json\n{json_format(changed)}\n```')
+                output.append(markdown_collapsible_section('Changed keys', f'```json\n{json_serialize(changed)}\n```'))
 
             if removed:
                 items = [f' - `{k}`' for k in removed]
                 output.append(f'Removed keys:\n{'\n'.join(items)}')
 
-            output.append(f'All changes in `{CONFIGURATION_FILE_PATH}`:\n\n```diff\n{diff}\n```')
+            output.append(markdown_collapsible_section(f'All changes in `{CONFIGURATION_FILE_PATH}`',
+                                                       f'```diff\n{diff}\n```'))
         else:
             output.append('No changes')
 
