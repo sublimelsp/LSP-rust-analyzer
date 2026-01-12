@@ -42,6 +42,16 @@ def extract_configuration_file(zip_path: Path, configuration_path: str, target_d
         return Path(zip_file.extract(filepath, target_dir))
 
 
+def generate_sublime_settings_markdown(settings: Json) -> str:
+    sublime_settings: list[str] = []
+    for key, value in settings.items():
+        description: str = value['markdownDescription'] if 'markdownDescription' in value else value['description']
+        wrapped_description: str = '\n'.join([f'// {line}'.rstrip() for line in description.splitlines()])
+        sublime_settings.append(f'{wrapped_description}\n"{key}": {json_serialize(value['default'])},')
+    sublime_settings_str = '\n\n'.join(sublime_settings)
+    return f'```\n{sublime_settings_str}\n```'
+
+
 def compare_json(contents_1: str, contents_2: str) -> tuple[Json, Json, list[str]]:
     flatten_settings_1: Json = json.loads(subprocess.check_output(  # noqa: S603
         ['jq', JQ_CONFIGURATION_SETTINGS_QUERY],  # noqa: S607
@@ -119,22 +129,17 @@ def main() -> None:
 
             if added:
                 output.append(markdown_collapsible_section('Added keys', f'```json\n{json_serialize(added)}\n```'))
-
-                sublime_settings: list[str] = []
-                for key, value in added.items():
-                    description: str = value['markdownDescription'] if 'markdownDescription' in value else value['description']
-                    wrapped_description: str = '\n'.join([f'// {line}'.rstrip() for line in description.splitlines()])
-                    sublime_settings.append(f'{wrapped_description}\n"{key}": {json_serialize(value['default'])},')
-                sublime_settings_str = '\n\n'.join(sublime_settings)
-                output.append(markdown_collapsible_section('New entries for package settings',
-                                                           f'```\n{sublime_settings_str}\n```'))
+                output.append(markdown_collapsible_section('New sublime settings',
+                                                           generate_sublime_settings_markdown(added)))
 
             if changed:
                 output.append(markdown_collapsible_section('Changed keys', f'```json\n{json_serialize(changed)}\n```'))
+                output.append(markdown_collapsible_section('Changed sublime settings',
+                                                           generate_sublime_settings_markdown(added)))
 
             if removed:
-                items = [f' - `{k}`' for k in removed]
-                output.append(f'Removed keys:\n{'\n'.join(items)}')
+                key_list = '\n'.join([f' - `{k}`' for k in removed])
+                output.append(f'Removed keys:\n{key_list}')
 
             output.append(markdown_collapsible_section(f'All changes in `{CONFIGURATION_FILE_PATH}`',
                                                        f'```diff\n{diff}\n```'))
