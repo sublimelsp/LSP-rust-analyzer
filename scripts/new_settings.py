@@ -135,7 +135,7 @@ def main() -> None:
             if changed:
                 output.append(markdown_collapsible_section('Changed keys', f'```json\n{json_serialize(changed)}\n```'))
                 output.append(markdown_collapsible_section('Changed sublime settings',
-                                                           generate_sublime_settings_markdown(added)))
+                                                           generate_sublime_settings_markdown(changed)))
 
             if removed:
                 key_list = '\n'.join([f' - `{k}`' for k in removed])
