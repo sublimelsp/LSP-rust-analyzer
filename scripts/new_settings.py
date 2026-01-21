@@ -128,18 +128,20 @@ def main() -> None:
             added, changed, removed = compare_json(configuration_1, configuration_2)
 
             if added:
-                output.append(markdown_collapsible_section('Added keys', f'```json\n{json_serialize(added)}\n```'))
+                output.append(markdown_collapsible_section(f'Added keys ({len(added.keys())})',
+                                                           f'```json\n{json_serialize(added)}\n```'))
                 output.append(markdown_collapsible_section('New sublime settings',
                                                            generate_sublime_settings_markdown(added)))
 
             if changed:
-                output.append(markdown_collapsible_section('Changed keys', f'```json\n{json_serialize(changed)}\n```'))
+                output.append(markdown_collapsible_section(f'Changed keys ({len(changed.keys())})',
+                                                           f'```json\n{json_serialize(changed)}\n```'))
                 output.append(markdown_collapsible_section('Changed sublime settings',
                                                            generate_sublime_settings_markdown(changed)))
 
             if removed:
                 key_list = '\n'.join([f' - `{k}`' for k in removed])
-                output.append(f'Removed keys:\n{key_list}')
+                output.append(f'Removed keys (${len(key_list)}):\n{key_list}')
 
             output.append(markdown_collapsible_section(f'All changes in `{CONFIGURATION_FILE_PATH}`',
                                                        f'```diff\n{diff}\n```'))
