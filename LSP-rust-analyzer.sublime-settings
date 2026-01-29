@@ -214,6 +214,7 @@
 		"rust-analyzer.procMacro.attributes.enable": true,
 		"rust-analyzer.procMacro.enable": true,
 		"rust-analyzer.procMacro.ignored": {},
+		"rust-analyzer.procMacro.processes": 1,
 		"rust-analyzer.procMacro.server": null,
 		"rust-analyzer.profiling.memoryProfile": null,
 		"rust-analyzer.references.excludeImports": false,
