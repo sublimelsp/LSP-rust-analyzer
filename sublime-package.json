@@ -1310,6 +1310,26 @@
                       "markdownDescription": "These proc-macros will be ignored when trying to expand them.\n\nThis config takes a map of crate names with the exported proc-macro names to ignore as values.",
                       "type": "object"
                     },
+                    "rust-analyzer.procMacro.processes": {
+                      "markdownDescription": "Number of proc-macro server processes to spawn.\n\nControls how many independent `proc-macro-srv` processes rust-analyzer\nruns in parallel to handle macro expansion.",
+                      "default": 1,
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 255
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "physical"
+                          ],
+                          "enumDescriptions": [
+                            "Use the number of physical cores"
+                          ]
+                        }
+                      ]
+                    },
                     "rust-analyzer.procMacro.server": {
                       "default": null,
                       "markdownDescription": "Internal config, path to proc-macro server executable.",
