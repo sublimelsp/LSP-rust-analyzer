@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from functools import partial
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import LspTextCommand
@@ -12,7 +13,9 @@ from LSP.plugin.core.views import point_to_offset
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_position_params
 from LSP.plugin.locationpicker import LocationPicker
-from typing import Any, TypedDict, TYPE_CHECKING
+from typing import Any
+from typing import TYPE_CHECKING
+from typing import TypedDict
 import gzip
 import os
 import shutil
@@ -21,8 +24,10 @@ import urllib.request
 import zipfile
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Callable
-    from LSP.protocol import HoverParams, Location
+    from collections.abc import Callable
+    from collections.abc import Mapping
+    from LSP.protocol import HoverParams
+    from LSP.protocol import Location
 
 
 try:

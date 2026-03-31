@@ -1,5 +1,19 @@
 [tool.ruff]
 target-version = "py38"
+line-length = 120
+
+[tool.ruff.lint]
+# Enable preview rules.
+preview = true
+select = ["F401", "I"]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+force-single-line = true
+from-first = true
+no-sections = true
+order-by-type = false
+required-imports = ["from __future__ import annotations"]
 
 [tool.pyright]
 pythonVersion = "3.8"
