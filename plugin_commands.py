@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from .plugin import RustAnalyzerCommand
 from LSP.plugin import apply_text_edits
 from LSP.plugin import Request
@@ -9,7 +10,9 @@ from LSP.plugin.core.views import text_document_identifier
 from LSP.protocol import Range
 from LSP.protocol import TextDocumentIdentifier
 from LSP.protocol import TextEdit
-from typing import List, Literal, TypedDict
+from typing import List
+from typing import Literal
+from typing import TypedDict
 import sublime
 
 
