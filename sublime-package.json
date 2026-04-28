@@ -21,39 +21,14 @@
                 "settings": {
                   "additionalProperties": false,
                   "properties": {
-                    "rust-analyzer.restartServerOnConfigChange": {
-                      "description": "Restart the server automatically when settings that require a restart are changed.",
+                    "rust-analyzer.terminusAutoClose": {
                       "default": false,
+                      "description": "Whether or not to automatically close terminus panel/tab upon completion.",
                       "type": "boolean"
                     },
-                    "rust-analyzer.showUnlinkedFileNotification": {
-                      "description": "Show a notification for unlinked files, prompting the user to add the corresponding Cargo.toml to the linked projects setting.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.showRequestFailedErrorNotification": {
-                      "description": "Show error notifications when requests fail.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.showDependenciesExplorer": {
-                      "description": "Show Rust Dependencies in the Explorer view.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.showSyntaxTree": {
-                      "description": "Show Syntax Tree in the Explorer view.",
+                    "rust-analyzer.terminusUsePanel": {
                       "default": false,
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.testExplorer": {
-                      "description": "Show the Test Explorer view.",
-                      "default": false,
-                      "type": "boolean"
-                    },
-                    "rust-analyzer.initializeStopped": {
-                      "markdownDescription": "Do not start rust-analyzer server when the extension is activated.",
-                      "default": false,
+                      "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
                       "type": "boolean"
                     },
                     "rust-analyzer.runnables.extraEnv": {
@@ -77,190 +52,22 @@
                               },
                               "mask": {
                                 "type": "string",
-                                "description": "Runnable name mask"
+                                "markdownDescription": "Runnable name mask"
                               },
                               "env": {
                                 "type": "object",
-                                "description": "Variables in form of { \"key\": \"value\"}"
+                                "markdownDescription": "Variables in form of { \"key\": \"value\"}"
                               }
                             }
                           }
                         },
                         {
                           "type": "object",
-                          "description": "Variables in form of { \"key\": \"value\"}"
+                          "markdownDescription": "Variables in form of { \"key\": \"value\"}"
                         }
                       ],
                       "default": null,
                       "markdownDescription": "Environment variables passed to the runnable launched using `Test` or `Debug` lens or `rust-analyzer.run` command."
-                    },
-                    "rust-analyzer.runnables.problemMatcher": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "default": [
-                        "$rustc"
-                      ],
-                      "markdownDescription": "Problem matchers to use for `rust-analyzer.run` command, eg `[\"$rustc\", \"$rust-panic\"]`."
-                    },
-                    "rust-analyzer.runnables.askBeforeUpdateTest": {
-                      "type": "boolean",
-                      "default": true,
-                      "markdownDescription": "Ask before updating the test when running it."
-                    },
-                    "rust-analyzer.statusBar.clickAction": {
-                      "type": "string",
-                      "enum": [
-                        "stopServer",
-                        "openLogs"
-                      ],
-                      "enumDescriptions": [
-                        "Stop Server",
-                        "Open Logs"
-                      ],
-                      "default": "openLogs",
-                      "markdownDescription": "Action to run when clicking the extension status bar item."
-                    },
-                    "rust-analyzer.statusBar.showStatusBar": {
-                      "markdownDescription": "When to show the extension status bar.\n\n`\"always\"` Always show the status bar.\n\n`\"never\"` Never show the status bar.\n\n`{ documentSelector: <DocumentSelector>[] }` Show the status bar if the open file matches any of the given document selectors.\n\nSee [VS Code -- DocumentSelector](https://code.visualstudio.com/api/references/document-selector) for more information.",
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "enum": [
-                            "always",
-                            "never"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "documentSelector": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "language": {
-                                    "type": "string"
-                                  },
-                                  "notebookType": {
-                                    "type": "string"
-                                  },
-                                  "scheme": {
-                                    "type": "string"
-                                  },
-                                  "pattern": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      ],
-                      "default": {
-                        "documentSelector": [
-                          {
-                            "language": "rust"
-                          },
-                          {
-                            "pattern": "**/Cargo.toml"
-                          },
-                          {
-                            "pattern": "**/Cargo.lock"
-                          },
-                          {
-                            "scheme": "output",
-                            "pattern": "extension-output-rust-lang.rust-analyzer*"
-                          }
-                        ]
-                      }
-                    },
-                    "rust-analyzer.server.path": {
-                      "type": [
-                        "null",
-                        "string"
-                      ],
-                      "scope": "machine-overridable",
-                      "default": null,
-                      "markdownDescription": "Path to rust-analyzer executable (points to bundled binary by default)."
-                    },
-                    "rust-analyzer.server.extraEnv": {
-                      "type": [
-                        "null",
-                        "object"
-                      ],
-                      "additionalProperties": {
-                        "type": [
-                          "string",
-                          "number",
-                          "null"
-                        ]
-                      },
-                      "default": null,
-                      "markdownDescription": "Extra environment variables that will be passed to the rust-analyzer executable. Useful for passing e.g. `RA_LOG` for debugging."
-                    },
-                    "rust-analyzer.trace.server": {
-                      "type": "string",
-                      "scope": "window",
-                      "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                      ],
-                      "enumDescriptions": [
-                        "No traces",
-                        "Error only",
-                        "Full log"
-                      ],
-                      "default": "off",
-                      "description": "Trace requests to the rust-analyzer (this is usually overly verbose and not recommended for regular users)."
-                    },
-                    "rust-analyzer.trace.extension": {
-                      "description": "Enable logging of VS Code extensions itself.",
-                      "markdownDeprecationMessage": "Log level is now controlled by the [Developer: Set Log Level...](command:workbench.action.setLogLevel) command.You can set the log level for the current session and also the default log level from there. This is also available by clicking the gear icon on the OUTPUT tab when Rust Analyzer Client is visible or by passing the --log rust-lang.rust-analyzer:debug parameter to VS Code.",
-                      "type": "boolean",
-                      "default": false
-                    },
-                    "rust-analyzer.debug.engine": {
-                      "type": "string",
-                      "enum": [
-                        "auto",
-                        "llvm-vs-code-extensions.lldb-dap",
-                        "vadimcn.vscode-lldb",
-                        "ms-vscode.cpptools",
-                        "webfreak.debug"
-                      ],
-                      "default": "auto",
-                      "description": "Preferred debug engine.",
-                      "markdownEnumDescriptions": [
-                        "Use the first available extension out of [LLDB DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap), [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), [C/C++ for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools), and [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug).",
-                        "Use [LLDB DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap)",
-                        "Use [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)",
-                        "Use [C/C++ for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)",
-                        "Use [Native Debug](https://marketplace.visualstudio.com/items?itemName=webfreak.debug)"
-                      ]
-                    },
-                    "rust-analyzer.debug.sourceFileMap": {
-                      "type": [
-                        "object",
-                        "string"
-                      ],
-                      "const": "auto",
-                      "description": "Optional source file mappings passed to the debug engine.",
-                      "default": {
-                        "/rustc/<id>": "${env:USERPROFILE}/.rustup/toolchains/<toolchain-id>/lib/rustlib/src/rust"
-                      }
-                    },
-                    "rust-analyzer.debug.buildBeforeRestart": {
-                      "markdownDescription": "Whether to rebuild the project modules before debugging the same test again",
-                      "type": "boolean",
-                      "default": false
-                    },
-                    "rust-analyzer.debug.engineSettings": {
-                      "type": "object",
-                      "default": {},
-                      "markdownDescription": "Optional settings passed to the debug engine. Example: `{ \"lldb\": { \"terminal\":\"external\"} }`"
                     },
                     "rust-analyzer.typing.continueCommentsOnNewline": {
                       "markdownDescription": "Whether to prefix newlines after comments with the corresponding comment prefix.",
@@ -290,7 +97,7 @@
                         "todo",
                         "default"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Fill missing expressions with the `todo` macro",
                         "Fill missing expressions with reasonable defaults, `new` or `default` constructors."
                       ]
@@ -331,7 +138,7 @@
                             "physical",
                             "logical"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Use the number of physical cores",
                             "Use the number of logical cores"
                           ]
@@ -361,7 +168,7 @@
                         "per_workspace",
                         "once"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "The command will be executed for each Rust workspace with the workspace as the working directory.",
                         "The command will be executed once with the opened project as the working directory."
                       ]
@@ -420,7 +227,7 @@
                           "enum": [
                             "all"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Pass `--all-features` to cargo"
                           ]
                         },
@@ -534,7 +341,7 @@
                           "enum": [
                             "all"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Pass `--all-features` to cargo"
                           ]
                         },
@@ -566,7 +373,7 @@
                         "per_workspace",
                         "once"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "The command will be executed for each Rust workspace with the workspace as the working directory.",
                         "The command will be executed once with the opened project as the working directory."
                       ]
@@ -663,7 +470,7 @@
                                   "always",
                                   "methods"
                                 ],
-                                "enumDescriptions": [
+                                "markdownEnumDescriptions": [
                                   "Do not show this item or its methods (if it is a trait) in auto-import completions.",
                                   "Do not show this traits methods in auto-import completions."
                                 ]
@@ -687,7 +494,7 @@
                         "add_parentheses",
                         "none"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Add call parentheses and pre-fill arguments.",
                         "Add call parentheses.",
                         "Do no snippet completions for callables."
@@ -736,40 +543,40 @@
                         "Ok": {
                           "postfix": "ok",
                           "body": "Ok(${receiver})",
-                          "description": "Wrap the expression in a `Result::Ok`",
+                          "markdownDescription": "Wrap the expression in a `Result::Ok`",
                           "scope": "expr"
                         },
                         "Box::pin": {
                           "postfix": "pinbox",
                           "body": "Box::pin(${receiver})",
                           "requires": "std::boxed::Box",
-                          "description": "Put the expression into a pinned `Box`",
+                          "markdownDescription": "Put the expression into a pinned `Box`",
                           "scope": "expr"
                         },
                         "Arc::new": {
                           "postfix": "arc",
                           "body": "Arc::new(${receiver})",
                           "requires": "std::sync::Arc",
-                          "description": "Put the expression into an `Arc`",
+                          "markdownDescription": "Put the expression into an `Arc`",
                           "scope": "expr"
                         },
                         "Some": {
                           "postfix": "some",
                           "body": "Some(${receiver})",
-                          "description": "Wrap the expression in an `Option::Some`",
+                          "markdownDescription": "Wrap the expression in an `Option::Some`",
                           "scope": "expr"
                         },
                         "Err": {
                           "postfix": "err",
                           "body": "Err(${receiver})",
-                          "description": "Wrap the expression in a `Result::Err`",
+                          "markdownDescription": "Wrap the expression in a `Result::Err`",
                           "scope": "expr"
                         },
                         "Rc::new": {
                           "postfix": "rc",
                           "body": "Rc::new(${receiver})",
                           "requires": "std::rc::Rc",
-                          "description": "Put the expression into an `Rc`",
+                          "markdownDescription": "Put the expression into an `Rc`",
                           "scope": "expr"
                         }
                       },
@@ -857,7 +664,7 @@
                         "client",
                         "server"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Use the client (editor) to watch files for changes",
                         "Use server-side file watching"
                       ]
@@ -984,7 +791,7 @@
                             "decimal",
                             "hexadecimal"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Render as 12 (0xC)",
                             "Render as 12",
                             "Render as 0xC"
@@ -1019,7 +826,7 @@
                             "decimal",
                             "hexadecimal"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Render as 12 (0xC)",
                             "Render as 12",
                             "Render as 0xC"
@@ -1041,7 +848,7 @@
                             "decimal",
                             "hexadecimal"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Render as 12 (0xC)",
                             "Render as 12",
                             "Render as 0xC"
@@ -1063,7 +870,7 @@
                             "decimal",
                             "hexadecimal"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Render as 12 (0xC)",
                             "Render as 12",
                             "Render as 0xC"
@@ -1114,7 +921,7 @@
                         "one",
                         "preserve"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Merge imports from the same crate into a single use statement. Conversely, imports from different crates are split into separate statements.",
                         "Merge imports from the same module into a single use statement. Conversely, imports from different modules are split into separate statements.",
                         "Flatten imports so that each has its own use statement.",
@@ -1151,7 +958,7 @@
                         "self",
                         "crate"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item.",
                         "Insert import paths relative to the current module, using up to one `super` prefix if the parent module contains the requested item. Prefixes `self` in front of the path if it starts with a module.",
                         "Force import paths to be absolute by always starting them with `crate` or the extern crate name they come from."
@@ -1197,7 +1004,7 @@
                         "never",
                         "with_block"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show type hints for return types of closures.",
                         "Never show type hints for return types of closures.",
                         "Only show type hints for return types of closures with blocks."
@@ -1213,7 +1020,7 @@
                         "with_id",
                         "hide"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "`impl_fn`: `impl FnMut(i32, u64) -> i8`",
                         "`rust_analyzer`: `|i32, u64| -> i8`",
                         "`with_id`: `{closure#14352}`, where that id is the unique number of the closure in r-a internals",
@@ -1229,7 +1036,7 @@
                         "never",
                         "fieldless"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show all discriminant hints.",
                         "Never show discriminant hints.",
                         "Only show discriminant hints on fieldless enum variants."
@@ -1249,7 +1056,7 @@
                         "never",
                         "reborrow"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show all adjustment hints.",
                         "Never show adjustment hints.",
                         "Only show auto borrow and dereference adjustment hints."
@@ -1270,7 +1077,7 @@
                         "prefer_prefix",
                         "prefer_postfix"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show adjustment hints as prefix (`*expr`).",
                         "Always show adjustment hints as postfix (`expr.*`).",
                         "Show prefix or postfix depending on which uses less parenthesis, preferring prefix.",
@@ -1316,7 +1123,7 @@
                         "never",
                         "skip_trivial"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show lifetime elision hints.",
                         "Never show lifetime elision hints.",
                         "Only show lifetime elision hints if a return type is involved."
@@ -1360,7 +1167,7 @@
                         "never",
                         "mutable"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Always show reborrow hints.",
                         "Never show reborrow hints.",
                         "Only show mutable reborrow hints."
@@ -1404,7 +1211,7 @@
                         "inline",
                         "end_of_line"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Render type hints directly after the binding identifier.",
                         "Render type hints after the end of the containing `let` statement when possible."
                       ]
@@ -1457,7 +1264,7 @@
                         "above_name",
                         "above_whole_item"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Render annotations above the name of the item.",
                         "Render annotations above the whole item, including documentation comments and attributes."
                       ]
@@ -1541,7 +1348,7 @@
                             "physical",
                             "logical"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Use the number of physical cores",
                             "Use the number of logical cores"
                           ]
@@ -1577,7 +1384,7 @@
                           "enum": [
                             "physical"
                           ],
-                          "enumDescriptions": [
+                          "markdownEnumDescriptions": [
                             "Use the number of physical cores"
                           ]
                         }
@@ -1768,7 +1575,7 @@
                         "full",
                         "parameters"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Show the entire signature.",
                         "Show only the parameters."
                       ]
@@ -1836,7 +1643,7 @@
                         "only_types",
                         "all_symbols"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Search for types only.",
                         "Search for all symbols kinds."
                       ]
@@ -1855,7 +1662,7 @@
                         "workspace",
                         "workspace_and_dependencies"
                       ],
-                      "enumDescriptions": [
+                      "markdownEnumDescriptions": [
                         "Search in current workspace only.",
                         "Search in current workspace and dependencies."
                       ]

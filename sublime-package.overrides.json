@@ -28,6 +28,7 @@
         "rust-analyzer.showSyntaxTree",
         "rust-analyzer.showUnlinkedFileNotification",
         "rust-analyzer.statusBar.clickAction",
+        "rust-analyzer.statusBar.showStatusBar",
         "rust-analyzer.testExplorer",
         "rust-analyzer.trace.extension",
         "rust-analyzer.trace.server"
