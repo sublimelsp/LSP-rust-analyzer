@@ -1,0 +1,39 @@
+{
+    "add": {
+        "rust-analyzer.terminusAutoClose": {
+          "default": false,
+          "description": "Whether or not to automatically close terminus panel/tab upon completion.",
+          "type": "boolean"
+        },
+        "rust-analyzer.terminusUsePanel": {
+          "default": false,
+          "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
+          "type": "boolean"
+        }
+    },
+    "remove": [
+        "rust-analyzer.debug.buildBeforeRestart",
+        "rust-analyzer.debug.engine",
+        "rust-analyzer.debug.engineSettings",
+        "rust-analyzer.debug.openDebugPane",
+        "rust-analyzer.debug.sourceFileMap",
+        "rust-analyzer.initializeStopped",
+        "rust-analyzer.restartServerOnConfigChange",
+        "rust-analyzer.runnables.askBeforeUpdateTest",
+        "rust-analyzer.runnables.problemMatcher",
+        "rust-analyzer.server.extraEnv",
+        "rust-analyzer.server.path",
+        "rust-analyzer.showDependenciesExplorer",
+        "rust-analyzer.showRequestFailedErrorNotification",
+        "rust-analyzer.showSyntaxTree",
+        "rust-analyzer.showUnlinkedFileNotification",
+        "rust-analyzer.statusBar.clickAction",
+        "rust-analyzer.testExplorer",
+        "rust-analyzer.trace.extension",
+        "rust-analyzer.trace.server"
+    ],
+    "transform": [
+        "walk(if type == \"object\" then with_entries(if .key == \"description\" then .key = \"markdownDescription\" else . end) else . end)",
+        "walk(if type == \"object\" then with_entries(if .key == \"enumDescriptions\" then .key = \"markdownEnumDescriptions\" else . end) else . end)"
+    ]
+}
