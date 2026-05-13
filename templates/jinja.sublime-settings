@@ -1,0 +1,9 @@
+{
+	"settings": {
+		{{ settings | indent('\t\t') }}
+	},
+	"selector": "source.rust",
+	"command": [
+		"${storage_path}/LSP-rust-analyzer/rust-analyzer"
+	],
+}

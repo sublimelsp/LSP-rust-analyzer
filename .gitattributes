@@ -1,5 +1,6 @@
 images/ export-ignore
 scripts/ export-ignore
+templates/ export-ignore
+settings-processor.json export-ignore
 renovate.json export-ignore
 tox.ini export-ignore
-sublime-package.overrides.json export-ignore
