@@ -58,7 +58,7 @@
     "render_templates": [
         {
             "type": "settings",
-            "template_path": "templates/jinja.sublime-settings",
+            "template_path": "templates/sublime-settings.jinja.json",
             "output_path": "LSP-rust-analyzer.sublime-settings"
         },
         {

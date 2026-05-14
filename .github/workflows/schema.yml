@@ -1,4 +1,4 @@
-name: Check/update RA settings
+name: Update settings
 
 on:
   pull_request:
