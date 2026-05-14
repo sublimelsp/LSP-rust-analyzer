@@ -1,4 +1,6 @@
 {
+    "input_repository_url": "https://github.com/rust-lang/rust-analyzer",
+    "input_repository_json_configuration_path": "editors/code/package.json",
     "transformers": [
         {
             "type": "jq",

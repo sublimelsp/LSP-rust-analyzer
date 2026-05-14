@@ -11,7 +11,5 @@ jobs:
   check-settings:
     uses: sublimelsp/workflows/.github/workflows/changed-settings.yaml@v2
     with:
-      repository_url: 'https://github.com/rust-lang/rust-analyzer'
-      configuration_file_path: 'editors/code/package.json'
       version_file: 'plugin.py'
       version_regexp: 'TAG = "([^"]+)"'
