@@ -1,0 +1,70 @@
+{
+    "input_repository_url": "https://github.com/rust-lang/rust-analyzer",
+    "input_repository_json_configuration_path": "editors/code/package.json",
+    "transformers": [
+        {
+            "type": "jq",
+            "options": "[.contributes.configuration[].properties | select(. != null)] | add"
+        },
+        {
+            "type": "jq",
+            "options": "walk(if type == \"object\" then with_entries(if .key == \"description\" then .key = \"markdownDescription\" else . end) else . end)"
+        },
+        {
+            "type": "jq",
+            "options": "walk(if type == \"object\" then with_entries(if .key == \"enumDescriptions\" then .key = \"markdownEnumDescriptions\" else . end) else . end)"
+        },
+        {
+            "type": "remove_keys",
+            "options": [
+                "rust-analyzer.debug.buildBeforeRestart",
+                "rust-analyzer.debug.engine",
+                "rust-analyzer.debug.engineSettings",
+                "rust-analyzer.debug.openDebugPane",
+                "rust-analyzer.debug.sourceFileMap",
+                "rust-analyzer.initializeStopped",
+                "rust-analyzer.restartServerOnConfigChange",
+                "rust-analyzer.runnables.askBeforeUpdateTest",
+                "rust-analyzer.runnables.problemMatcher",
+                "rust-analyzer.server.extraEnv",
+                "rust-analyzer.server.path",
+                "rust-analyzer.showDependenciesExplorer",
+                "rust-analyzer.showRequestFailedErrorNotification",
+                "rust-analyzer.showSyntaxTree",
+                "rust-analyzer.showUnlinkedFileNotification",
+                "rust-analyzer.statusBar.clickAction",
+                "rust-analyzer.statusBar.showStatusBar",
+                "rust-analyzer.testExplorer",
+                "rust-analyzer.trace.extension",
+                "rust-analyzer.trace.server"
+            ]
+        },
+        {
+            "type": "prepend_keys",
+            "options": {
+                "rust-analyzer.terminusAutoClose": {
+                    "default": false,
+                    "description": "Whether or not to automatically close terminus panel/tab upon completion.",
+                    "type": "boolean"
+                },
+                "rust-analyzer.terminusUsePanel": {
+                    "default": false,
+                    "description": "Whether or not to spawn a panel at the bottom, or a new tab.",
+                    "type": "boolean"
+                }
+            }
+        }
+    ],
+    "render_templates": [
+        {
+            "type": "settings",
+            "template_path": "templates/sublime-settings.jinja.json",
+            "output_path": "LSP-rust-analyzer.sublime-settings"
+        },
+        {
+            "type": "schema",
+            "template_path": "templates/sublime-package.jinja.json",
+            "output_path": "sublime-package.json"
+        }
+    ]
+}
