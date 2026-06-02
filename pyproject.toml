@@ -17,3 +17,4 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.pyright]
 pythonVersion = "3.8"
+typeCheckingMode = "standard"
