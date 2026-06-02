@@ -6,7 +6,7 @@ This is a helper package that starts the [rust-analyzer](https://github.com/rust
 
 1. Install [LSP](https://packagecontrol.io/packages/LSP) via Package Control.
 2. Install [LSP-rust-analyzer](https://packagecontrol.io/packages/LSP-rust-analyzer) via Package Control.
-3. (Recommended) Install the [LSP-file-watcher-chokidar](https://github.com/sublimelsp/LSP-file-watcher-chokidar) via Package Control to enable functionality to notify the server about changed files.
+3. (Recommended) Install the [LSP-file-watcher-rust](https://github.com/sublimelsp/LSP-file-watcher-rust) via Package Control to enable functionality to notify the server about changed files.
 
 ## Configuration
 
@@ -21,7 +21,7 @@ You can also have a project-specific configuration. Run the `Project: Edit Proje
     // ]
     "settings": {
         "LSP": {
-            "rust-analyzer": {
+            "LSP-rust-analyzer": {
                 "settings": {
                     //Setting-here
                 }

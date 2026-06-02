@@ -1,0 +1,33 @@
+!!WARNING!!
+
+The key used to override LSP-rust-analyzer settings in project settings has changed from "rust-analyzer" to "LSP-rust-analyzer".
+
+If you are using project-specific overrides for LSP-rust-analyzer then you have to change the key for it to apply.
+
+Before:
+
+```
+{
+    "settings": {
+        "LSP": {
+            "rust-analyzer": {
+              // ...
+            }
+        }
+    }
+}
+```
+
+After:
+
+```
+{
+    "settings": {
+        "LSP": {
+            "LSP-rust-analyzerd": {
+              // ...
+            }
+        }
+    }
+}
+```

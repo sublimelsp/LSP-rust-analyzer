@@ -1,32 +1,31 @@
 from __future__ import annotations
 
 from functools import partial
-from LSP.plugin import AbstractPlugin
+from LSP.plugin import ClientConfig
+from LSP.plugin import ClientRequest
+from LSP.plugin import command_handler
+from LSP.plugin import LspPlugin
 from LSP.plugin import LspTextCommand
-from LSP.plugin import register_plugin
+from LSP.plugin import OnPreStartContext
+from LSP.plugin import Promise
 from LSP.plugin import Request
-from LSP.plugin import Session
-from LSP.plugin import unregister_plugin
 from LSP.plugin.core.protocol import Point
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import point_to_offset
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_position_params
-from LSP.plugin.locationpicker import LocationPicker
+from LSP.protocol import LSPAny
 from typing import Any
 from typing import TYPE_CHECKING
 from typing import TypedDict
+from typing_extensions import override
 import gzip
-import os
 import shutil
 import sublime
 import urllib.request
 import zipfile
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-    from collections.abc import Mapping
-    from LSP.protocol import HoverParams
     from LSP.protocol import Location
 
 
@@ -35,8 +34,6 @@ try:
 except ImportError:
     Terminus = None
 
-
-SESSION_NAME = "rust-analyzer"
 
 TAG = "2026-05-25"
 """
@@ -52,11 +49,13 @@ package.json, but not in `LSP-rust-analyzer`'s sublime-settings.
 
 URL = "https://github.com/rust-analyzer/rust-analyzer/releases/download/{tag}/rust-analyzer-{arch}-{platform}.{ext}"
 
+
 class RunnableArgs(TypedDict, total=True):
     cargoArgs: list[str]
     executableArgs: list[str]
     overrideCargo: str | None
     workspaceRoot: str
+
 
 class Runnable(TypedDict, total=True):
     args: RunnableArgs
@@ -65,36 +64,28 @@ class Runnable(TypedDict, total=True):
 
 
 def arch() -> str:
-    if sublime.arch() == "x64":
+    arch = sublime.arch()
+    if arch == "x64":
         return "x86_64"
-    if sublime.arch() == "x32":
+    if arch == "x32":
         raise RuntimeError("Unsupported platform: 32-bit is not supported")
-    if sublime.arch() == "arm64":
+    if arch == "arm64":
         return "aarch64"
-    raise RuntimeError("Unknown architecture: " + sublime.arch())
-
-
-def get_setting(view: sublime.View, key: str, *, default: str | bool | None = None) -> Any:
-    settings = view.settings()
-    if settings.has(key):
-        return settings.get(key)
-    settings = sublime.load_settings('LSP-rust-analyzer.sublime-settings').get("settings", {})
-    return settings.get(key, default)
+    raise RuntimeError("Unknown architecture: " + arch)
 
 
 def platform() -> str:
-    if sublime.platform() == "windows":
+    platform = sublime.platform()
+    if platform == "windows":
         return "pc-windows-msvc"
-    if sublime.platform() == "osx":
+    if platform == "osx":
         return "apple-darwin"
     return "unknown-linux-gnu"
 
 
-def open_runnables_in_terminus(window: sublime.Window | None, runnables: list[Runnable]) -> None:
+def open_runnables_in_terminus(window: sublime.Window, runnables: list[Runnable], config: ClientConfig) -> None:
     filtered_runnables = [r for r in runnables if r["kind"] == "cargo"]
     if len(filtered_runnables) == 0:
-        return
-    if not window:
         return
     view = window.active_view()
     if not view:
@@ -117,129 +108,87 @@ def open_runnables_in_terminus(window: sublime.Window | None, runnables: list[Ru
             "title": runnable["label"],
             "cmd": command_to_run,
             "cwd": args["workspaceRoot"],
-            "auto_close": get_setting(view, "rust-analyzer.terminusAutoClose", default=False)
+            "auto_close": config.settings.get("rust-analyzer.terminusAutoClose", default=False)
         }
-        if get_setting(view, "rust-analyzer.terminusUsePanel", default=False):
+        if config.settings.get("rust-analyzer.terminusUsePanel", default=False):
             terminus_args["panel_name"] = runnable["label"]
         window.run_command("terminus_open", terminus_args)
 
 
-class RustAnalyzer(AbstractPlugin):
+class RustAnalyzer(LspPlugin):
 
     @classmethod
-    def name(cls) -> str:
-        return SESSION_NAME
-
-    @classmethod
-    def basedir(cls) -> str:
-        return os.path.join(cls.storage_path(), __package__)
-
-    @classmethod
-    def server_version(cls) -> str:
-        return TAG
-
-    @classmethod
-    def current_server_version(cls) -> str:
-        with open(os.path.join(cls.basedir(), "VERSION"), "r") as fp:
-            return fp.read()
-
-    @classmethod
-    def needs_update_or_installation(cls) -> bool:
+    @override
+    def on_pre_start_async(cls, context: OnPreStartContext) -> None:
+        version_file_path = cls.plugin_storage_path / "VERSION"
+        if version_file_path.is_file() and version_file_path.read_text(encoding="utf-8") == TAG:
+            return
         try:
-            return cls.server_version() != cls.current_server_version()
-        except OSError:
-            return True
-
-    @classmethod
-    def install_or_update(cls) -> None:
-        try:
-            if os.path.isdir(cls.basedir()):
-                shutil.rmtree(cls.basedir())
-            os.makedirs(cls.basedir(), exist_ok=True)
-            version = cls.server_version()
+            if cls.plugin_storage_path.is_dir():
+                shutil.rmtree(cls.plugin_storage_path)
+            cls.plugin_storage_path.mkdir(exist_ok=True, parents=True)
             is_windows = sublime.platform() == "windows"
             extension = "zip" if is_windows else "gz"
             url = URL.format(tag=TAG, arch=arch(), platform=platform(), ext=extension)
-            archive_file = os.path.join(cls.basedir(), f"rust-analyzer.{extension}")
+            archive_file = cls.plugin_storage_path / f"rust-analyzer.{extension}"
             rust_analyzer_filename = "rust-analyzer.exe" if is_windows else "rust-analyzer"
-            rust_analyzer_path = os.path.join(cls.basedir(), rust_analyzer_filename)
-            with urllib.request.urlopen(url) as fp:
-                with open(archive_file, "wb") as f:
-                    f.write(fp.read())
+            rust_analyzer_path = cls.plugin_storage_path / rust_analyzer_filename
+            with urllib.request.urlopen(url) as fp, open(archive_file, "wb") as f:
+                f.write(fp.read())
             if is_windows:
                 with zipfile.ZipFile(archive_file, "r") as zip_ref:
-                    zip_ref.extract(rust_analyzer_filename, cls.basedir())
+                    zip_ref.extract(rust_analyzer_filename, cls.plugin_storage_path)
             else:
-                with gzip.open(archive_file, "rb") as fp:
-                    with open(rust_analyzer_path, "wb") as f:
-                        f.write(fp.read())
-            os.remove(archive_file)
-            os.chmod(rust_analyzer_path, 0o744)
-            with open(os.path.join(cls.basedir(), "VERSION"), "w") as fp:
-                fp.write(version)
+                with gzip.open(archive_file, "rb") as fp, open(rust_analyzer_path, "wb") as f:
+                    f.write(fp.read())
+            archive_file.unlink()
+            rust_analyzer_path.chmod(0o744)
+            version_file_path.write_text(TAG, encoding='utf-8')
         except BaseException:
-            shutil.rmtree(cls.basedir(), ignore_errors=True)
+            shutil.rmtree(cls.plugin_storage_path, ignore_errors=True)
             raise
 
-    def on_pre_send_request_async(self, request_id: int, request: Request) -> None:
-        if request.method == 'textDocument/hover' and request.view:
-            session = self.weaksession()
-            if not session:
-                return
-            if not session.get_capability('experimental.hoverRange'):
-                return
-            view = request.view
-            region = first_selection_region(view)
-            if region is not None:
-                params: HoverParams = request.params
-                position = params['position']
-                point = point_to_offset(Point.from_lsp(position), view)
+    @override
+    def on_pre_send_request_async(self, request: ClientRequest, view: sublime.View | None) -> None:
+        if (
+            request['method'] == 'textDocument/hover' and view
+            and (session := self.weaksession())
+            and session.get_capability('experimental.hoverRange')
+        ):
+            if (region := first_selection_region(view)) is not None:
+                params = request['params']
+                point = point_to_offset(Point.from_lsp(params['position']), view)
                 if region.contains(point):
-                    params['position'] = region_to_range(view, region)
+                    params['position'] = region_to_range(view, region)  # pyright: ignore[reportGeneralTypeIssues]
+            return
 
-    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        command_name = command["command"]
-        try:
-            session = self.weaksession()
-            if not session:
-                return False
-            if command_name in ("rust-analyzer.runSingle", "rust-analyzer.runDebug"):
-                open_runnables_in_terminus(sublime.active_window(), command["arguments"])
-                done_callback()
-                return True
-            if command_name == "rust-analyzer.showReferences":
-                return self._handle_show_references(session, command, done_callback)
-            if command_name == "rust-analyzer.triggerParameterHints":
-                done_callback()
-                return True
-        except Exception as ex:
-            print(f"Exception handling command {command_name}: {ex}")
-        return False
+    @command_handler('rust-analyzer.runSingle')
+    @command_handler('rust-analyzer.runDebug')
+    def handle_run_single_command(self, arguments: list[Runnable] | None) -> Promise[None]:
+        if session := self.weaksession():
+            open_runnables_in_terminus(session.window, arguments or [], session.config)
+        return Promise.resolve(None)
 
-    def _handle_show_references(
-        self,
-        session: Session,
-        command: Mapping[str, Any],
-        done_callback: Callable[[], None]
-    ) -> bool:
-        locations = command["arguments"][2]
-        view = session.window.active_view()
-        if not view:
-            return True
-        LocationPicker(view, session, locations, side_by_side=False)
-        done_callback()
-        return True
+    @command_handler('rust-analyzer.showReferences')
+    def handle_show_references_command(self, arguments: list[LSPAny] | None) -> Promise[None]:
+        if session := self.weaksession():
+            session.execute_command({
+                'command': 'editor.action.showReferences',
+                'arguments': arguments or [],
+            })
+        return Promise.resolve(None)
 
-    def is_valid_for_view(self, view: sublime.View) -> bool:
-        session = self.weaksession()
-        return bool(session and session.session_view_for_view_async(view))
+    @command_handler('rust-analyzer.triggerParameterHints')
+    def handle_trigger_parameter_hints_command(self, arguments: list[LSPAny] | None) -> Promise[None]:
+        if session := self.weaksession():
+            session.execute_command({
+                'command': 'editor.action.triggerParameterHints',
+                'arguments': arguments or [],
+            })
+        return Promise.resolve(None)
 
 
-class RustAnalyzerCommand(LspTextCommand):
-    session_name = SESSION_NAME
-
-
-class RustAnalyzerOpenDocsCommand(RustAnalyzerCommand):
+class RustAnalyzerOpenDocsCommand(LspTextCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -262,7 +211,7 @@ class RustAnalyzerOpenDocsCommand(RustAnalyzerCommand):
             window.run_command("open_url", {"url": url})
 
 
-class RustAnalyzerMemoryUsage(RustAnalyzerCommand):
+class RustAnalyzerMemoryUsage(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
@@ -291,19 +240,18 @@ class RustAnalyzerMemoryUsage(RustAnalyzerCommand):
             window.select_sheets(sheets)
 
 
-class RustAnalyzerExec(RustAnalyzerCommand):
+class RustAnalyzerExec(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(Request("experimental/runnables", params), self.on_result)
+        if session := self.session_by_name(self.session_name):
+            params = text_document_position_params(self.view, self.view.sel()[0].b)
+            session.send_request(Request("experimental/runnables", params), self.on_result)
 
     def run_terminus(self, check_phrase: str, runnables: list[Runnable]) -> None:
-        for runnable in runnables:
-            if runnable["label"].startswith(check_phrase):
-                open_runnables_in_terminus(self.view.window(), [runnable])
+        if session := self.session_by_name(self.session_name):
+            for runnable in runnables:
+                if runnable["label"].startswith(check_phrase):
+                    open_runnables_in_terminus(session.window, [runnable], session.config)
 
     def on_result(self, payload: Any) -> None:
         raise NotImplementedError
@@ -338,7 +286,7 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
         self.run_terminus(items[option], payload)
 
 
-class RustAnalyzerOpenCargoToml(RustAnalyzerCommand):
+class RustAnalyzerOpenCargoToml(LspTextCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -363,7 +311,7 @@ class RustAnalyzerOpenCargoToml(RustAnalyzerCommand):
         session.open_location_async(payload)
 
 
-class RustAnalyzerSyntaxTree(RustAnalyzerCommand):
+class RustAnalyzerSyntaxTree(LspTextCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -400,7 +348,7 @@ class RustAnalyzerSyntaxTree(RustAnalyzerCommand):
             window.select_sheets(sheets)
 
 
-class RustAnalyzerViewItemTree(RustAnalyzerCommand):
+class RustAnalyzerViewItemTree(LspTextCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -437,7 +385,7 @@ class RustAnalyzerViewItemTree(RustAnalyzerCommand):
             window.select_sheets(sheets)
 
 
-class RustAnalyzerReloadProject(RustAnalyzerCommand):
+class RustAnalyzerReloadProject(LspTextCommand):
 
     def run(self, _: sublime.Edit) -> None:
         session = self.session_by_name(self.session_name)
@@ -446,7 +394,7 @@ class RustAnalyzerReloadProject(RustAnalyzerCommand):
         session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
 
 
-class RustAnalyzerExpandMacro(RustAnalyzerCommand):
+class RustAnalyzerExpandMacro(LspTextCommand):
 
     def is_enabled(self) -> bool:
         selection = self.view.sel()
@@ -486,8 +434,8 @@ class RustAnalyzerExpandMacro(RustAnalyzerCommand):
 
 
 def plugin_loaded() -> None:
-    register_plugin(RustAnalyzer)
+    RustAnalyzer.register()
 
 
 def plugin_unloaded() -> None:
-    unregister_plugin(RustAnalyzer)
+    RustAnalyzer.unregister()
