@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .plugin import RustAnalyzerCommand
 from LSP.plugin import apply_text_edits
+from LSP.plugin import LspTextCommand
 from LSP.plugin import Request
 from LSP.plugin.core.protocol import Error
 from LSP.plugin.core.views import first_selection_region
@@ -47,7 +47,7 @@ class MoveItemRequest:
     ReturnType = List[Union[RASnippetTextEdit, SnippetTextEdit]]
 
 
-class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
+class RustAnalyzerJoinLinesCommand(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
         sublime.set_timeout_async(self.make_request_async)
@@ -66,7 +66,7 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
             'textDocument': text_document_identifier(self.view),
             'ranges': [region_to_range(self.view, region) for region in self.view.sel()],
         }
-        request: Request[JoinLinesRequest.ReturnType] = Request(JoinLinesRequest.Type, params)
+        request: Request[JoinLinesRequest.ParamsType, JoinLinesRequest.ReturnType] = Request(JoinLinesRequest.Type, params)
         document_version = self.view.change_count()
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
@@ -80,7 +80,7 @@ class RustAnalyzerJoinLinesCommand(RustAnalyzerCommand):
         apply_text_edits(self.view, edits, required_view_version=document_version)
 
 
-class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
+class RustAnalyzerMoveItemCommand(LspTextCommand):
 
     def run(self, edit: sublime.Edit, direction: MoveItemRequest.Direction | None = None) -> None:
         if direction not in ('Up', 'Down'):
@@ -106,7 +106,7 @@ class RustAnalyzerMoveItemCommand(RustAnalyzerCommand):
             'range': region_to_range(self.view, first_selection),
             'direction': direction,
         }
-        request: Request[MoveItemRequest.ReturnType] = Request(MoveItemRequest.Type, params)
+        request: Request[MoveItemRequest.ParamsType, MoveItemRequest.ReturnType] = Request(MoveItemRequest.Type, params)
         document_version = self.view.change_count()
         view_listener.purge_changes_async()
         session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
