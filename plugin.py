@@ -9,13 +9,19 @@ from LSP.plugin import LspTextCommand
 from LSP.plugin import OnPreStartContext
 from LSP.plugin import Promise
 from LSP.plugin import Request
+from LSP.plugin import ServerResponse
 from LSP.plugin.core.protocol import Point
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import point_to_offset
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_position_params
+from LSP.protocol import AnnotatedTextEdit
+from LSP.protocol import InsertTextFormat
 from LSP.protocol import LSPAny
+from LSP.protocol import SnippetTextEdit
+from LSP.protocol import TextEdit
 from typing import Any
+from typing import cast
 from typing import TYPE_CHECKING
 from typing import TypedDict
 from typing_extensions import override
@@ -177,6 +183,23 @@ class RustAnalyzer(LspPlugin):
                 if region.contains(point):
                     params['position'] = region_to_range(view, region)  # pyright: ignore[reportGeneralTypeIssues]
             return
+
+    @override
+    def on_server_response_async(self, response: ServerResponse) -> None:
+        if response['method'] == 'codeAction/resolve':
+            result = response['result']
+            if (edit := result.get('edit')) and (document_changes := edit.get('documentChanges')):
+                for change in document_changes:
+                    if 'edits' in change:
+                        for edit in change['edits']:
+                            if 'newText' in edit:
+                                self.convert_proprietary_snippet(edit)
+            return
+
+    def convert_proprietary_snippet(self, edit: TextEdit | AnnotatedTextEdit) -> None:
+        if not 'snippet' in edit and edit.get('insertTextFormat') == InsertTextFormat.Snippet:
+            cast('SnippetTextEdit', edit)['snippet'] = {'kind': 'snippet', 'value': edit['newText']}
+
 
     @command_handler('rust-analyzer.runSingle')
     @command_handler('rust-analyzer.runDebug')
