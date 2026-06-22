@@ -15,31 +15,6 @@
             "options": "walk(if type == \"object\" then with_entries(if .key == \"enumDescriptions\" then .key = \"markdownEnumDescriptions\" else . end) else . end)"
         },
         {
-            "type": "remove_keys",
-            "options": [
-                "rust-analyzer.debug.buildBeforeRestart",
-                "rust-analyzer.debug.engine",
-                "rust-analyzer.debug.engineSettings",
-                "rust-analyzer.debug.openDebugPane",
-                "rust-analyzer.debug.sourceFileMap",
-                "rust-analyzer.initializeStopped",
-                "rust-analyzer.restartServerOnConfigChange",
-                "rust-analyzer.runnables.askBeforeUpdateTest",
-                "rust-analyzer.runnables.problemMatcher",
-                "rust-analyzer.server.extraEnv",
-                "rust-analyzer.server.path",
-                "rust-analyzer.showDependenciesExplorer",
-                "rust-analyzer.showRequestFailedErrorNotification",
-                "rust-analyzer.showSyntaxTree",
-                "rust-analyzer.showUnlinkedFileNotification",
-                "rust-analyzer.statusBar.clickAction",
-                "rust-analyzer.statusBar.showStatusBar",
-                "rust-analyzer.testExplorer",
-                "rust-analyzer.trace.extension",
-                "rust-analyzer.trace.server"
-            ]
-        },
-        {
             "type": "prepend_keys",
             "options": {
                 "terminusAutoClose": {
@@ -57,6 +32,33 @@
         {
             "type": "jq",
             "options": "with_entries(.key |= ltrimstr(\"rust-analyzer.\"))"
+        },
+        {
+            "type": "remove_keys",
+            "options": [
+                "debug.buildBeforeRestart",
+                "debug.engine",
+                "debug.engineSettings",
+                "debug.openDebugPane",
+                "debug.sourceFileMap",
+                "initializeStopped",
+                "projectCreation.openAfterCreate",
+                "restartServerOnConfigChange",
+                "runnables.askBeforeUpdateTest",
+                "runnables.problemMatcher",
+                "server.extraEnv",
+                "server.path",
+                "showDependenciesExplorer",
+                "showRequestFailedErrorNotification",
+                "showSyntaxTree",
+                "showUnlinkedFileNotification",
+                "statusBar.clickAction",
+                "statusBar.showStatusBar",
+                "testExplorer",
+                "testExplorer",
+                "trace.extension",
+                "trace.server"
+            ]
         }
     ],
     "render_templates": [

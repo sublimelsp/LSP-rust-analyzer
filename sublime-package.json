@@ -1678,7 +1678,7 @@
                   }
                 },
                 "settings": {
-                  "deprecationMessage": "Use `initialization_options` instead."
+                  "deprecationMessage": "Set settings in `initialization_options` instead. Don't include the \"rust-analyzer.\" prefix in the key."
                 }
               }
             }
