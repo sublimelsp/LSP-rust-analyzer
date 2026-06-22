@@ -18,9 +18,12 @@
           "definitions": {
             "PluginConfig": {
               "properties": {
-                "settings": {
+                "initialization_options": {
                   "additionalProperties": false,
                   "properties": {{ settings | indent(18) }}
+                },
+                "settings": {
+                  "deprecationMessage": "Set settings in `initialization_options` instead. Don't include the \"rust-analyzer.\" prefix in the key."
                 }
               }
             }

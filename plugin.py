@@ -108,18 +108,26 @@ def open_runnables_in_terminus(window: sublime.Window, runnables: list[Runnable]
             "title": runnable["label"],
             "cmd": command_to_run,
             "cwd": args["workspaceRoot"],
-            "auto_close": config.settings.get("rust-analyzer.terminusAutoClose", default=False)
+            "auto_close": get_package_setting(config, "terminusAutoClose", default=False)
         }
-        if config.settings.get("rust-analyzer.terminusUsePanel", default=False):
+        if get_package_setting(config, "terminusUsePanel", default=False):
             terminus_args["panel_name"] = runnable["label"]
         window.run_command("terminus_open", terminus_args)
 
+
+def get_package_setting(config: ClientConfig, key: str, *, default: Any = None) -> Any:
+    legacy_key = f'rust-analyzer.{key}'
+    if legacy_key in config.settings:
+        return config.settings.get(legacy_key, default)
+    return config.initialization_options.get(key, default)
 
 class RustAnalyzer(LspPlugin):
 
     @classmethod
     @override
     def on_pre_start_async(cls, context: OnPreStartContext) -> None:
+        # Copy initialization_options to settings.
+        context.configuration.settings.set('rust-analyzer', context.configuration.initialization_options.get())
         version_file_path = cls.plugin_storage_path / "VERSION"
         if version_file_path.is_file() and version_file_path.read_text(encoding="utf-8") == TAG:
             return

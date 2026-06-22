@@ -1,5 +1,5 @@
 {
-	"settings": {
+	"initialization_options": {
 		{{ settings | indent('\t\t') }}
 	},
 	"selector": "source.rust",
