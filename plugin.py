@@ -126,8 +126,16 @@ class RustAnalyzer(LspPlugin):
     @classmethod
     @override
     def on_pre_start_async(cls, context: OnPreStartContext) -> None:
+        server_path = context.configuration.root_settings.get('server_path')
+        if not server_path or server_path == 'auto':
+            cls.install_server()
+            server_path = str(cls.plugin_storage_path / 'rust-analyzer')
+        context.variables.update({'server_path': server_path})
         # Copy initialization_options to settings.
         context.configuration.settings.set('rust-analyzer', context.configuration.initialization_options.get())
+
+    @classmethod
+    def install_server(cls) -> None:
         version_file_path = cls.plugin_storage_path / "VERSION"
         if version_file_path.is_file() and version_file_path.read_text(encoding="utf-8") == TAG:
             return
