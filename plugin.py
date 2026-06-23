@@ -138,7 +138,7 @@ class RustAnalyzer(LspPlugin):
             server_path = str(cls.plugin_storage_path / 'rust-analyzer')
         context.variables.update({'server_path': server_path})
         # Copy initialization_options to settings.
-        legacy_settings = context.configuration.settings.get('rust-analyzer', {})
+        legacy_settings = context.configuration.settings.get('rust-analyzer') or {}
         context.configuration.initialization_options.update(legacy_settings)
         context.configuration.settings.set('rust-analyzer', context.configuration.initialization_options.get())
 
