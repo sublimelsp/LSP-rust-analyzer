@@ -8,7 +8,6 @@ from LSP.plugin import Error
 from LSP.plugin import LspPlugin
 from LSP.plugin import LspTextCommand
 from LSP.plugin import OnPreStartContext
-from LSP.plugin import Promise
 from LSP.plugin import Request
 from LSP.plugin import run_coroutine
 from LSP.plugin import ServerResponse
@@ -207,28 +206,25 @@ class RustAnalyzer(LspPlugin):
 
     @command_handler('rust-analyzer.runSingle')
     @command_handler('rust-analyzer.runDebug')
-    def handle_run_single_command(self, arguments: list[Runnable] | None) -> Promise[None]:
+    async def handle_run_single_command(self, arguments: list[Runnable] | None) -> None:
         if session := self.weaksession():
             open_runnables_in_terminus(session.window, arguments or [], session.config)
-        return Promise.resolve(None)
 
     @command_handler('rust-analyzer.showReferences')
-    def handle_show_references_command(self, arguments: list[LSPAny] | None) -> Promise[None]:
+    async def handle_show_references_command(self, arguments: list[LSPAny] | None) -> None:
         if session := self.weaksession():
-            session.execute_command({
+            await session.run_command({
                 'command': 'editor.action.showReferences',
                 'arguments': arguments or [],
             })
-        return Promise.resolve(None)
 
     @command_handler('rust-analyzer.triggerParameterHints')
-    def handle_trigger_parameter_hints_command(self, arguments: list[LSPAny] | None) -> Promise[None]:
+    async def handle_trigger_parameter_hints_command(self, arguments: list[LSPAny] | None) -> None:
         if session := self.weaksession():
-            session.execute_command({
+            await session.run_command({
                 'command': 'editor.action.triggerParameterHints',
                 'arguments': arguments or [],
             })
-        return Promise.resolve(None)
 
 
 class RustAnalyzerOpenDocsCommand(LspTextCommand):
@@ -240,13 +236,17 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
         params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(Request("experimental/externalDocs", params), self.on_result_async)
-
-    def on_result_async(self, url: str | None) -> None:
+        url: str | Error | None = await session.request(Request("experimental/externalDocs", params))
+        if isinstance(url, Error):
+            sublime.error_message(f"failed to open docs: {url}")
+            return
         window = self.view.window()
         if window is None:
             return
@@ -257,15 +257,13 @@ class RustAnalyzerOpenDocsCommand(LspTextCommand):
 class RustAnalyzerMemoryUsage(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(
-            Request("rust-analyzer/memoryUsage"),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
-        )
-
-    def on_result(self, payload: str) -> None:
+        payload: str | Error = await session.request(Request("rust-analyzer/memoryUsage"))
         window = self.view.window()
         if window is None:
             return
@@ -273,9 +271,12 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
         view = window.new_file(flags=sublime.TRANSIENT)
         view.set_scratch(True)
         view.set_name("--- RustAnalyzer Memory Usage ---")
-        view.run_command("append", {"characters": "Per-query memory usage:\n"})
-        view.run_command("append", {"characters": payload})
-        view.run_command("append", {"characters": "\n(note: database has been cleared)"})
+        if isinstance(payload, Error):
+            view.run_command("append", {"characters": f"ERROR: {payload}"})
+        else:
+            view.run_command("append", {"characters": "Per-query memory usage:\n"})
+            view.run_command("append", {"characters": payload})
+            view.run_command("append", {"characters": "\n(note: database has been cleared)"})
         view.set_read_only(True)
         sheet = view.sheet()
         if sheet is not None:
@@ -286,9 +287,16 @@ class RustAnalyzerMemoryUsage(LspTextCommand):
 class RustAnalyzerExec(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         if session := self.session_by_name(self.session_name):
             params = text_document_position_params(self.view, self.view.sel()[0].b)
-            session.send_request(Request("experimental/runnables", params), self.on_result)
+            payload: Any | Error = await session.request(Request("experimental/runnables", params))
+            if isinstance(payload, Error):
+                sublime.error_message(f"Error fetching runnables: {payload}")
+                return
+            self.on_result(payload)
 
     def run_terminus(self, check_phrase: str, runnables: list[Runnable]) -> None:
         if session := self.session_by_name(self.session_name):
@@ -308,14 +316,7 @@ class RustAnalyzerRunProject(RustAnalyzerExec):
             return False
         return super().is_enabled()
 
-    def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(Request("experimental/runnables", params), self.on_result_async)
-
-    def on_result_async(self, payload: list[Runnable]) -> None:
+    def on_result(self, payload: list[Runnable]) -> None:
         items = [item["label"] for item in payload]
         view = self.view
         window = view.window()
@@ -367,16 +368,19 @@ class RustAnalyzerSyntaxTree(LspTextCommand):
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(
-            Request("rust-analyzer/syntaxTree", params),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
-        )
+        sublime.set_timeout(partial(self.on_result, await session.request(Request("rust-analyzer/syntaxTree", params))))
 
-    def on_result(self, out: str | None) -> None:
+    def on_result(self, out: str | Error | None) -> None:
+        if isinstance(out, Error):
+            sublime.error_message(f"Error loading syntax tree: {out}")
+            return
         window = self.view.window()
         if window is None:
             return
@@ -396,7 +400,6 @@ class RustAnalyzerSyntaxTree(LspTextCommand):
 
 
 class RustAnalyzerViewItemTree(LspTextCommand):
-
     def is_enabled(self) -> bool:
         selection = self.view.sel()
         if len(selection) == 0:
@@ -404,16 +407,21 @@ class RustAnalyzerViewItemTree(LspTextCommand):
         return super().is_enabled()
 
     def run(self, _: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         params = text_document_position_params(self.view, self.view.sel()[0].b)
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(
-            Request("rust-analyzer/viewItemTree", params),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
+        sublime.set_timeout(
+            partial(self.on_result, await session.request(Request("rust-analyzer/viewItemTree", params)))
         )
 
-    def on_result(self, out: str | None) -> None:
+    def on_result(self, out: str | Error | None) -> None:
+        if isinstance(out, Error):
+            sublime.error_message(f"Error loading item tree: {out}")
+            return
         window = self.view.window()
         if window is None:
             return
@@ -438,7 +446,11 @@ class RustAnalyzerReloadProject(LspTextCommand):
         session = self.session_by_name(self.session_name)
         if session is None:
             return
-        session.send_request(Request("rust-analyzer/reloadWorkspace"), lambda _: None)
+
+        async def reload() -> None:
+            await session.request(Request("rust-analyzer/reloadWorkspace"))
+
+        run_coroutine(reload())
 
 
 class RustAnalyzerExpandMacro(LspTextCommand):
@@ -450,16 +462,21 @@ class RustAnalyzerExpandMacro(LspTextCommand):
         return super().is_enabled()
 
     def run(self, _: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
         params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(
-            Request("rust-analyzer/expandMacro", params),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
+        sublime.set_timeout(
+            partial(self.on_result, await session.request(Request("rust-analyzer/expandMacro", params)))
         )
 
-    def on_result(self, expanded_macro: dict[str, str] | None) -> None:
+    def on_result(self, expanded_macro: dict[str, str] | Error | None) -> None:
+        if isinstance(expanded_macro, Error):
+            sublime.error_message(f"Error expanding macro: {expanded_macro}")
+            return
         if expanded_macro is None:
             return
         window = self.view.window()
