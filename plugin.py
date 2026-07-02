@@ -348,7 +348,7 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
             return
         payload: Location | Error = await session.request(Request("experimental/openCargoToml", params))
         if isinstance(payload, Error):
-            sublime.status_message(f"unable to open cargo.toml file: {payload.message}")
+            sublime.status_message(f"unable to open cargo.toml file: {payload}")
             return
         window = self.view.window()
         if window is None:
