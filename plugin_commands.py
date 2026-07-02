@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from LSP.plugin import apply_text_edits
+from LSP.plugin import Error
 from LSP.plugin import LspTextCommand
 from LSP.plugin import Request
-from LSP.plugin.core.aio import run_coroutine
-from LSP.plugin.core.protocol import Error
+from LSP.plugin import run_coroutine
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_identifier

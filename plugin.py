@@ -4,6 +4,7 @@ from functools import partial
 from LSP.plugin import ClientConfig
 from LSP.plugin import ClientRequest
 from LSP.plugin import command_handler
+from LSP.plugin import Error
 from LSP.plugin import LspPlugin
 from LSP.plugin import LspTextCommand
 from LSP.plugin import OnPreStartContext
@@ -11,7 +12,6 @@ from LSP.plugin import Promise
 from LSP.plugin import Request
 from LSP.plugin import run_coroutine
 from LSP.plugin import ServerResponse
-from LSP.plugin.core.protocol import Error
 from LSP.plugin.core.protocol import Point
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import point_to_offset
@@ -348,6 +348,7 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
         payload: Location | Error = await session.request(Request("experimental/openCargoToml", params))
         if isinstance(payload, Error):
             sublime.status_message(f"unable to open cargo.toml file: {payload.message}")
+            return
         window = self.view.window()
         if window is None:
             return
