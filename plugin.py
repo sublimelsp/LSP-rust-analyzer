@@ -199,7 +199,7 @@ class RustAnalyzer(LspPlugin):
             return
 
     def convert_proprietary_snippet(self, edit: TextEdit | AnnotatedTextEdit) -> None:
-        if not 'snippet' in edit and edit.get('insertTextFormat') == InsertTextFormat.Snippet:
+        if edit.get('insertTextFormat') == InsertTextFormat.Snippet:
             cast('SnippetTextEdit', edit)['snippet'] = {'kind': 'snippet', 'value': edit['newText']}
 
 
@@ -350,43 +350,6 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
         if session is None:
             return
         session.open_location_async(payload)
-
-
-class RustAnalyzerSyntaxTree(LspTextCommand):
-
-    def is_enabled(self) -> bool:
-        selection = self.view.sel()
-        if len(selection) == 0:
-            return False
-        return super().is_enabled()
-
-    def run(self, edit: sublime.Edit) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        session.send_request(
-            Request("rust-analyzer/syntaxTree", params),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
-        )
-
-    def on_result(self, out: str | None) -> None:
-        window = self.view.window()
-        if window is None:
-            return
-        if out is None:
-            return
-        sheets = window.selected_sheets()
-        view = window.new_file(flags=sublime.TRANSIENT)
-        view.set_scratch(True)
-        view.set_name("Syntax Tree")
-        # Resource Aware Session Types Syntax highlighting not available
-        view.run_command("append", {"characters": out})
-        view.set_read_only(True)
-        sheet = view.sheet()
-        if sheet is not None:
-            sheets.append(sheet)
-            window.select_sheets(sheets)
 
 
 class RustAnalyzerViewItemTree(LspTextCommand):
