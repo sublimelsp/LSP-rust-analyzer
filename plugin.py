@@ -42,7 +42,7 @@ except ImportError:
     Terminus = None
 
 
-TAG = "2026-06-22"
+TAG = "2026-06-29"
 """
 Update this single git tag to download a newer version.
 After changing this tag, go through the server settings again to see
@@ -200,7 +200,7 @@ class RustAnalyzer(LspPlugin):
             return
 
     def convert_proprietary_snippet(self, edit: TextEdit | AnnotatedTextEdit) -> None:
-        if not 'snippet' in edit and edit.get('insertTextFormat') == InsertTextFormat.Snippet:
+        if edit.get('insertTextFormat') == InsertTextFormat.Snippet:
             cast('SnippetTextEdit', edit)['snippet'] = {'kind': 'snippet', 'value': edit['newText']}
 
 
@@ -358,45 +358,6 @@ class RustAnalyzerOpenCargoToml(LspTextCommand):
             return
         await session.open_location(payload)
 
-
-class RustAnalyzerSyntaxTree(LspTextCommand):
-
-    def is_enabled(self) -> bool:
-        selection = self.view.sel()
-        if len(selection) == 0:
-            return False
-        return super().is_enabled()
-
-    def run(self, edit: sublime.Edit) -> None:
-        run_coroutine(self._run())
-
-    async def _run(self) -> None:
-        params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session = self.session_by_name(self.session_name)
-        if session is None:
-            return
-        sublime.set_timeout(partial(self.on_result, await session.request(Request("rust-analyzer/syntaxTree", params))))
-
-    def on_result(self, out: str | Error | None) -> None:
-        if isinstance(out, Error):
-            sublime.error_message(f"Error loading syntax tree: {out}")
-            return
-        window = self.view.window()
-        if window is None:
-            return
-        if out is None:
-            return
-        sheets = window.selected_sheets()
-        view = window.new_file(flags=sublime.TRANSIENT)
-        view.set_scratch(True)
-        view.set_name("Syntax Tree")
-        # Resource Aware Session Types Syntax highlighting not available
-        view.run_command("append", {"characters": out})
-        view.set_read_only(True)
-        sheet = view.sheet()
-        if sheet is not None:
-            sheets.append(sheet)
-            window.select_sheets(sheets)
 
 
 class RustAnalyzerViewItemTree(LspTextCommand):
