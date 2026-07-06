@@ -889,4 +889,7 @@
 	"command": [
 		"${server_path}"
 	],
+	"experimental_capabilities": {
+		"snippetTextEdit": true,
+	}
 }
