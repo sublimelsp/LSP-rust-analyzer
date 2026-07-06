@@ -78,6 +78,10 @@
 			"debug_assertions",
 			"miri"
 		],
+		// Path to a `.cargo/config.toml` style file to pass to cargo via `--config`
+		// for every cargo invocation (metadata, build scripts, config discovery).
+		// Useful to give rust-analyzer a consistent view of the project configuration.
+		"cargo.configPath": null,
 		// Extra arguments that are passed to every cargo invocation.
 		"cargo.extraArgs": [],
 		// Extra environment variables that will be set when running cargo, rustc
