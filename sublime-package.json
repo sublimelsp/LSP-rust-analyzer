@@ -1013,7 +1013,7 @@
                       "minimum": 0
                     },
                     "inlayHints.closureCaptureHints.enable": {
-                      "markdownDescription": "Show inlay hints for closure captures.",
+                      "markdownDescription": "Show inlay hints for closure and coroutine captures.",
                       "default": false,
                       "type": "boolean"
                     },
