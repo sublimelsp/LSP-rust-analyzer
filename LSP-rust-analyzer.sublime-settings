@@ -585,7 +585,7 @@
 		//
 		// Controls how many independent `proc-macro-srv` processes rust-analyzer
 		// runs in parallel to handle macro expansion.
-		"procMacro.processes": 1,
+		"procMacro.processes": 2,
 		// Internal config, path to proc-macro server executable.
 		"procMacro.server": null,
 		// The path where to save memory profiling output.
