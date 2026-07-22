@@ -457,7 +457,7 @@
 		// Minimum number of lines required before the `}` until the hint is shown (set to 0 or 1
 		// to always show them).
 		"inlayHints.closingBraceHints.minLines": 25,
-		// Show inlay hints for closure captures.
+		// Show inlay hints for closure and coroutine captures.
 		"inlayHints.closureCaptureHints.enable": false,
 		// Show inlay type hints for return types of closures.
 		"inlayHints.closureReturnTypeHints.enable": "never",
