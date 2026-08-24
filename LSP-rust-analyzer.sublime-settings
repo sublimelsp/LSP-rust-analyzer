@@ -18,9 +18,6 @@
 		"assist.expressionFillDefault": "todo",
 		// Prefer to use `Self` over the type name when inserting a type (e.g. in "fill match arms" assist).
 		"assist.preferSelf": false,
-		// Enable borrow checking for term search code assists. If set to false, also there will be
-		// more suggestions, but some of them may not borrow-check.
-		"assist.termSearch.borrowcheck": true,
 		// Term search fuel in "units of work" for assists (Defaults to 1800).
 		"assist.termSearch.fuel": 1800,
 		// Warm up caches on project load.
