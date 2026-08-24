@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from functools import partial
+from LSP.plugin import Error
 from LSP.plugin import LspTextCommand
 from LSP.plugin import Promise
 from LSP.plugin import Request
+from LSP.plugin import run_coroutine
 from LSP.plugin.core.tree_view import new_tree_view_sheet
 from LSP.plugin.core.tree_view import TreeDataProvider
 from LSP.plugin.core.tree_view import TreeItem
@@ -177,18 +179,20 @@ class RustAnalyzerSyntaxTreeCommand(LspTextCommand):
         return super().is_enabled()
 
     def run(self, edit: sublime.Edit) -> None:
+        run_coroutine(self._run())
+
+    async def _run(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
         params = text_document_position_params(self.view, self.view.sel()[0].b)
-        session.send_request(
-            Request("rust-analyzer/viewSyntaxTree", params),
-            lambda response: sublime.set_timeout(partial(self.on_result, response))
+        sublime.set_timeout(
+            partial(self.on_result, await session.request(Request("rust-analyzer/viewSyntaxTree", params)))
         )
 
-    def on_result(self, out: str) -> None:
-        session = self.session_by_name(self.session_name)
-        if session is None:
+    def on_result(self, out: str | Error) -> None:
+        if isinstance(out, Error):
+            sublime.error_message(f"Error loading syntax tree: {out}")
             return
         window = self.view.window()
         if window is None:

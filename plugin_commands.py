@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from LSP.plugin import apply_text_edits
+from LSP.plugin import Error
 from LSP.plugin import LspTextCommand
 from LSP.plugin import Request
-from LSP.plugin.core.protocol import Error
+from LSP.plugin import run_coroutine
 from LSP.plugin.core.views import first_selection_region
 from LSP.plugin.core.views import region_to_range
 from LSP.plugin.core.views import text_document_identifier
@@ -50,9 +51,9 @@ class MoveItemRequest:
 class RustAnalyzerJoinLinesCommand(LspTextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
-        sublime.set_timeout_async(self.make_request_async)
+        run_coroutine(self.make_request())
 
-    def make_request_async(self) -> None:
+    async def make_request(self) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
@@ -68,16 +69,14 @@ class RustAnalyzerJoinLinesCommand(LspTextCommand):
         }
         request: Request[JoinLinesRequest.ParamsType, JoinLinesRequest.ReturnType] = Request(JoinLinesRequest.Type, params)
         document_version = self.view.change_count()
-        view_listener.purge_changes_async()
-        session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
-
-    def on_result_async(self, edits: JoinLinesRequest.ReturnType | Error, document_version: int) -> None:
+        await view_listener.purge_changes()
+        edits = await session.request(request)
         if isinstance(edits, Error):
             sublime.status_message(
                 f'Error handling the "{JoinLinesRequest.Type}" request. Falling back to native join.')
             self.view.run_command('join_lines')
             return
-        apply_text_edits(self.view, edits, required_view_version=document_version)
+        await apply_text_edits(self.view, edits, required_view_version=document_version)
 
 
 class RustAnalyzerMoveItemCommand(LspTextCommand):
@@ -86,9 +85,9 @@ class RustAnalyzerMoveItemCommand(LspTextCommand):
         if direction not in ('Up', 'Down'):
             sublime.status_message('Error running command: direction must be either "Up" or "Down".')
             return
-        sublime.set_timeout_async(lambda: self.make_request_async(direction))
+        run_coroutine(self.make_request(direction))
 
-    def make_request_async(self, direction: MoveItemRequest.Direction) -> None:
+    async def make_request(self, direction: MoveItemRequest.Direction) -> None:
         session = self.session_by_name(self.session_name)
         if session is None:
             return
@@ -108,10 +107,8 @@ class RustAnalyzerMoveItemCommand(LspTextCommand):
         }
         request: Request[MoveItemRequest.ParamsType, MoveItemRequest.ReturnType] = Request(MoveItemRequest.Type, params)
         document_version = self.view.change_count()
-        view_listener.purge_changes_async()
-        session.send_request_task(request).then(lambda result: self.on_result_async(result, document_version))
-
-    def on_result_async(self, edits: MoveItemRequest.ReturnType | Error, document_version: int) -> None:
+        await view_listener.purge_changes()
+        edits = await session.request(request)
         if document_version != self.view.change_count():
             return
         if isinstance(edits, Error):
@@ -128,4 +125,4 @@ class RustAnalyzerMoveItemCommand(LspTextCommand):
                 and re.search(r'(^|[^\\])\$', edit['newText'])
             ):
                 edits[i] = {'range': edit['range'], 'snippet': {'kind': 'snippet', 'value': edit['newText']}}
-        apply_text_edits(self.view, edits)
+        await apply_text_edits(self.view, edits)
