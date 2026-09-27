@@ -4,10 +4,10 @@ from functools import partial
 from LSP.plugin import LspTextCommand
 from LSP.plugin import Promise
 from LSP.plugin import Request
+from LSP.plugin import text_document_position_params
 from LSP.plugin.core.tree_view import new_tree_view_sheet
 from LSP.plugin.core.tree_view import TreeDataProvider
 from LSP.plugin.core.tree_view import TreeItem
-from LSP.plugin.core.views import text_document_position_params
 from LSP.protocol import NotRequired
 from LSP.protocol import Range
 from typing import Any
