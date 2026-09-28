@@ -4,17 +4,16 @@ from functools import partial
 from LSP.plugin import ClientConfig
 from LSP.plugin import ClientRequest
 from LSP.plugin import command_handler
+from LSP.plugin import first_selection_region
 from LSP.plugin import LspPlugin
 from LSP.plugin import LspTextCommand
 from LSP.plugin import OnPreStartContext
+from LSP.plugin import position_to_offset
 from LSP.plugin import Promise
+from LSP.plugin import region_to_range
 from LSP.plugin import Request
 from LSP.plugin import ServerResponse
-from LSP.plugin.core.protocol import Point
-from LSP.plugin.core.views import first_selection_region
-from LSP.plugin.core.views import point_to_offset
-from LSP.plugin.core.views import region_to_range
-from LSP.plugin.core.views import text_document_position_params
+from LSP.plugin import text_document_position_params
 from LSP.protocol import AnnotatedTextEdit
 from LSP.protocol import InsertTextFormat
 from LSP.protocol import LSPAny
@@ -181,7 +180,7 @@ class RustAnalyzer(LspPlugin):
         ):
             if (region := first_selection_region(view)) is not None:
                 params = request['params']
-                point = point_to_offset(Point.from_lsp(params['position']), view)
+                point = position_to_offset(view, params['position'])
                 if region.contains(point):
                     params['position'] = region_to_range(view, region)  # pyright: ignore[reportGeneralTypeIssues]
             return
