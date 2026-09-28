@@ -40,7 +40,7 @@ except ImportError:
     Terminus = None
 
 
-TAG = "2026-08-17"
+TAG = "2026-09-28"
 """
 Update this single git tag to download a newer version.
 After changing this tag, go through the server settings again to see
