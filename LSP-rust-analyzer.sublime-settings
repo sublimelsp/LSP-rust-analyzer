@@ -315,6 +315,8 @@
 		"completion.termSearch.enable": false,
 		// Term search fuel in "units of work" for autocompletion (Defaults to 1000).
 		"completion.termSearch.fuel": 1000,
+		// Complete turbofish (`::<>`) at the call site (if needed).
+		"completion.turbofish.enable": true,
 		// List of rust-analyzer diagnostics to disable.
 		"diagnostics.disabled": [],
 		// Show native rust-analyzer diagnostics.
