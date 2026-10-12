@@ -4,3 +4,4 @@ templates/ export-ignore
 settings-processor.json export-ignore
 renovate.json export-ignore
 tox.ini export-ignore
+tests/ export-ignore
