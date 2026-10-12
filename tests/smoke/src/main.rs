@@ -1,3 +1,3 @@
 fn main() {
-    let x = ;
+    let _number: i32 = "not a number";
 }
