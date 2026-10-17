@@ -3,3 +3,7 @@ test.py
 LSP/
 *.sublime-workspace
 *.sublime-project
+
+# Created when rust-analyzer checks the smoke test project.
+tests/smoke/Cargo.lock
+tests/smoke/target/

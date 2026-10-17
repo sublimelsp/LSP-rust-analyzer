@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sublimelsp/lsp_smoke_test/v1/smoke.schema.json
+file: src/main.rs
+# E0308 (mismatched types) is only reported once rust-analyzer has loaded the Cargo project and inferred the types.
+expected_diagnostics:
+  source: rust-analyzer
+  code: E0308
+  severity: 1
