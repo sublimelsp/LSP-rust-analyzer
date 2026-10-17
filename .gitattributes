@@ -1,7 +1,11 @@
+/.gitattributes export-ignore
+/.github/ export-ignore
+/.gitignore export-ignore
 images/ export-ignore
-scripts/ export-ignore
-templates/ export-ignore
-settings-processor.json export-ignore
+/pyproject.toml export-ignore
 renovate.json export-ignore
-tox.ini export-ignore
+scripts/ export-ignore
+settings-processor.json export-ignore
+templates/ export-ignore
 tests/ export-ignore
+tox.ini export-ignore
