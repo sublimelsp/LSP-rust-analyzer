@@ -9,7 +9,9 @@ on:
 
 jobs:
   check-settings:
-    uses: sublimelsp/workflows/.github/workflows/changed-settings.yaml@v2
+    uses: sublimelsp/workflows/.github/workflows/changed-settings.yaml@v3
     with:
       version_file: 'plugin.py'
       version_regexp: 'TAG = "([^"]+)"'
+    secrets:
+      SUBLIMELSP_APP_PRIVATE_KEY: ${{ secrets.SUBLIMELSP_APP_PRIVATE_KEY }}
