@@ -24,7 +24,9 @@
         "rust-lang/rust-analyzer"
       ],
       "separateMajorMinor": false,
-      "commitMessageExtra": "to v{{{prettyNewVersion}}}"
+      "commitMessageExtra": "to v{{{prettyNewVersion}}}",
+      "description": "Versions are release dates, so a new year isn't a breaking change: automerge every update, not only patch and minor ones.",
+      "automerge": true
     }
   ]
 }
