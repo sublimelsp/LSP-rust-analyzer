@@ -18,9 +18,6 @@
 		"assist.expressionFillDefault": "todo",
 		// Prefer to use `Self` over the type name when inserting a type (e.g. in "fill match arms" assist).
 		"assist.preferSelf": false,
-		// Enable borrow checking for term search code assists. If set to false, also there will be
-		// more suggestions, but some of them may not borrow-check.
-		"assist.termSearch.borrowcheck": true,
 		// Term search fuel in "units of work" for assists (Defaults to 1800).
 		"assist.termSearch.fuel": 1800,
 		// Warm up caches on project load.
@@ -78,6 +75,10 @@
 			"debug_assertions",
 			"miri"
 		],
+		// Path to a `.cargo/config.toml` style file to pass to cargo via `--config`
+		// for every cargo invocation (metadata, build scripts, config discovery).
+		// Useful to give rust-analyzer a consistent view of the project configuration.
+		"cargo.configPath": null,
 		// Extra arguments that are passed to every cargo invocation.
 		"cargo.extraArgs": [],
 		// Extra environment variables that will be set when running cargo, rustc
@@ -87,6 +88,9 @@
 		//
 		// Set this to `"all"` to pass `--all-features` to cargo.
 		"cargo.features": [],
+		// Extra arguments passed only to `cargo metadata`, not to other cargo invocations.
+		// Useful for flags like `--config` that `cargo metadata` supports.
+		"cargo.metadataExtraArgs": [],
 		// Whether to pass `--no-default-features` to cargo.
 		"cargo.noDefaultFeatures": false,
 		// Whether to skip fetching dependencies. If set to "true", the analysis is performed
@@ -193,6 +197,10 @@
 		// If false, `-p <package>` will be passed instead if applicable. In case it is not, no
 		// check will be performed.
 		"check.workspace": true,
+		// Automatically add `::` when completing the module.
+		//
+		// Will not be completed in `use`.
+		"completion.addColonsToModule": true,
 		// Automatically add a semicolon when completing unit-returning functions.
 		//
 		// In `match` arms it completes a comma instead.
@@ -217,6 +225,12 @@
 		// verbose form `{ "path": "path::to::item", type: "always" }`.
 		//
 		// For traits the type "methods" can be used to only exclude the methods but not the trait
+		// itself.
+		//
+		// For modules the type "sub_items" can be used to only exclude the all items in it but not the module
+		// itself. This does not include items defined in nested modules.
+		//
+		// For enums the type "variants" can be used to only exclude the all variants in it but not the enum
 		// itself.
 		//
 		// This setting also inherits `#rust-analyzer.completion.excludeTraits#`.
@@ -301,6 +315,8 @@
 		"completion.termSearch.enable": false,
 		// Term search fuel in "units of work" for autocompletion (Defaults to 1000).
 		"completion.termSearch.fuel": 1000,
+		// Complete turbofish (`::<>`) at the call site (if needed).
+		"completion.turbofish.enable": true,
 		// List of rust-analyzer diagnostics to disable.
 		"diagnostics.disabled": [],
 		// Show native rust-analyzer diagnostics.
@@ -323,6 +339,10 @@
 		// The warnings will be indicated by a blue squiggly underline in code and a blue icon in
 		// the `Problems Panel`.
 		"diagnostics.warningsAsInfo": [],
+		// Disable support for `#[rust_analyzer::rust_fixture]` snippets.
+		//
+		// If you are not working on rust-analyzer itself, you should ignore this config.
+		"disableFixtureSupport": false,
 		// Exclude all locals from document symbol search.
 		"document.symbol.search.excludeLocals": true,
 		// List of files to ignore
@@ -436,7 +456,7 @@
 		// Minimum number of lines required before the `}` until the hint is shown (set to 0 or 1
 		// to always show them).
 		"inlayHints.closingBraceHints.minLines": 25,
-		// Show inlay hints for closure captures.
+		// Show inlay hints for closure and coroutine captures.
 		"inlayHints.closureCaptureHints.enable": false,
 		// Show inlay type hints for return types of closures.
 		"inlayHints.closureReturnTypeHints.enable": "never",
@@ -502,6 +522,8 @@
 		"inlayHints.typeHints.hideInferredTypes": false,
 		// Hide inlay type hints for constructors.
 		"inlayHints.typeHints.hideNamedConstructor": false,
+		// Where to render type hints relative to their binding pattern.
+		"inlayHints.typeHints.location": "inline",
 		// Enable the experimental support for interpreting tests.
 		"interpret.tests": false,
 		// Join lines merges consecutive declaration and initialization of an assignment.
@@ -562,7 +584,7 @@
 		//
 		// Controls how many independent `proc-macro-srv` processes rust-analyzer
 		// runs in parallel to handle macro expansion.
-		"procMacro.processes": 1,
+		"procMacro.processes": 2,
 		// Internal config, path to proc-macro server executable.
 		"procMacro.server": null,
 		// The path where to save memory profiling output.
@@ -581,18 +603,30 @@
 		// Override the command used for bench runnables.
 		// The first element of the array should be the program to execute (for example, `cargo`).
 		//
-		// Use the placeholders `${package}`, `${target_arg}`, `${target}`, `${test_name}` to dynamically
-		// replace the package name, target option (such as `--bin` or `--example`), the target name and
-		// the test name (name of test function or test mod path).
+		// Use the placeholders:
+		// - `${package}`: package name.
+		// - `${target_arg}`: target option such as `--bin`, `--test`, `--lib`, etc.
+		// - `${target}`: target name (empty for `--lib`).
+		// - `${test_name}`: the test path filter, e.g. `module::bench_func`.
+		// - `${exact}`: `--exact` for single benchmarks, empty for modules.
+		// - `${include_ignored}`: always empty for benchmarks.
+		// - `${executable_args}`: all of the above binary args bundled together
+		//     (includes `rust-analyzer.runnables.extraTestBinaryArgs`).
 		"runnables.bench.overrideCommand": null,
 		// Command to be executed instead of 'cargo' for runnables.
 		"runnables.command": null,
-		// Override the command used for bench runnables.
+		// Override the command used for doc-test runnables.
 		// The first element of the array should be the program to execute (for example, `cargo`).
 		//
-		// Use the placeholders `${package}`, `${target_arg}`, `${target}`, `${test_name}` to dynamically
-		// replace the package name, target option (such as `--bin` or `--example`), the target name and
-		// the test name (name of test function or test mod path).
+		// Use the placeholders:
+		// - `${package}`: package name.
+		// - `${target_arg}`: target option such as `--bin`, `--test`, `--lib`, etc.
+		// - `${target}`: target name (empty for `--lib`).
+		// - `${test_name}`: the test path filter, e.g. `module::func`.
+		// - `${exact}`: always empty for doc-tests.
+		// - `${include_ignored}`: always empty for doc-tests.
+		// - `${executable_args}`: all of the above binary args bundled together
+		//     (includes `rust-analyzer.runnables.extraTestBinaryArgs`).
 		"runnables.doctest.overrideCommand": null,
 		// Additional arguments to be passed to cargo for runnables such as
 		// tests or binaries. For example, it may be `--release`.
@@ -612,9 +646,15 @@
 		// Override the command used for test runnables.
 		// The first element of the array should be the program to execute (for example, `cargo`).
 		//
-		// Use the placeholders `${package}`, `${target_arg}`, `${target}`, `${test_name}` to dynamically
-		// replace the package name, target option (such as `--bin` or `--example`), the target name and
-		// the test name (name of test function or test mod path).
+		// Available placeholders:
+		// - `${package}`: package name.
+		// - `${target_arg}`: target option such as `--bin`, `--test`, `--lib`, etc.
+		// - `${target}`: target name (empty for `--lib`).
+		// - `${test_name}`: the test path filter, e.g. `module::test_func`.
+		// - `${exact}`: `--exact` for single tests, empty for modules.
+		// - `${include_ignored}`: `--include-ignored` for single tests, empty otherwise.
+		// - `${executable_args}`: all of the above binary args bundled together
+		//     (includes `rust-analyzer.runnables.extraTestBinaryArgs`).
 		"runnables.test.overrideCommand": null,
 		// Path to the Cargo.toml of the rust compiler workspace, for usage in rustc_private
 		// projects, or "discover" to try to automatically find it if the `rustc-dev` component
@@ -781,9 +821,9 @@
 		//
 		// **Warning**: This format is provisional and subject to change.
 		//
-		// The discover command should output JSON objects, one per
-		// line (JSONL format). These objects should correspond to
-		// this Rust data type:
+		// The discover command should output JSON objects to stdout,
+		// one per line (JSONL format). These objects should correspond
+		// to this Rust data type:
 		//
 		// ```norun
 		// #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -823,6 +863,9 @@
 		// Only the finished event is required, but the other
 		// variants are encouraged to give users more feedback about
 		// progress or errors.
+		//
+		// Stderr is not parsed as JSONL. It is treated as command log
+		// output and forwarded to rust-analyzer's own logs.
 		"workspace.discoverConfig": null,
 		// Exclude all imports from workspace symbol search.
 		//
