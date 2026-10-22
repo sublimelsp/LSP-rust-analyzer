@@ -24,7 +24,7 @@ After:
 {
     "settings": {
         "LSP": {
-            "LSP-rust-analyzerd": {
+            "LSP-rust-analyzer": {
               // ...
             }
         }
