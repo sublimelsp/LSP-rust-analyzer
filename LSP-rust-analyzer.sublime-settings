@@ -208,6 +208,8 @@
 		// Show method calls and field accesses completions with `await` prefixed to them when
 		// completing on a future.
 		"completion.autoAwait.enable": true,
+		// Complete traits with `dyn` prefixed to them when completing in a type position.
+		"completion.autoDyn.enable": true,
 		// Show method call completions with `iter()` or `into_iter()` prefixed to them when
 		// completing on a type that has them.
 		"completion.autoIter.enable": true,
@@ -483,7 +485,7 @@
 		// Show generic type parameter name inlay hints.
 		"inlayHints.genericParameterHints.type.enable": false,
 		// Show implicit drop hints.
-		"inlayHints.implicitDrops.enable": false,
+		"inlayHints.implicitDrops.enable": "never",
 		// Show inlay hints for the implied type parameter `Sized` bound.
 		"inlayHints.implicitSizedBoundHints.enable": false,
 		// Show inlay hints for the implied `dyn` keyword in trait object types.
