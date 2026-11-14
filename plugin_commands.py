@@ -16,7 +16,6 @@ from LSP.protocol import TextEdit
 from typing import List
 from typing import Literal
 from typing import TypedDict
-from typing import Union
 import re
 import sublime
 
@@ -47,7 +46,7 @@ class MoveItemRequest:
 
     Type = 'experimental/moveItem'
     Direction = Literal['Up', 'Down']
-    ReturnType = List[Union[RASnippetTextEdit, SnippetTextEdit]]
+    ReturnType = List[RASnippetTextEdit]
 
 
 class RustAnalyzerJoinLinesCommand(LspTextCommand):
@@ -126,9 +125,7 @@ class RustAnalyzerMoveItemCommand(LspTextCommand):
         # Convert custom TextEdit with placeholder into SnippetTextEdit
         text_edits: list[TextEdit | SnippetTextEdit] = []
         for edit in edits:
-            if 'snippet' in edit:
-                text_edits.append(edit)
-            elif (
+            if (
                 edit.get('insertTextFormat') == InsertTextFormat.Snippet
                 # Only apply if text actually contains unexpected `$` since RA tends to also mark non-snippets as such.
                 and re.search(r'(^|[^\\])\$', edit['newText'])
