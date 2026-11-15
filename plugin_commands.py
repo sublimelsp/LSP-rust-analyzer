@@ -16,7 +16,6 @@ from LSP.protocol import TextEdit
 from typing import List
 from typing import Literal
 from typing import TypedDict
-from typing import Union
 import re
 import sublime
 
@@ -31,7 +30,10 @@ class JoinLinesRequest:
     ReturnType = List[TextEdit]
 
 
-class RASnippetTextEdit(TextEdit):
+class RASnippetTextEdit(TypedDict):
+    """`TextEdit` with rust-analyzer's `insertTextFormat` extension."""
+    range: Range
+    newText: str
     insertTextFormat: NotRequired[InsertTextFormat]
 
 
@@ -44,7 +46,7 @@ class MoveItemRequest:
 
     Type = 'experimental/moveItem'
     Direction = Literal['Up', 'Down']
-    ReturnType = List[Union[RASnippetTextEdit, SnippetTextEdit]]
+    ReturnType = List[RASnippetTextEdit]
 
 
 class RustAnalyzerJoinLinesCommand(LspTextCommand):
@@ -121,11 +123,14 @@ class RustAnalyzerMoveItemCommand(LspTextCommand):
             sublime.status_message('Did not find anything to move.')
             return
         # Convert custom TextEdit with placeholder into SnippetTextEdit
-        for i, edit in enumerate(edits):
+        text_edits: list[TextEdit | SnippetTextEdit] = []
+        for edit in edits:
             if (
-                'insertTextFormat' in edit and edit.get('insertTextFormat') == InsertTextFormat.Snippet
+                edit.get('insertTextFormat') == InsertTextFormat.Snippet
                 # Only apply if text actually contains unexpected `$` since RA tends to also mark non-snippets as such.
                 and re.search(r'(^|[^\\])\$', edit['newText'])
             ):
-                edits[i] = {'range': edit['range'], 'snippet': {'kind': 'snippet', 'value': edit['newText']}}
-        apply_text_edits(self.view, edits)
+                text_edits.append({'range': edit['range'], 'snippet': {'kind': 'snippet', 'value': edit['newText']}})
+            else:
+                text_edits.append({'range': edit['range'], 'newText': edit['newText']})
+        apply_text_edits(self.view, text_edits)
